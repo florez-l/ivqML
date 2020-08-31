@@ -3,12 +3,11 @@
 ## =========================================================================
 
 import math
-from Perceptron import *
-import ActivationFunctions
+from LinearFunction import *
 
 w = [ 1, 1, 2, 3 ]
 b = 0.3
-p = Perceptron( w, b, ActivationFunctions.LogisticSigmoid( ) )
-print( p( [ 0, 0, 1, 3 ] ) )
+f = LinearFunction( w, b )
+print( f( [ 0, 0, 1, 3 ] ) )
 
 ## eof - $RCSfile$

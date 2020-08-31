@@ -2,13 +2,12 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-import math, numpy
+import numpy
 
-## -------------------------------------------------------------------------
-class Perceptron:
-
-  '''Initialize a perceptron with weights, bias and activation function.'''
-  def __init__( self, w, b, s ):
+class LinearFunction:
+  ## -----------------------------------------------------------------------
+  '''Initialize a function with weights and bias.'''
+  def __init__( self, w, b ):
     assert isinstance( b, ( int, float ) ) , "Invalid bias data type." 
 
     if type( w ) is int:
@@ -24,10 +23,9 @@ class Perceptron:
     # end if
     assert self.m_W.shape[ 0 ] == 1, "Weights should be a row vector."
     self.m_B = float( b )
-    self.m_S = s
-    self.m_T = self.m_S.Threshold
   # end def __init__
 
+  ## -----------------------------------------------------------------------
   '''Parentheses operator overloading'''
   def __call__( self, x ):
     if type( x ) is int:
@@ -41,7 +39,7 @@ class Perceptron:
     else:
       raise TypeError( 'Invalid input type.' )
     # end if
-    return self.m_S( w.item( ) + self.m_B )
+    return w.item( ) + self.m_B
   # end def __call__
 # end class
 
