@@ -12,7 +12,7 @@ class LinearCost:
   Constructor method from file.
   '''
   @classmethod
-  def ReadFromFile( cls, filename, delimiter = "," ):
+  def ReadFromFile( cls, filename, normalization = "none", delimiter = "," ):
     fptr = open( filename )
     reader = csv.reader( fptr, delimiter = delimiter )
     line_count = 0
@@ -29,7 +29,7 @@ class LinearCost:
       # end try
     # end for
     fptr.close( )
-    return cls( X, Y )
+    return cls( X, Y, normalization = normalization )
   # end def ReadFromFile( )
 
   '''
@@ -39,7 +39,7 @@ class LinearCost:
   @output An object created with some intermediary values useful for
           analytic solutions and gradient descent.
   '''
-  def __init__( self, X, Y ):
+  def __init__( self, X, Y, normalization = "none" ):
     # Check inputs
     assert isinstance( X, ( list, numpy.matrix ) ), "Invalid X type."
     assert isinstance( Y, ( list, numpy.matrix ) ), "Invalid Y type."
@@ -70,6 +70,18 @@ class LinearCost:
     self.m_C = 2.0 * numpy.mean( numpy.multiply( self.m_X, self.m_Y ), axis = 0 ).T
     self.m_d = 2.0 * self.m_Y.mean( )
     self.m_e = ( self.m_Y.T @ self.m_Y ).item( ) / float( self.m_M )
+
+    # Compute covariance matrix
+    if normalization != "none":
+      c = self.m_X - numpy.mean( X, axis = 0 )
+      S =( c.T @ c ) / float( self.m_M - 1 )
+      if normalization == "standardize":
+        self.m_X = ( numpy.linalg.inv( S ) @ self.m_X.T ).T
+      elif normalization == "decorrelate":
+        eig_val, eig_vec = numpy.linalg.eig( S )
+        print( eig_val, eig_vec )
+      # end if
+    # end if
   # end def __init__
 
   '''
@@ -169,6 +181,7 @@ class LinearCost:
     b = b0
     J = self( w, b )
 
+    vparams = [ [ numpy.squeeze( numpy.asarray( w ) ).tolist( ), b ] ]
     n_iter = 0
     stop = False
     while not stop:
@@ -176,6 +189,7 @@ class LinearCost:
       w = w - ( dw * alpha )
       b = b - ( db * alpha )
       Jn = self( w, b )
+      vparams.append( [ numpy.squeeze( numpy.asarray( w ) ).tolist( ), b ] )
 
       if n_iter % 1000 == 0:
         print( "Iteration: {: 7d}, dJ = {:.4e}".format( n_iter, J - Jn ) )
@@ -187,7 +201,7 @@ class LinearCost:
       n_iter += 1
     # end while
 
-    return [ w, b, J, n_iter ]
+    return [ w, b, J, n_iter, vparams ]
   # end def gradient_descent
 
   '''.'''
@@ -195,7 +209,7 @@ class LinearCost:
     if generator == "random":
       return numpy.asmatrix( numpy.random.rand( 1, self.m_N ) )
     else:
-      return numpy.zeros( ( 1, self.m_N ) )
+      return numpy.asmatrix( numpy.zeros( ( 1, self.m_N ) ) )
     # end if
   # end def W0
 
@@ -207,6 +221,16 @@ class LinearCost:
       return 0.0
     # end if
   # end def B0
+
+  '''.'''
+  def number_of_variables( self ):
+    return self.m_N
+  # end def
+
+  '''.'''
+  def number_of_samples( self ):
+    return self.m_N
+  # end def
 
 # end class
 
