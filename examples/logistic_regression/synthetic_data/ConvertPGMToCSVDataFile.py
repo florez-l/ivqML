@@ -64,8 +64,8 @@ for j in range( H ):
     rx = x * math.cos( t ) - y * math.sin( t ) + ox
     ry = x * math.sin( t ) + y * math.cos( t ) + oy
     r = L[ v ][ 1 ]
-    if noise < random.uniform( 0, 1 ):
-      r += 1
+    #if noise < random.uniform( 0, 1 ):
+    #r += 1
     # end if
     L[ v ][ 0 ].append( "{:.4f},{:.4f},{:d}".format( rx, ry, r % 2 ) )
   # end for

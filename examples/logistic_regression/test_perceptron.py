@@ -6,9 +6,10 @@ import math
 from Perceptron import *
 import ActivationFunctions
 
-w = [ 1, 1, 2, 3 ]
-b = 0.3
+w = [ 1, 1 ]
+b = 0
 p = Perceptron( w, b, ActivationFunctions.LogisticSigmoid( ) )
-print( p( [ 0, 0, 1, 3 ] ) )
+
+p.create_example_image( "data3.ppm", numpy.matrix( [ [ -10, -10 ], [ 10, 10 ] ] ), numpy.matrix( [ 1, 1 ] ) )
 
 ## eof - $RCSfile$
