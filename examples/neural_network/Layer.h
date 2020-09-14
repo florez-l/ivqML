@@ -26,6 +26,9 @@ public:
   virtual ~Layer( ) = default;
   Self& operator=( const Self& other );
 
+  unsigned int input_size( ) const;
+  unsigned int output_size( ) const;
+
   TMatrix& W( );
   const TMatrix& W( ) const;
 

@@ -51,6 +51,22 @@ operator=( const Self& other )
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
+unsigned int  Layer< _TScalar >::
+input_size( ) const
+{
+  return( this->m_W.cols( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+unsigned int  Layer< _TScalar >::
+output_size( ) const
+{
+  return( this->m_W.rows( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
 typename Layer< _TScalar >::
 TMatrix& Layer< _TScalar >::
 W( )

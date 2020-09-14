@@ -56,7 +56,18 @@ template< class _TScalar >
 void NeuralNetwork< _TScalar >::
 add( const TLayer& l )
 {
-  // TODO
+  if( this->m_Layers.size( ) > 0 )
+    assert( l.input_size( ) == this->m_Layers.back( ).output_size( ) );
+  this->m_Layers.push_back( l );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+void NeuralNetwork< _TScalar >::
+init( bool randomly )
+{
+  for( TLayer& l: this->m_Layers )
+    l.init( randomly );
 }
 
 // -------------------------------------------------------------------------

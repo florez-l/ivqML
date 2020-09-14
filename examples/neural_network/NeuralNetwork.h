@@ -30,6 +30,8 @@ public:
   void add( const TMatrix& w, const TColVector& b, const TActivation& f );
   void add( const TLayer& l );
 
+  void init( bool randomly = true );
+
   TColVector operator()( const TRowVector& x ) const;
 
 protected:
