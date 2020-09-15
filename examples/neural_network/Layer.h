@@ -20,6 +20,7 @@ public:
   using TActivation = std::function< TColVector( const TColVector& ) >;
 
 public:
+  Layer( );
   Layer( unsigned int i_size, unsigned int o_size, const TActivation& f );
   Layer( const TMatrix& w, const TColVector& b, const TActivation& f );
   Layer( const Self& other );
@@ -53,14 +54,14 @@ protected:
 
 public:
   ///!
-  friend std::istream operator>>( std::istream& i, Self& l )
+  friend std::istream& operator>>( std::istream& i, Self& l )
     {
       l._ReadFrom( i );
       return( i );
     }
 
   ///!
-  friend std::ostream operator<<( std::ostream& o, const Self& l )
+  friend std::ostream& operator<<( std::ostream& o, const Self& l )
     {
       l._CopyTo( o );
       return( o );

@@ -90,16 +90,14 @@ template< class _TScalar >
 void NeuralNetwork< _TScalar >::
 _ReadFrom( std::istream& i )
 {
-  /* TODO
-     unsigned int N;
-     i >> N;
-     for( unsigned int n = 0; n < N; ++n )
-     {
-     TLayer l;
-     i >> l;
-     this->add( l );
-     } // end for
-  */
+  unsigned int N;
+  i >> N;
+  for( unsigned int n = 0; n < N; ++n )
+  {
+    TLayer l;
+    i >> l;
+    this->add( l );
+  } // end for
 }
 
 // -------------------------------------------------------------------------
@@ -107,38 +105,14 @@ template< class _TScalar >
 void NeuralNetwork< _TScalar >::
 _CopyTo( std::ostream& o ) const
 {
-  /* TODO
-     o << this->m_Layers.size( ) << std::endl;
-     for( const TLayer& l: this->m_Layers )
-     o << l << std::endl;
-  */
+  o << this->m_Layers.size( ) << std::endl;
+  for( const TLayer& l: this->m_Layers )
+    o << l << std::endl;
 }
 
 // -------------------------------------------------------------------------
 template class NeuralNetwork< float >;
 template class NeuralNetwork< double >;
 template class NeuralNetwork< long double >;
-
-/* TODO
-   protected:
-   std::vector< TNeuralNetwork > m_NeuralNetworks;
-
-   public:
-   ///!
-   friend std::istream operator>>( std::istream& i, Self& l )
-   {
-   l._ReadFrom( i );
-   return( i );
-   }
-
-   ///!
-   friend std::ostream operator<<( std::ostream& o, const Self& l )
-   {
-   l._CopyTo( o );
-   return( o );
-   }
-   };
-   #endif // __PUJ_ML__NeuralNetwork__h__
-*/
 
 // eof - $RCSfile$

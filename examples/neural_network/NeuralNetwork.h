@@ -43,14 +43,14 @@ protected:
 
 public:
   ///!
-  friend std::istream operator>>( std::istream& i, Self& n )
+  friend std::istream& operator>>( std::istream& i, Self& n )
     {
       n._ReadFrom( i );
       return( i );
     }
 
   ///!
-  friend std::ostream operator<<( std::ostream& o, const Self& n )
+  friend std::ostream& operator<<( std::ostream& o, const Self& n )
     {
       n._CopyTo( o );
       return( o );

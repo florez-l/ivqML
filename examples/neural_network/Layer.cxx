@@ -8,6 +8,15 @@
 // -------------------------------------------------------------------------
 template< class _TScalar >
 Layer< _TScalar >::
+Layer( )
+{
+  this->m_W = TMatrix::Zero( 1, 1 );
+  this->m_B = TColVector::Zero( 1 );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+Layer< _TScalar >::
 Layer( unsigned int i_size, unsigned int o_size, const TActivation& f )
 {
   this->m_W = TMatrix::Zero( o_size, i_size );
