@@ -8,6 +8,11 @@ from BinaryLabelingCost import *
 from Perceptron import *
 
 # -- Read data
+if len( sys.argv ) < 6:
+  print( "Usage:", sys.argv[ 0 ], " csv_file ppm_file epsilon alpha lambda" )
+  sys.exit( 1 )
+# end if
+
 e = float( sys.argv[ 3 ] )
 a = float( sys.argv[ 4 ] )
 l = float( sys.argv[ 5 ] )
