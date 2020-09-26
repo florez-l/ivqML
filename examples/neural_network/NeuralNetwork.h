@@ -4,7 +4,8 @@
 #ifndef __PUJ_ML__NeuralNetwork__h__
 #define __PUJ_ML__NeuralNetwork__h__
 
-#include <vector>
+#include <limits>
+#include <map>
 #include "Layer.h"
 
 template< class _TScalar >
@@ -20,6 +21,8 @@ public:
   using TColVector  = typename TLayer::TColVector;
   using TActivation = typename TLayer::TActivation;
 
+  using TLayers = std::map< unsigned int, TLayer >;
+
 public:
   NeuralNetwork( );
   NeuralNetwork( const Self& other );
@@ -27,19 +30,33 @@ public:
   Self& operator=( const Self& other );
 
   void add( unsigned int i, unsigned int o, const TActivation& f );
+  void add( unsigned int o, const TActivation& f );
   void add( const TMatrix& w, const TColVector& b, const TActivation& f );
   void add( const TLayer& l );
 
   void init( bool randomly = true );
 
-  TColVector operator()( const TRowVector& x ) const;
+  TColVector operator()( const TColVector& x ) const;
+
+  TScalar cost(
+    std::vector< TMatrix >& dw, std::vector< TMatrix >& db,
+    const TMatrix& X, const TMatrix& Y,
+    const TScalar& lambda = TScalar( 0 )
+    );
+  void train(
+    const TMatrix& X, const TMatrix& Y,
+    const TScalar& alpha,
+    const TScalar& lambda = TScalar( 0 ),
+    const TScalar& epsilon = std::numeric_limits< TScalar >::epsilon,
+    std::ostream* os = nullptr
+    );
 
 protected:
   void _ReadFrom( std::istream& i );
   void _CopyTo( std::ostream& o ) const;
 
 protected:
-  std::vector< TLayer > m_Layers;
+  TLayers m_Layers;
 
 public:
   ///!

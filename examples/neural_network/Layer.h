@@ -17,7 +17,7 @@ public:
   using TMatrix     = Eigen::Matrix< TScalar, Eigen::Dynamic, Eigen::Dynamic >;
   using TRowVector  = Eigen::Matrix< TScalar, 1, Eigen::Dynamic >;
   using TColVector  = Eigen::Matrix< TScalar, Eigen::Dynamic, 1 >;
-  using TActivation = std::function< TColVector( const TColVector& ) >;
+  using TActivation = std::function< TMatrix( const TMatrix&, bool ) >;
 
 public:
   Layer( );
@@ -30,18 +30,23 @@ public:
   unsigned int input_size( ) const;
   unsigned int output_size( ) const;
 
-  TMatrix& W( );
-  const TMatrix& W( ) const;
+  TMatrix& weights( );
+  const TMatrix& weights( ) const;
 
-  TColVector& B( );
-  const TColVector& B( ) const;
+  TColVector& biases( );
+  const TColVector& biases( ) const;
 
   TActivation& sigma( );
   const TActivation& sigma( ) const;
 
   void init( bool randomly = true );
 
-  TColVector operator()( const TColVector& z ) const;
+  TColVector linear_fwd( const TColVector& x ) const;
+  TColVector sigma_fwd( const TColVector& z ) const;
+  TColVector delta_bck( const TColVector& d, const TColVector& z ) const;
+  TColVector operator()( const TColVector& x ) const;
+
+  TScalar regularization( ) const;
 
 protected:
   void _ReadFrom( std::istream& i );
@@ -50,7 +55,7 @@ protected:
 protected:
   TMatrix     m_W;
   TColVector  m_B;
-  TActivation m_sigma;
+  TActivation m_S;
 
 public:
   ///!
