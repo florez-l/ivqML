@@ -44,7 +44,7 @@ public:
   TColVector linear_fwd( const TColVector& x ) const;
   TColVector sigma_fwd( const TColVector& z ) const;
   TColVector delta_bck( const TColVector& d, const TColVector& z ) const;
-  TColVector operator()( const TColVector& x ) const;
+  TMatrix operator()( const TMatrix& X ) const;
 
   TScalar regularization( ) const;
 

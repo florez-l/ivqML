@@ -7,9 +7,11 @@
 #include "CSVReader.h"
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <sstream>
 
 // -- Some typedefs
+using TPixel = unsigned short;
 using TScalar = float;
 using TAnn = NeuralNetwork< TScalar >;
 
@@ -17,20 +19,20 @@ using TAnn = NeuralNetwork< TScalar >;
 int main( int argc, char** argv )
 {
   // Check inputs and get them
-  if( argc < 6 )
+  if( argc < 5 )
   {
     std::cerr
-      << "Usage: " << argv[ 0 ] << " input_examples.csv y_size alpha lambda epsilon"
+      << "Usage: " << argv[ 0 ] << " input_examples.csv y_size alpha lambda"
       << std::endl;
     return( 1 );
   } // end if
   std::string input_examples = argv[ 1 ];
   std::stringstream args;
-  args << argv[ 2 ] << " " << argv[ 3 ] << " " << argv[ 4 ]<< " " << argv[ 5 ];
+  args << argv[ 2 ] << " " << argv[ 3 ] << " " << argv[ 4 ];
   std::istringstream iargs( args.str( ) );
   int p;
-  TScalar alpha, lambda, epsilon;
-  iargs >> p >> alpha >> lambda >> epsilon;
+  TScalar alpha, lambda;
+  iargs >> p >> alpha >> lambda;
 
   // Read data
   CSVReader reader( input_examples, "," );
@@ -49,7 +51,14 @@ int main( int argc, char** argv )
   ann.init( true );
 
   // Train the neural network
-  ann.train( X, Y, alpha, lambda, epsilon, &std::cout );
+  ann.train( X, Y, alpha, lambda, &std::cout );
+
+  std::cout
+    << "*******************************" << std::endl
+    << "Trained parameters: " << std::endl
+    << ann
+    << std::endl
+    << "*******************************" << std::endl;
 
   // Show results
   if( X.cols( ) == 2 )
@@ -59,7 +68,7 @@ int main( int argc, char** argv )
     auto difX = maxX - minX;
 
     unsigned long samples = 100;
-    std::vector< unsigned char > data( 3 * samples * samples );
+    std::vector< TPixel > data( 3 * samples * samples );
     unsigned long k = 0;
     for( unsigned long j = 0; j < samples; ++j )
     {
@@ -71,8 +80,12 @@ int main( int argc, char** argv )
         di += minX( 0, 0 );
         TAnn::TRowVector x( X.cols( ) );
         x << di, dj;
-        data[ k     ] = ( ann( x )( 0, 0 ) >= 0.5 )? 255: 0;
-        data[ k + 2 ] = ( ann( x )( 0, 0 ) < 0.5 )? 255: 0;
+        data[ k ] =
+          TPixel(
+            ann( x )( 0, 0 ) *
+            TScalar( std::numeric_limits< TPixel >::max( ) )
+            );
+        data[ k + 1 ] = data[ k + 2 ] = data[ k ];
         k += 3;
       } // end for
     } // end for
@@ -83,13 +96,11 @@ int main( int argc, char** argv )
       << "P6" << std::endl
       << "# Result of a 2-class ANN" << std::endl
       << samples << " " << samples << std::endl
-      << "255" << std::endl;
+      << std::numeric_limits< TPixel >::max( ) << std::endl;
     out.write( reinterpret_cast< char* >( data.data( ) ), 3 * samples * samples );
     out.close( );
-
   } // end if
 
-  // Test the forward-propagation with a one-filled vector
   return( 0 );
 }
 

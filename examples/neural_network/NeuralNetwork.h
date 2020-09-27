@@ -5,9 +5,12 @@
 #define __PUJ_ML__NeuralNetwork__h__
 
 #include <limits>
-#include <map>
+#include <vector>
+
 #include "Layer.h"
 
+/**
+ */
 template< class _TScalar >
 class NeuralNetwork
 {
@@ -21,10 +24,13 @@ public:
   using TColVector  = typename TLayer::TColVector;
   using TActivation = typename TLayer::TActivation;
 
-  using TLayers = std::map< unsigned int, TLayer >;
+  using TLayers = std::vector< TLayer >;
 
 public:
-  NeuralNetwork( );
+  NeuralNetwork(
+    const TScalar& epsilon =
+    std::numeric_limits< TScalar >::epsilon( ) * TScalar( 10 )
+    );
   NeuralNetwork( const Self& other );
   virtual ~NeuralNetwork( ) = default;
   Self& operator=( const Self& other );
@@ -36,18 +42,20 @@ public:
 
   void init( bool randomly = true );
 
-  TColVector operator()( const TColVector& x ) const;
+  TMatrix operator()( const TMatrix& x ) const;
 
   TScalar cost(
-    std::vector< TMatrix >& dw, std::vector< TMatrix >& db,
-    const TMatrix& X, const TMatrix& Y,
-    const TScalar& lambda = TScalar( 0 )
+    std::vector< TMatrix >& dw,
+    std::vector< TColVector >& db,
+    std::vector< TColVector >& a,
+    std::vector< TColVector >& z,
+    std::vector< TColVector >& d,
+    const TMatrix& X, const TMatrix& Y
     );
   void train(
     const TMatrix& X, const TMatrix& Y,
     const TScalar& alpha,
     const TScalar& lambda = TScalar( 0 ),
-    const TScalar& epsilon = std::numeric_limits< TScalar >::epsilon,
     std::ostream* os = nullptr
     );
 
@@ -56,7 +64,8 @@ protected:
   void _CopyTo( std::ostream& o ) const;
 
 protected:
-  TLayers m_Layers;
+  TScalar m_Epsilon;
+  TLayers m_L;
 
 public:
   ///!
