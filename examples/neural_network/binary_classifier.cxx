@@ -58,7 +58,8 @@ int main( int argc, char** argv )
 
   // Show results
   std::cout
-    << ( ann( X.transpose( ) ).transpose( ).array( ) >= 0.5 )
+    << "Train mean error: "
+    << ( ( ann( X.transpose( ) ).transpose( ).array( ) >= 0.5 ).template cast< TScalar >( ) - Y.array( ) ).mean( )
     << std::endl;
 
 
