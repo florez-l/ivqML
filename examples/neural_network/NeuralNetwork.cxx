@@ -82,8 +82,6 @@ typename NeuralNetwork< _TScalar >::
 TMatrix NeuralNetwork< _TScalar >::
 operator()( const TMatrix& x ) const
 {
-  assert( this->m_L.size( ) > 1 );
-
   typename TLayers::const_iterator lIt = this->m_L.begin( );
   TMatrix z = lIt->operator()( x );
   for( lIt++; lIt != this->m_L.end( ); ++lIt )
@@ -205,7 +203,7 @@ train(
     dJ = J - Jn;
     if( dJ <= this->m_Epsilon )
       stop = true;
-    if( nIter % 1000 == 0 && os != nullptr )
+    if( nIter % 100 == 0 && os != nullptr )
       *os
         << "\33[2K\rIteration: " << nIter
         << "\tJ = " << J

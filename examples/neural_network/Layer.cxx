@@ -182,7 +182,7 @@ typename Layer< _TScalar >::
 TMatrix Layer< _TScalar >::
 operator()( const TMatrix& x ) const
 {
-  return( this->m_S( ( this->m_W * x ) + this->m_B, false ) );
+  return( this->m_S( ( this->m_W * x ).colwise( ) + this->m_B, false ) );
 }
 
 // -------------------------------------------------------------------------
