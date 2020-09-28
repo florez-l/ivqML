@@ -44,22 +44,26 @@ public:
 
   TMatrix operator()( const TMatrix& x ) const;
 
-  TScalar cost(
-    std::vector< TMatrix >& dw,
-    std::vector< TColVector >& db,
-    std::vector< TColVector >& a,
-    std::vector< TColVector >& z,
-    std::vector< TColVector >& d,
-    const TMatrix& X, const TMatrix& Y
-    );
+  TScalar cost( const TMatrix& X, const TMatrix& Y ) const;
+
   void train(
     const TMatrix& X, const TMatrix& Y,
     const TScalar& alpha,
     const TScalar& lambda = TScalar( 0 ),
     std::ostream* os = nullptr
     );
+  TMatrix confusion_matrix( const TMatrix& X, const TMatrix& Y ) const;
 
 protected:
+  TScalar _cost_and_gradient(
+    std::vector< TMatrix >& dw,
+    std::vector< TColVector >& db,
+    std::vector< TColVector >& a,
+    std::vector< TColVector >& z,
+    std::vector< TColVector >& d,
+    const TMatrix& X, const TMatrix& Y
+    ) const;
+
   void _ReadFrom( std::istream& i );
   void _CopyTo( std::ostream& o ) const;
 

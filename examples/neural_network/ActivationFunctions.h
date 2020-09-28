@@ -4,6 +4,8 @@
 #ifndef __PUJ_ML__ActivationFunctions__h__
 #define __PUJ_ML__ActivationFunctions__h__
 
+#include <map>
+#include <string>
 #include <Eigen/Core>
 
 namespace ActivationFunctions

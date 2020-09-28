@@ -1,15 +1,20 @@
+INCLUDES=-I/usr/local/include/eigen3
+C_VERSION=c++17
+OPT_FLAGS=-Ofast -fopenmp
+EXE_FLAGS=-std=$(C_VERSION) $(OPT_FLAGS) $(INCLUDES)
+OBJ_FLAGS=$(EXE_FLAGS) -c
 
 all: test binary_classifier
 clean:
 	rm -rf *.o test binary_classifier
 
 test: ActivationFunctions.o Layer.o NeuralNetwork.o test.cxx
-	g++ -std=c++17 -I/usr/local/include/eigen3 -o $@ $^
+	g++ $(EXE_FLAGS) -o $@ $^
 
 binary_classifier: CSVReader.o ActivationFunctions.o Layer.o NeuralNetwork.o binary_classifier.cxx
-	g++ -std=c++17 -I/usr/local/include/eigen3 -o $@ $^
+	g++ $(EXE_FLAGS) -o $@ $^
 
 %.o: %.cxx
-	g++ -std=c++17 -I/usr/local/include/eigen3 -c -o $@ $^
+	g++ $(OBJ_FLAGS) -o $@ $^
 
 ## eof - $RCSfile$

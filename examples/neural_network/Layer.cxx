@@ -4,6 +4,7 @@
 
 #include "Layer.h"
 #include <cassert>
+#include <random>
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
@@ -137,8 +138,16 @@ init( bool randomly )
   unsigned int c = this->m_W.cols( );
   if( randomly )
   {
-    this->m_W = TMatrix::Random( r, c );
-    this->m_B = TColVector::Random( r );
+    std::random_device rd;
+    std::mt19937 gen( rd( ) );
+    std::uniform_real_distribution< TScalar > dis( -1, 1 );
+
+    this->m_W = TMatrix::Zero( r, c ).unaryExpr(
+      [&]( TScalar not_used ) { return( dis( gen ) ); }
+      );
+    this->m_B = TColVector::Zero( r ).unaryExpr(
+      [&]( TScalar not_used ) { return( dis( gen ) ); }
+      );
   }
   else
   {

@@ -7,12 +7,13 @@
 #include "CSVReader.h"
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <limits>
 #include <sstream>
 
 // -- Some typedefs
 using TPixel = unsigned short;
-using TScalar = float;
+using TScalar = double;
 using TAnn = NeuralNetwork< TScalar >;
 
 // -- Main function
@@ -41,14 +42,14 @@ int main( int argc, char** argv )
   reader.cast( X, Y, p );
 
   // Create an empty artifical neural network
-  TAnn ann;
+  TAnn ann( 1e-6 );
   /* TODO
      ann.add( X.cols( ), X.cols( ) * 4, ActivationFunctions::ReLU< TScalar >( ) );
      ann.add( X.cols( ) * 3, ActivationFunctions::ReLU< TScalar >( ) );
      ann.add( X.cols( ) * 2, ActivationFunctions::ReLU< TScalar >( ) );
      ann.add( p, ActivationFunctions::Logistic< TScalar >( ) );
   */
-  ann.add( X.cols( ), 1, ActivationFunctions::Logistic< TScalar >( ) );
+  ann.add( X.cols( ), p, ActivationFunctions::Logistic< TScalar >( ) );
 
   // Initialize the ANN with random weights and biases
   ann.init( true );
@@ -56,13 +57,30 @@ int main( int argc, char** argv )
   // Train the neural network
   ann.train( X, Y, alpha, lambda, &std::cout );
 
-  // Show results
+  // Evaluate trained results
+  TAnn::TMatrix K = ann.confusion_matrix( X, Y );
   std::cout
-    << "Train mean error: "
-    << ( ( ann( X.transpose( ) ).transpose( ).array( ) >= 0.5 ).template cast< TScalar >( ) - Y.array( ) ).mean( )
-    << std::endl;
-
-
+    << "*******************" << std::endl
+    << "***** Results *****" << std::endl
+    << "*******************" << std::endl
+    << "* Confusion matrix:" << std::endl << K << std::endl
+    << std::setprecision( 4 )
+    << "* Sen (0) : "
+    << ( 100.0 * ( K( 0, 0 ) / ( K( 0, 0 ) + K( 1, 0 ) ) ) )
+    << "%" << std::endl
+    << "* PPV (0) : "
+    << ( 100.0 * ( K( 0, 0 ) / ( K( 0, 0 ) + K( 0, 1 ) ) ) )
+    << "%" << std::endl
+    << "* Spe (1) : "
+    << ( 100.0 * ( K( 1, 1 ) / ( K( 1, 1 ) + K( 0, 1 ) ) ) )
+    << "%" << std::endl
+    << "* NPV (1) : "
+    << ( 100.0 * ( K( 1, 1 ) / ( K( 1, 1 ) + K( 1, 0 ) ) ) )
+    << "%" << std::endl
+    << "* F1      : "
+    << ( ( 2.0 * K( 0, 0 ) ) / ( ( 2.0 * K( 0, 0 ) ) + K( 0, 1 ) + K( 1, 0 ) ) )
+    << std::endl
+    << "*******************" << std::endl;
 
   /* TODO
      if( X.cols( ) == 2 )

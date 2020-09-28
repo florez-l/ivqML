@@ -93,14 +93,123 @@ operator()( const TMatrix& x ) const
 template< class _TScalar >
 typename NeuralNetwork< _TScalar >::
 TScalar NeuralNetwork< _TScalar >::
-cost(
+cost( const TMatrix& X, const TMatrix& Y ) const
+{
+  static const TScalar _1 = TScalar( 1 );
+
+  TMatrix Yr = this->operator()( X.transpose( ) ).transpose( );
+  auto y = ( Y.array( ) == _1 ).template cast< TScalar >( );
+  TScalar J = -( Eigen::log( Yr.array( ) ) * y ).sum( );
+  J -= ( Eigen::log( _1 - Yr.array( ) ) * ( _1 - y ) ).sum( );
+  J /= TScalar( X.rows( ) );
+  return( J );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+void NeuralNetwork< _TScalar >::
+train(
+  const TMatrix& X, const TMatrix& Y,
+  const TScalar& alpha, const TScalar& lambda,
+  std::ostream* os
+  )
+{
+  // Initialize temporary values
+  unsigned long L = this->m_L.size( );
+  std::vector< TMatrix > dw( L );
+  std::vector< TColVector > db( L ), a( L + 1 ), z( L ), d( L );
+  a.shrink_to_fit( );
+  z.shrink_to_fit( );
+  d.shrink_to_fit( );
+  dw.shrink_to_fit( );
+  db.shrink_to_fit( );
+
+  // First cost
+  TScalar J = this->_cost_and_gradient( dw, db, a, z, d, X, Y );
+  if( lambda != TScalar( 0 ) )
+    for( unsigned long l = 0; l < L; ++l )
+      J += this->m_L[ l ].regularization( ) * lambda;
+  TScalar dJ = J;
+
+  // Main loop
+  bool stop = false;
+  unsigned long nIter = 0;
+  while( !stop )
+  {
+    // Update parameters
+    for( unsigned long l = 0; l < L; ++l )
+    {
+      if( lambda != TScalar( 0 ) )
+        this->m_L[ l ].weights( ) -=
+          ( dw[ l ] * alpha ) +
+          ( this->m_L[ l ].weights( ) * lambda );
+      else
+        this->m_L[ l ].weights( ) -= dw[ l ] * alpha;
+      this->m_L[ l ].biases( ) -= db[ l ] * alpha;
+    } // end for
+
+    // Update cost
+    TScalar Jn = this->_cost_and_gradient( dw, db, a, z, d, X, Y );
+    if( lambda != TScalar( 0 ) )
+      for( unsigned long l = 0; l < L; ++l )
+        Jn += this->m_L[ l ].regularization( ) * lambda;
+    dJ = J - Jn;
+    if( dJ <= this->m_Epsilon )
+      stop = true;
+    if( nIter % 100 == 0 && os != nullptr )
+      *os
+        << "\33[2K\rIteration: " << nIter
+        << "\tJ = " << J
+        << "\tdJ = " << dJ
+        << std::flush;
+    J = Jn;
+    nIter++;
+  } // end while
+
+  if( os != nullptr )
+    *os
+      << std::endl
+      << "********************************************" << std::endl
+      << "** ANN trained in " << nIter << " iterations" << std::endl
+      << "** Final J  : " << J << std::endl
+      << "** Final dJ : " << dJ << std::endl
+      << "** Alpha    : " << alpha << std::endl
+      << "** Lambda   : " << lambda << std::endl
+      << "** Epsilon  : " << this->m_Epsilon << std::endl
+      << "********************************************" << std::endl;
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+typename NeuralNetwork< _TScalar >::
+TMatrix NeuralNetwork< _TScalar >::
+confusion_matrix( const TMatrix& X, const TMatrix& Y ) const
+{
+  TMatrix K = TMatrix::Zero( 2, 2 );
+  auto R =
+    ( this->operator()( X.transpose( ) ).array( ) >= 0.5 ).
+    template cast< TScalar >( ).transpose( );
+  auto RpY = Y.array( ) + R.array( );
+  auto RmY = Y.array( ) - R.array( );
+  K( 0, 0 ) = ( RpY == 0 ).template cast< TScalar >( ).sum( );
+  K( 1, 1 ) = ( RpY == 2 ).template cast< TScalar >( ).sum( );
+  K( 0, 1 ) = ( RmY < 0 ).template cast< TScalar >( ).sum( );
+  K( 1, 0 ) = ( RmY > 0 ).template cast< TScalar >( ).sum( );
+  return( K );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+typename NeuralNetwork< _TScalar >::
+TScalar NeuralNetwork< _TScalar >::
+_cost_and_gradient(
   std::vector< TMatrix >& dw,
   std::vector< TColVector >& db,
   std::vector< TColVector >& a,
   std::vector< TColVector >& z,
   std::vector< TColVector >& d,
   const TMatrix& X, const TMatrix& Y
-  )
+  ) const
 {
   static const TScalar _0 = TScalar( 0 );
   static const TScalar _1 = TScalar( 1 );
@@ -161,69 +270,6 @@ cost(
 
   // Ok, we're done!
   return( J );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-void NeuralNetwork< _TScalar >::
-train(
-  const TMatrix& X, const TMatrix& Y,
-  const TScalar& alpha, const TScalar& lambda,
-  std::ostream* os
-  )
-{
-  // Initialize temporary values
-  unsigned long L = this->m_L.size( );
-  std::vector< TMatrix > dw( L );
-  std::vector< TColVector > db( L ), a( L + 1 ), z( L ), d( L );
-  a.shrink_to_fit( );
-  z.shrink_to_fit( );
-  d.shrink_to_fit( );
-  dw.shrink_to_fit( );
-  db.shrink_to_fit( );
-
-  // First cost
-  TScalar J = this->cost( dw, db, a, z, d, X, Y );
-  TScalar dJ = J;
-
-  // Main loop
-  bool stop = false;
-  unsigned long nIter = 0;
-  while( !stop )
-  {
-    // Update parameters
-    for( unsigned long l = 0; l < L; ++l )
-    {
-      this->m_L[ l ].weights( ) -= dw[ l ] * alpha;
-      this->m_L[ l ].biases( ) -= db[ l ] * alpha;
-    } // end for
-
-    // Update cost
-    TScalar Jn = this->cost( dw, db, a, z, d, X, Y );
-    dJ = J - Jn;
-    if( dJ <= this->m_Epsilon )
-      stop = true;
-    if( nIter % 100 == 0 && os != nullptr )
-      *os
-        << "\33[2K\rIteration: " << nIter
-        << "\tJ = " << J
-        << "\tdJ = " << dJ
-        << std::flush;
-    J = Jn;
-    nIter++;
-  } // end while
-
-  if( os != nullptr )
-    *os
-      << std::endl
-      << "********************************************" << std::endl
-      << "** ANN trained in " << nIter << " iterations" << std::endl
-      << "** Final J  : " << J << std::endl
-      << "** Final dJ : " << dJ << std::endl
-      << "** Alpha    : " << alpha << std::endl
-      << "** Lambda   : " << lambda << std::endl
-      << "** Epsilon  : " << this->m_Epsilon << std::endl
-      << "********************************************" << std::endl;
 }
 
 // -------------------------------------------------------------------------
