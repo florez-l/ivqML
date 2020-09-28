@@ -5,6 +5,9 @@
 #include "Layer.h"
 #include <cassert>
 
+
+#include <iostream>
+
 // -------------------------------------------------------------------------
 template< class _TScalar >
 Layer< _TScalar >::
@@ -21,7 +24,7 @@ Layer( unsigned int i_size, unsigned int o_size, const TActivation& f )
 {
   this->m_W = TMatrix::Zero( o_size, i_size );
   this->m_B = TColVector::Zero( o_size );
-  this->m_sigma = f;
+  this->m_S = f;
 }
 
 // -------------------------------------------------------------------------
@@ -33,7 +36,7 @@ Layer( const TMatrix& w, const TColVector& b, const TActivation& f )
 
   this->m_W = w;
   this->m_B = b;
-  this->m_sigma = f;
+  this->m_S = f;
 }
 
 // -------------------------------------------------------------------------
@@ -43,7 +46,7 @@ Layer( const Self& other )
 {
   this->m_W = other.m_W;
   this->m_B = other.m_B;
-  this->m_sigma = other.m_sigma;
+  this->m_S = other.m_S;
 }
 
 // -------------------------------------------------------------------------
@@ -54,7 +57,7 @@ operator=( const Self& other )
 {
   this->m_W = other.m_W;
   this->m_B = other.m_B;
-  this->m_sigma = other.m_sigma;
+  this->m_S = other.m_S;
   return( *this );
 }
 
@@ -78,7 +81,7 @@ output_size( ) const
 template< class _TScalar >
 typename Layer< _TScalar >::
 TMatrix& Layer< _TScalar >::
-W( )
+weights( )
 {
   return( this->m_W );
 }
@@ -87,7 +90,7 @@ W( )
 template< class _TScalar >
 const typename Layer< _TScalar >::
 TMatrix& Layer< _TScalar >::
-W( ) const
+weights( ) const
 {
   return( this->m_W );
 }
@@ -96,7 +99,7 @@ W( ) const
 template< class _TScalar >
 typename Layer< _TScalar >::
 TColVector& Layer< _TScalar >::
-B( )
+biases( )
 {
   return( this->m_B );
 }
@@ -105,7 +108,7 @@ B( )
 template< class _TScalar >
 const typename Layer< _TScalar >::
 TColVector& Layer< _TScalar >::
-B( ) const
+biases( ) const
 {
   return( this->m_B );
 }
@@ -116,7 +119,7 @@ typename Layer< _TScalar >::
 TActivation& Layer< _TScalar >::
 sigma( )
 {
-  return( this->m_sigma );
+  return( this->m_S );
 }
 
 // -------------------------------------------------------------------------
@@ -125,7 +128,7 @@ const typename Layer< _TScalar >::
 TActivation& Layer< _TScalar >::
 sigma( ) const
 {
-  return( this->m_sigma );
+  return( this->m_S );
 }
 
 // -------------------------------------------------------------------------
@@ -137,8 +140,8 @@ init( bool randomly )
   unsigned int c = this->m_W.cols( );
   if( randomly )
   {
-    this->m_W = TMatrix::Random( r, c );
-    this->m_B = TColVector::Random( r );
+    this->m_W = TMatrix::Random( r, c ) * 0.01;
+    this->m_B = TColVector::Random( r ) * 0.01;
   }
   else
   {
@@ -151,9 +154,47 @@ init( bool randomly )
 template< class _TScalar >
 typename Layer< _TScalar >::
 TColVector Layer< _TScalar >::
-operator()( const TColVector& z ) const
+linear_fwd( const TColVector& x ) const
 {
-  return( this->m_sigma( ( this->m_W * z ) + this->m_B ) );
+  return( ( this->m_W * x ).colwise( ) + this->m_B );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+typename Layer< _TScalar >::
+TColVector Layer< _TScalar >::
+sigma_fwd( const TColVector& z ) const
+{
+  return( this->m_S( z, false ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+typename Layer< _TScalar >::
+TColVector Layer< _TScalar >::
+delta_bck( const TColVector& d, const TColVector& z ) const
+{
+  return(
+    ( this->m_W.transpose( ) * d ).array( ) * this->m_S( z, true ).array( )
+    );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+typename Layer< _TScalar >::
+TColVector Layer< _TScalar >::
+operator()( const TColVector& x ) const
+{
+  return( this->m_S( ( this->m_W * x ).colwise( ) + this->m_B, false ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+typename Layer< _TScalar >::
+TScalar Layer< _TScalar >::
+regularization( ) const
+{
+  return( this->m_W.squaredNorm( ) + this->m_B.squaredNorm( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -188,7 +229,7 @@ _CopyTo( std::ostream& o ) const
   } // end for
   for( unsigned int r = 0; r < this->m_B.rows( ); ++r )
     o << this->m_B( r, 0 ) << " ";
-  o << std::endl << typeid( this->m_sigma ).name( ) << std::endl;
+  o << std::endl << typeid( this->m_S ).name( ) << std::endl;
 }
 
 // -------------------------------------------------------------------------

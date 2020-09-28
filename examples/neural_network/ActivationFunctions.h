@@ -13,10 +13,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct Identity
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
   };
 
   /**
@@ -24,10 +23,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct BinaryStep
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
   };
 
   /**
@@ -35,10 +33,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct Logistic
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
   };
 
   /**
@@ -46,10 +43,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct Tanh
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
   };
 
   /**
@@ -57,10 +53,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct ArcTan
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
   };
 
   /**
@@ -68,10 +63,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct ReLU
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
   };
 
   /**
@@ -79,10 +73,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct LeakyReLU
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
   };
 
   /**
@@ -90,10 +83,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct RandomizedReLU
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
 
     RandomizedReLU( const _TScalar& a );
     const _TScalar& GetA( ) const;
@@ -107,10 +99,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct ELU
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
 
     ELU( const _TScalar& a );
     const _TScalar& GetA( ) const;
@@ -124,10 +115,9 @@ namespace ActivationFunctions
   template< class _TScalar >
   struct SoftPlus
   {
-    using TColVector = Eigen::Matrix< _TScalar, Eigen::Dynamic, 1 >;
+    using TMatrix = Eigen::Matrix< _TScalar, Eigen::Dynamic, Eigen::Dynamic >;
 
-    TColVector operator()( const TColVector& z ) const;
-    TColVector operator[]( const TColVector& z ) const;
+    TMatrix operator()( const TMatrix& z, bool derivative ) const;
   };
 
 };

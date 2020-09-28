@@ -22,6 +22,7 @@ int main( )
 
   std::cout << "Input : " << x << std::endl;
   std::cout << "Output: " << std::endl << y << std::endl;
+  std::cout << "ANN   : " << std::endl << ann << std::endl;
 
   return( 0 );
 }

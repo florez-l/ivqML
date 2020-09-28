@@ -7,170 +7,139 @@
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::Identity< _TScalar >::
-TColVector ActivationFunctions::Identity< _TScalar >::
-operator()( const TColVector& z ) const
+TMatrix ActivationFunctions::Identity< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  return( z );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::Identity< _TScalar >::
-TColVector ActivationFunctions::Identity< _TScalar >::
-operator[]( const TColVector& z ) const
-{
-  return( TColVector::Ones( z.rows( ), z.cols( ) ) );
+  if( derivative )
+    return( TMatrix::Ones( z.rows( ), z.cols( ) ) );
+  else
+    return( z );
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::BinaryStep< _TScalar >::
-TColVector ActivationFunctions::BinaryStep< _TScalar >::
-operator()( const TColVector& z ) const
+TMatrix ActivationFunctions::BinaryStep< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  TColVector r = TColVector::Ones( z.rows( ), z.cols( ) );
-  r.array( ) *= ( z.array( ) >= 0 ).template cast< _TScalar >( );
-  return( r );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::BinaryStep< _TScalar >::
-TColVector ActivationFunctions::BinaryStep< _TScalar >::
-operator[]( const TColVector& z ) const
-{
-  return( TColVector::Zero( z.rows( ), z.cols( ) ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::Logistic< _TScalar >::
-TColVector ActivationFunctions::Logistic< _TScalar >::
-operator()( const TColVector& z ) const
-{
-  return( _TScalar( 1 ) / ( _TScalar( 1 ) + Eigen::exp( -z.array( ) ) ) );
+  if( !derivative )
+  {
+    TMatrix r = TMatrix::Ones( z.rows( ), z.cols( ) );
+    r.array( ) *= ( z.array( ) >= 0 ).template cast< _TScalar >( );
+    return( r );
+  }
+  else
+    return( TMatrix::Zero( z.rows( ), z.cols( ) ) );
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::Logistic< _TScalar >::
-TColVector ActivationFunctions::Logistic< _TScalar >::
-operator[]( const TColVector& z ) const
+TMatrix ActivationFunctions::Logistic< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  TColVector e = this->operator()( z );
-  return( e.array( ) * ( _TScalar( 1 ) - e.array( ) ) );
+  if( derivative )
+  {
+    TMatrix e = this->operator()( z, false );
+    return( e.array( ) * ( _TScalar( 1 ) - e.array( ) ) );
+  }
+  else
+    return( _TScalar( 1 ) / ( _TScalar( 1 ) + Eigen::exp( -z.array( ) ) ) );
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::Tanh< _TScalar >::
-TColVector ActivationFunctions::Tanh< _TScalar >::
-operator()( const TColVector& z ) const
+TMatrix ActivationFunctions::Tanh< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  return( Eigen::tanh( z.array( ) ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::Tanh< _TScalar >::
-TColVector ActivationFunctions::Tanh< _TScalar >::
-operator[]( const TColVector& z ) const
-{
-  TColVector t = this->operator()( z );
-  return( _TScalar( 1 ) - Eigen::pow( t.array( ), 2 ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::ArcTan< _TScalar >::
-TColVector ActivationFunctions::ArcTan< _TScalar >::
-operator()( const TColVector& z ) const
-{
-  return( Eigen::atan( z.array( ) ) );
+  if( derivative )
+  {
+    TMatrix t = this->operator()( z, false );
+    return( _TScalar( 1 ) - Eigen::pow( t.array( ), 2 ) );
+  }
+  else
+    return( Eigen::tanh( z.array( ) ) );
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::ArcTan< _TScalar >::
-TColVector ActivationFunctions::ArcTan< _TScalar >::
-operator[]( const TColVector& z ) const
+TMatrix ActivationFunctions::ArcTan< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  return( _TScalar( 1 ) / ( Eigen::pow( z.array( ), 2 ) + _TScalar( 1 ) )  );
-}
-
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::ReLU< _TScalar >::
-TColVector ActivationFunctions::ReLU< _TScalar >::
-operator()( const TColVector& z ) const
-{
-  TColVector r = z;
-  r.array( ) *= ( z.array( ) >= 0 ).template cast< _TScalar >( );
-  return( r );
+  if( derivative )
+    return( _TScalar( 1 ) / ( Eigen::pow( z.array( ), 2 ) + _TScalar( 1 ) )  );
+  else
+    return( Eigen::atan( z.array( ) ) );
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::ReLU< _TScalar >::
-TColVector ActivationFunctions::ReLU< _TScalar >::
-operator[]( const TColVector& z ) const
+TMatrix ActivationFunctions::ReLU< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  TColVector r = TColVector::Ones( z.rows( ), z.cols( ) );
-  r.array( ) *= ( z.array( ) >= 0 ).template cast< _TScalar >( );
-  return( r );
+  if( derivative )
+  {
+    TMatrix r = TMatrix::Ones( z.rows( ), z.cols( ) );
+    r.array( ) *= ( z.array( ) >= 0 ).template cast< _TScalar >( );
+    return( r );
+  }
+  else
+  {
+    TMatrix r = z;
+    r.array( ) *= ( z.array( ) >= 0 ).template cast< _TScalar >( );
+    return( r );
+  } // end if
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::LeakyReLU< _TScalar >::
-TColVector ActivationFunctions::LeakyReLU< _TScalar >::
-operator()( const TColVector& z ) const
+TMatrix ActivationFunctions::LeakyReLU< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  TColVector r( z.rows( ), z.cols( ) );
-  auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
-  r.array( ) =
-    ( c * z.array( ) ) +
-    ( ( _TScalar( 1 ) - c ) * _TScalar( 1e-2 ) ) * z.array( );
-  return( r );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::LeakyReLU< _TScalar >::
-TColVector ActivationFunctions::LeakyReLU< _TScalar >::
-operator[]( const TColVector& z ) const
-{
-  TColVector r( z.rows( ), z.cols( ) );
-  auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
-  r.array( ) = c + ( ( _TScalar( 1 ) - c ) * _TScalar( 1e-2 ) );
-  return( r );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::RandomizedReLU< _TScalar >::
-TColVector ActivationFunctions::RandomizedReLU< _TScalar >::
-operator()( const TColVector& z ) const
-{
-  TColVector r( z.rows( ), z.cols( ) );
-  auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
-  r.array( ) =
-    ( c * z.array( ) ) +
-    ( ( _TScalar( 1 ) - c ) * this->m_A ) * z.array( );
-  return( r );
+  if( derivative )
+  {
+    TMatrix r( z.rows( ), z.cols( ) );
+    auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
+    r.array( ) = c + ( ( _TScalar( 1 ) - c ) * _TScalar( 1e-2 ) );
+    return( r );
+  }
+  else
+  {
+    TMatrix r( z.rows( ), z.cols( ) );
+    auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
+    r.array( ) =
+      ( c * z.array( ) ) +
+      ( ( _TScalar( 1 ) - c ) * _TScalar( 1e-2 ) ) * z.array( );
+    return( r );
+  } // end if
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::RandomizedReLU< _TScalar >::
-TColVector ActivationFunctions::RandomizedReLU< _TScalar >::
-operator[]( const TColVector& z ) const
+TMatrix ActivationFunctions::RandomizedReLU< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  TColVector r( z.rows( ), z.cols( ) );
-  auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
-  r.array( ) = c + ( ( _TScalar( 1 ) - c ) * this->m_A );
-  return( r );
+  if( derivative )
+  {
+    TMatrix r( z.rows( ), z.cols( ) );
+    auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
+    r.array( ) = c + ( ( _TScalar( 1 ) - c ) * this->m_A );
+    return( r );
+  }
+  else
+  {
+    TMatrix r( z.rows( ), z.cols( ) );
+    auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
+    r.array( ) =
+      ( c * z.array( ) ) +
+      ( ( _TScalar( 1 ) - c ) * this->m_A ) * z.array( );
+    return( r );
+  } // end if
 }
 
 // -------------------------------------------------------------------------
@@ -192,31 +161,29 @@ GetA( ) const
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::ELU< _TScalar >::
-TColVector ActivationFunctions::ELU< _TScalar >::
-operator()( const TColVector& z ) const
+TMatrix ActivationFunctions::ELU< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  TColVector r( z.rows( ), z.cols( ) );
-  auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
-  r.array( ) =
-    ( c * z.array( ) ) +
-    (
-      ( ( _TScalar( 1 ) - c ) * this->m_A ) *
-      ( Eigen::exp( z.array( ) ) - _TScalar( 1 ) )
-      );
-  return( r );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::ELU< _TScalar >::
-TColVector ActivationFunctions::ELU< _TScalar >::
-operator[]( const TColVector& z ) const
-{
-  TColVector e = this->operator()( z );
-  TColVector r( z.rows( ), z.cols( ) );
-  auto c = ( z.array( ) < 0 ).template cast< _TScalar >( );
-  r.array( ) = ( c * ( e.array( ) + this->m_A ) ) + ( _TScalar( 1 ) - c );
-  return( r );
+  if( derivative )
+  {
+    TMatrix e = this->operator()( z, false );
+    TMatrix r( z.rows( ), z.cols( ) );
+    auto c = ( z.array( ) < 0 ).template cast< _TScalar >( );
+    r.array( ) = ( c * ( e.array( ) + this->m_A ) ) + ( _TScalar( 1 ) - c );
+    return( r );
+  }
+  else
+  {
+    TMatrix r( z.rows( ), z.cols( ) );
+    auto c = ( z.array( ) >= 0 ).template cast< _TScalar >( );
+    r.array( ) =
+      ( c * z.array( ) ) +
+      (
+        ( ( _TScalar( 1 ) - c ) * this->m_A ) *
+        ( Eigen::exp( z.array( ) ) - _TScalar( 1 ) )
+        );
+    return( r );
+  } // end if
 }
 
 // -------------------------------------------------------------------------
@@ -238,19 +205,13 @@ GetA( ) const
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename ActivationFunctions::SoftPlus< _TScalar >::
-TColVector ActivationFunctions::SoftPlus< _TScalar >::
-operator()( const TColVector& z ) const
+TMatrix ActivationFunctions::SoftPlus< _TScalar >::
+operator()( const TMatrix& z, bool derivative ) const
 {
-  return( Eigen::log( Eigen::exp( z.array( ) ) + _TScalar( 1 ) ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-typename ActivationFunctions::SoftPlus< _TScalar >::
-TColVector ActivationFunctions::SoftPlus< _TScalar >::
-operator[]( const TColVector& z ) const
-{
-  return( _TScalar( 1 ) / ( _TScalar( 1 ) + Eigen::exp( -z.array( ) ) ) );
+  if( derivative )
+    return( _TScalar( 1 ) / ( _TScalar( 1 ) + Eigen::exp( -z.array( ) ) ) );
+  else
+    return( Eigen::log( Eigen::exp( z.array( ) ) + _TScalar( 1 ) ) );
 }
 
 // -------------------------------------------------------------------------
