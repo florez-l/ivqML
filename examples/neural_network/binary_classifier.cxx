@@ -13,7 +13,7 @@
 
 // -- Some typedefs
 using TPixel = unsigned short;
-using TScalar = double;
+using TScalar = double; // float | double | long double
 using TAnn = NeuralNetwork< TScalar >;
 
 // -- Main function
