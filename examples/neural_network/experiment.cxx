@@ -41,10 +41,22 @@ int main( int argc, char** argv )
   TAnn::TMatrix X_validation, Y_validation;
   validation_reader.cast( X_validation, Y_validation, 1 );
 
+  // Normalization
+  TAnn::TRowVector min_D = X_train.colwise( ).minCoeff( );
+  TAnn::TRowVector max_D = X_train.colwise( ).maxCoeff( );
+  TAnn::TRowVector dif_D = max_D - min_D;
+  X_train.rowwise( ) -= min_D;
+  X_train.array( ).rowwise( ) /= dif_D.array( );
+
+  X_test.rowwise( ) -= min_D;
+  X_test.array( ).rowwise( ) /= dif_D.array( );
+
+  X_validation.rowwise( ) -= min_D;
+  X_validation.array( ).rowwise( ) /= dif_D.array( );
+
   // Create
   TAnn ann( 5e-6 );
   ann.add( X_train.cols( ), 8, ActivationFunctions::ReLU< TScalar >( ) );
-  ann.add( 4, ActivationFunctions::ReLU< TScalar >( ) );
   ann.add( 1, ActivationFunctions::Logistic< TScalar >( ) );
 
   // Train
