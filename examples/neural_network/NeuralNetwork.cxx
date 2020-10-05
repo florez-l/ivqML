@@ -4,6 +4,9 @@
 
 #include "NeuralNetwork.h"
 
+
+#include <iostream>
+
 // -------------------------------------------------------------------------
 template< class _TScalar >
 NeuralNetwork< _TScalar >::
@@ -231,8 +234,9 @@ _cost_and_gradient(
 
     // Update cost
     auto y = ( Y.row( i ).array( ) == _1 ).template cast< TScalar >( );
-    J -= ( Eigen::log( a[ L ].array( ) ) * y ).sum( ) / sm;
-    J -= ( Eigen::log( _1 - a[ L ].array( ) ) * ( _1 - y ) ).sum( ) / sm;
+
+    J -= ( Eigen::log( a[ L ].transpose( ).array( ) ) * y ).sum( ) / sm;
+    J -= ( Eigen::log( _1 - a[ L ].transpose( ).array( ) ) * ( _1 - y ) ).sum( ) / sm;
 
     // Output error
     d[ L - 1 ] =
