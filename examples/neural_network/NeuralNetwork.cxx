@@ -5,18 +5,13 @@
 #include "NeuralNetwork.h"
 
 
-
-
 #include <iostream>
-
-
-
-
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 NeuralNetwork< _TScalar >::
-NeuralNetwork( )
+NeuralNetwork( const TScalar& epsilon )
+  : m_Epsilon( epsilon )
 {
 }
 
@@ -25,12 +20,8 @@ template< class _TScalar >
 NeuralNetwork< _TScalar >::
 NeuralNetwork( const Self& other )
 {
-  /* TODO
-     this->m_Layers.clear( );
-     this->m_Layers.insert(
-     this->m_Layers.begin( ), other.m_Layers.begin( ), other.m_Layers.end( )
-     );
-  */
+  this->m_L.clear( );
+  this->m_L.insert( this->m_L.begin( ), other.m_L.begin( ), other.m_L.end( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -39,12 +30,8 @@ typename NeuralNetwork< _TScalar >::
 Self& NeuralNetwork< _TScalar >::
 operator=( const Self& other )
 {
-  /* TODO
-     this->m_Layers.clear( );
-     this->m_Layers.insert(
-     this->m_Layers.begin( ), other.m_Layers.begin( ), other.m_Layers.end( )
-     );
-  */
+  this->m_L.clear( );
+  this->m_L.insert( this->m_L.begin( ), other.m_L.begin( ), other.m_L.end( ) );
   return( *this );
 }
 
@@ -61,8 +48,8 @@ template< class _TScalar >
 void NeuralNetwork< _TScalar >::
 add( unsigned int o, const TActivation& f )
 {
-  assert( this->m_Layers.size( ) > 0 );
-  this->add( this->m_Layers.rbegin( )->second.output_size( ), o, f );
+  assert( this->m_L.size( ) > 0 );
+  this->add( this->m_L.back( ).output_size( ), o, f );
 }
 
 // -------------------------------------------------------------------------
@@ -78,11 +65,9 @@ template< class _TScalar >
 void NeuralNetwork< _TScalar >::
 add( const TLayer& l )
 {
-  /* TODO
-     if( this->m_Layers.size( ) > 0 )
-     assert( l.input_size( ) == this->m_Layers.back( ).output_size( ) );
-  */
-  this->m_Layers[ this->m_Layers.size( ) + 1 ] = l;
+  if( this->m_L.size( ) > 0 )
+    assert( l.input_size( ) == this->m_L.back( ).output_size( ) );
+  this->m_L.push_back( l );
 }
 
 // -------------------------------------------------------------------------
@@ -90,22 +75,20 @@ template< class _TScalar >
 void NeuralNetwork< _TScalar >::
 init( bool randomly )
 {
-  for( auto& l: this->m_Layers )
-    l.second.init( randomly );
+  for( TLayer& l: this->m_L )
+    l.init( randomly );
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename NeuralNetwork< _TScalar >::
-TColVector NeuralNetwork< _TScalar >::
-operator()( const TColVector& x ) const
+TMatrix NeuralNetwork< _TScalar >::
+operator()( const TMatrix& x ) const
 {
-  assert( this->m_Layers.size( ) > 1 );
-
-  auto lIt = this->m_Layers.begin( );
-  TColVector z = lIt->second.operator()( x.transpose( ) );
-  for( lIt++; lIt != this->m_Layers.end( ); ++lIt )
-    z = lIt->second.operator()( z );
+  typename TLayers::const_iterator lIt = this->m_L.begin( );
+  TMatrix z = lIt->operator()( x );
+  for( lIt++; lIt != this->m_L.end( ); ++lIt )
+    z = lIt->operator()( z );
   return( z );
 }
 
@@ -113,99 +96,15 @@ operator()( const TColVector& x ) const
 template< class _TScalar >
 typename NeuralNetwork< _TScalar >::
 TScalar NeuralNetwork< _TScalar >::
-cost(
-  std::vector< TMatrix >& dw, std::vector< TMatrix >& db,
-  const TMatrix& X, const TMatrix& Y, const TScalar& lambda
-  )
+cost( const TMatrix& X, const TMatrix& Y ) const
 {
-  // Intermediary values
-  using _TCols = std::map< unsigned int, TColVector >;
-  using _TMatrices = std::map< unsigned int, TMatrix >;
-  _TCols a, z, d;
-  _TMatrices D;
+  static const TScalar _1 = TScalar( 1 );
 
-  // Initialize fwd propagation
-  typename TLayers::iterator fIt = this->m_Layers.begin( );
-  a[ 0 ] = TColVector::Ones( fIt->second.input_size( ) );
-  for( ; fIt != this->m_Layers.end( ); ++fIt )
-  {
-    a[ fIt->first ] = TColVector::Ones( fIt->second.output_size( ) );
-    z[ fIt->first ] = TColVector::Zero( fIt->second.output_size( ) );
-    D[ fIt->first ] =
-      TMatrix::Zero( fIt->second.output_size( ), fIt->second.input_size( ) );
-  } // end while
-
-  // Initialize bck propagation
-  typename TLayers::reverse_iterator bIt = this->m_Layers.rbegin( );
-  d[ this->m_Layers.size( ) ] = TColVector::Zero( bIt->second.output_size( ) );
-  for( bIt++; bIt != this->m_Layers.rend( ); ++bIt )
-    d[ bIt->first ] = TColVector::Zero( bIt->second.output_size( ) );
-
-  // Main loop
-  TScalar J = TScalar( 0 );
-  for( unsigned long i = 0; i < X.rows( ); ++i )
-  {
-    // a[ 0 ]
-    typename _TCols::iterator afIt = a.begin( );
-    afIt->second = X.row( i ).transpose( );
-
-    // Fwd propagation
-    fIt = this->m_Layers.begin( );
-    typename _TCols::iterator zfIt = z.begin( );
-    for( ; fIt != this->m_Layers.end( ); ++fIt, ++zfIt )
-    {
-      zfIt->second = fIt->second.linear_fwd( afIt->second );
-      afIt++;
-      afIt->second = fIt->second.sigma_fwd( zfIt->second );
-    } // end for
-
-    // Update cost
-    auto y = ( Y.row( i ).array( ) == TScalar( 1 ) ).template cast< TScalar >( );
-    J -= ( Eigen::log( afIt->second.array( ) ) * y ).sum( );
-    J -= ( Eigen::log( TScalar( 1 ) - afIt->second.array( ) ) * ( TScalar( 1 ) - y ) ).sum( );
-
-    // delta_out
-    typename _TCols::reverse_iterator dbIt = d.rbegin( );
-    dbIt->second = afIt->second - Y.row( i ).transpose( );
-
-    // Bck propagation
-    typename _TCols::reverse_iterator ndbIt = d.rbegin( );
-    typename _TCols::reverse_iterator zbIt = z.rbegin( );
-    bIt = this->m_Layers.rbegin( );
-    for( dbIt++, zbIt++; dbIt != d.rend( ); ++dbIt, ++ndbIt, ++bIt, ++zbIt )
-      dbIt->second = bIt->second.delta_bck( ndbIt->second, zbIt->second );
-
-    // Gradient assembly
-    typename _TMatrices::iterator DfIt = D.begin( );
-    typename _TCols::iterator dfIt = d.begin( );
-    afIt = a.begin( );
-    for( ; dfIt != d.end( ); ++DfIt, ++afIt, ++dfIt )
-      DfIt->second += dfIt->second * afIt->second.transpose( );
-
-  } // end for
-
-  dw.clear( );
-  db.clear( );
-  typename _TMatrices::iterator DfIt = D.begin( );
-  typename _TCols::iterator dfIt = d.begin( );
-  fIt = this->m_Layers.begin( );
-  for( ; DfIt != D.end( ); ++DfIt, ++dfIt, ++fIt )
-  {
-    dw.push_back( DfIt->second / TScalar( X.rows( ) ) );
-    if( lambda != TScalar( 0 ) )
-      dw.back( ) += fIt->second.weights( ) * lambda;
-    db.push_back( dfIt->second / TScalar( X.rows( ) ) );
-  } // end for
-
-  // Regularize cost and finish
+  TMatrix Yr = this->operator()( X.transpose( ) ).transpose( );
+  auto y = ( Y.array( ) == _1 ).template cast< TScalar >( );
+  TScalar J = -( Eigen::log( Yr.array( ) ) * y ).sum( );
+  J -= ( Eigen::log( _1 - Yr.array( ) ) * ( _1 - y ) ).sum( );
   J /= TScalar( X.rows( ) );
-  if( lambda != TScalar( 0 ) )
-  {
-    TScalar r = TScalar( 0 );
-    for( const auto& l: this->m_Layers )
-      r += l.second.regularization( );
-    J += lambda * r / TScalar( X.rows( ) );
-  } // end if
   return( J );
 }
 
@@ -215,37 +114,52 @@ void NeuralNetwork< _TScalar >::
 train(
   const TMatrix& X, const TMatrix& Y,
   const TScalar& alpha, const TScalar& lambda,
-  const TScalar& epsilon,
   std::ostream* os
   )
 {
-  // Initialization
-  std::vector< TMatrix > dw, db;
-  TScalar J = this->cost( dw, db, X, Y, lambda );
+  // Initialize temporary values
+  unsigned long L = this->m_L.size( );
+  std::vector< TMatrix > dw( L );
+  std::vector< TColVector > db( L ), a( L + 1 ), z( L ), d( L );
+  a.shrink_to_fit( );
+  z.shrink_to_fit( );
+  d.shrink_to_fit( );
+  dw.shrink_to_fit( );
+  db.shrink_to_fit( );
+
+  // First cost
+  TScalar J = this->_cost_and_gradient( dw, db, a, z, d, X, Y );
+  if( lambda != TScalar( 0 ) )
+    for( unsigned long l = 0; l < L; ++l )
+      J += this->m_L[ l ].regularization( ) * lambda;
   TScalar dJ = J;
 
   // Main loop
-  TScalar m = TScalar( X.rows( ) );
   bool stop = false;
   unsigned long nIter = 0;
   while( !stop )
   {
     // Update parameters
-    typename TLayers::iterator lIt = this->m_Layers.begin( );
-    typename std::vector< TMatrix >::const_iterator wIt = dw.begin( );
-    typename std::vector< TMatrix >::const_iterator bIt = db.begin( );
-    for( ; lIt != this->m_Layers.end( ); ++lIt, ++wIt, ++bIt )
+    for( unsigned long l = 0; l < L; ++l )
     {
-      lIt->second.weights( ) -= *wIt * alpha;
-      lIt->second.biases( ) -= *bIt * alpha;
+      if( lambda != TScalar( 0 ) )
+        this->m_L[ l ].weights( ) -=
+          ( dw[ l ] * alpha ) +
+          ( this->m_L[ l ].weights( ) * lambda );
+      else
+        this->m_L[ l ].weights( ) -= dw[ l ] * alpha;
+      this->m_L[ l ].biases( ) -= db[ l ] * alpha;
     } // end for
 
     // Update cost
-    TScalar Jn = this->cost( dw, db, X, Y, lambda );
+    TScalar Jn = this->_cost_and_gradient( dw, db, a, z, d, X, Y );
+    if( lambda != TScalar( 0 ) )
+      for( unsigned long l = 0; l < L; ++l )
+        Jn += this->m_L[ l ].regularization( ) * lambda;
     dJ = J - Jn;
-    if( dJ <= epsilon )
+    if( dJ <= this->m_Epsilon )
       stop = true;
-    if( nIter % 1000 == 0 && os != nullptr )
+    if( nIter % 100 == 0 && os != nullptr )
       *os
         << "\33[2K\rIteration: " << nIter
         << "\tJ = " << J
@@ -264,8 +178,102 @@ train(
       << "** Final dJ : " << dJ << std::endl
       << "** Alpha    : " << alpha << std::endl
       << "** Lambda   : " << lambda << std::endl
-      << "** Epsilon  : " << epsilon << std::endl
+      << "** Epsilon  : " << this->m_Epsilon << std::endl
       << "********************************************" << std::endl;
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+typename NeuralNetwork< _TScalar >::
+TMatrix NeuralNetwork< _TScalar >::
+confusion_matrix( const TMatrix& X, const TMatrix& Y ) const
+{
+  TMatrix K = TMatrix::Zero( 2, 2 );
+  auto R =
+    ( this->operator()( X.transpose( ) ).array( ) >= 0.5 ).
+    template cast< TScalar >( ).transpose( );
+  auto RpY = Y.array( ) + R.array( );
+  auto RmY = Y.array( ) - R.array( );
+  K( 0, 0 ) = ( RpY == 0 ).template cast< TScalar >( ).sum( );
+  K( 1, 1 ) = ( RpY == 2 ).template cast< TScalar >( ).sum( );
+  K( 0, 1 ) = ( RmY < 0 ).template cast< TScalar >( ).sum( );
+  K( 1, 0 ) = ( RmY > 0 ).template cast< TScalar >( ).sum( );
+  return( K );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+typename NeuralNetwork< _TScalar >::
+TScalar NeuralNetwork< _TScalar >::
+_cost_and_gradient(
+  std::vector< TMatrix >& dw,
+  std::vector< TColVector >& db,
+  std::vector< TColVector >& a,
+  std::vector< TColVector >& z,
+  std::vector< TColVector >& d,
+  const TMatrix& X, const TMatrix& Y
+  ) const
+{
+  static const TScalar _0 = TScalar( 0 );
+  static const TScalar _1 = TScalar( 1 );
+
+  long L = this->m_L.size( );
+  unsigned long m = X.rows( );
+  TScalar sm = TScalar( m );
+  TScalar J = _0;
+
+  for( unsigned long i = 0; i < m; ++i )
+  {
+    // Fwd propagation
+    a[ 0 ] = X.row( i ).transpose( );
+    for( long l = 0; l < L; ++l )
+    {
+      z[ l ] = this->m_L[ l ].linear_fwd( a[ l ] );
+      a[ l + 1 ] = this->m_L[ l ].sigma_fwd( z[ l ] );
+    } // end for
+
+    // Update cost
+    auto y = ( Y.row( i ).array( ) == _1 ).template cast< TScalar >( );
+
+    J -= ( Eigen::log( a[ L ].transpose( ).array( ) ) * y ).sum( ) / sm;
+    J -= ( Eigen::log( _1 - a[ L ].transpose( ).array( ) ) * ( _1 - y ) ).sum( ) / sm;
+
+    // Output error
+    d[ L - 1 ] =
+      ( a[ L ] - Y.row( i ).transpose( ) ).array( ) *
+      this->m_L[ L - 1 ].sigma( )( z[ L - 1 ], true ).array( );
+    if( i == 0 )
+    {
+      dw[ L - 1 ]  = ( d[ L - 1 ] * a[ L - 1 ].transpose( ) ) / sm;
+      db[ L - 1 ]  = d[ L - 1 ] / sm;
+    }
+    else
+    {
+      dw[ L - 1 ] += ( d[ L - 1 ] * a[ L - 1 ].transpose( ) ) / sm;
+      db[ L - 1 ] += d[ L - 1 ] / sm;
+    } // end if
+
+    // Bck propagation
+    for( long l = L - 2; l >= 0; --l )
+    {
+      d[ l ] =
+        ( this->m_L[ l + 1 ].weights( ).transpose( ) * d[ l + 1 ] ).array( ) *
+        this->m_L[ l ].sigma( )( z[ l ], true ).array( );
+      if( i == 0 )
+      {
+        dw[ l ]  = ( d[ l ] * a[ l ].transpose( ) ) / sm;
+        db[ l ]  = d[ l ] / sm;
+      }
+      else
+      {
+        dw[ l ] += ( d[ l ] * a[ l ].transpose( ) ) / sm;
+        db[ l ] += d[ l ] / sm;
+      } // end if
+    } // end for
+  } // end for
+
+  // Ok, we're done!
+  return( J );
 }
 
 // -------------------------------------------------------------------------
@@ -288,9 +296,9 @@ template< class _TScalar >
 void NeuralNetwork< _TScalar >::
 _CopyTo( std::ostream& o ) const
 {
-  o << this->m_Layers.size( ) << std::endl;
-  for( const auto& l: this->m_Layers )
-    o << l.second << std::endl;
+  o << this->m_L.size( ) << std::endl;
+  for( const TLayer& l: this->m_L )
+    o << l << std::endl;
 }
 
 // -------------------------------------------------------------------------

@@ -4,9 +4,7 @@
 
 #include "Layer.h"
 #include <cassert>
-
-
-#include <iostream>
+#include <random>
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
@@ -140,8 +138,16 @@ init( bool randomly )
   unsigned int c = this->m_W.cols( );
   if( randomly )
   {
-    this->m_W = TMatrix::Random( r, c ) * 0.01;
-    this->m_B = TColVector::Random( r ) * 0.01;
+    std::random_device rd;
+    std::mt19937 gen( rd( ) );
+    std::uniform_real_distribution< TScalar > dis( -1, 1 );
+
+    this->m_W = TMatrix::Zero( r, c ).unaryExpr(
+      [&]( TScalar not_used ) { return( dis( gen ) ); }
+      );
+    this->m_B = TColVector::Zero( r ).unaryExpr(
+      [&]( TScalar not_used ) { return( dis( gen ) ); }
+      );
   }
   else
   {
@@ -156,7 +162,7 @@ typename Layer< _TScalar >::
 TColVector Layer< _TScalar >::
 linear_fwd( const TColVector& x ) const
 {
-  return( ( this->m_W * x ).colwise( ) + this->m_B );
+  return( ( this->m_W * x ) + this->m_B );
 }
 
 // -------------------------------------------------------------------------
@@ -182,8 +188,8 @@ delta_bck( const TColVector& d, const TColVector& z ) const
 // -------------------------------------------------------------------------
 template< class _TScalar >
 typename Layer< _TScalar >::
-TColVector Layer< _TScalar >::
-operator()( const TColVector& x ) const
+TMatrix Layer< _TScalar >::
+operator()( const TMatrix& x ) const
 {
   return( this->m_S( ( this->m_W * x ).colwise( ) + this->m_B, false ) );
 }
