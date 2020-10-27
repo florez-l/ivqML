@@ -58,7 +58,7 @@ def BruteForce( X, k ):
     # end if
     iteration += 1
   # end for
-  return Label( X, means )
+  return [ Label( X, means ), means ]
 # end def
 
 ## -------------------------------------------------------------------------
@@ -88,7 +88,7 @@ def Lloyd( X, init_means ):
     mu = mu2
     iteration += 1
   # end while
-  return Label( X, mu )
+  return [ Label( X, mu ), mu ]
 # end def
 
 ## -------------------------------------------------------------------------
