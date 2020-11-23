@@ -115,6 +115,8 @@ int main( int argc, char** argv )
     << "Testing    : " << Xtest.rows( ) << std::endl
     << "Validation : " << Xvalidation.rows( ) << std::endl
     << "EXAMPLES   : " << M << std::endl
+    << "INPUTS     : " << N << std::endl
+    << "OUTPUTS    : " << P << std::endl
     << "TOTAL      : " << Xtrain.rows( ) + Xtest.rows( ) + Xvalidation.rows( )
     << std::endl
     << "---------------------------" << std::endl;
@@ -124,6 +126,7 @@ int main( int argc, char** argv )
   unsigned int Mtrain = Xtrain.rows( );
   for( unsigned int q = 0; q < Q; ++q )
   {
+    std::cout << "Model " << q << std::endl;
     // Randomly extract examples (with replace)
     std::uniform_int_distribution< unsigned int > dis2( 0, Mtrain - 1 );
     auto indexes =
@@ -139,14 +142,35 @@ int main( int argc, char** argv )
     } // end for
 
     // Create neural network
-    /* TODO
-       models[ q ].add( Xbagg.cols( ), k1, af_1 );
-       models[ q ].add( k2, af_2 );
-       ...
-       models[ q ].add( Ybagg.cols( ), af_out );
-    */
+    models[ q ].add( Xbagg.cols( ), 1000, "relu" );
+    models[ q ].add( 100, "relu" );
+    models[ q ].add( 10, "relu" );
+    models[ q ].add( Ybagg.cols( ), "outtanh" );
 
     // Train neural network
+    TTrainer tr( &models[ q ] );
+    tr.setData( Xbagg.transpose( ), Ybagg.transpose( ) );
+    tr.setEpsilon( std::numeric_limits< float >::epsilon( ) );
+    tr.setLearningRate( 3e-2 );
+    tr.setRegularization( 0 );
+    tr.setBatchSize( 10 );
+    tr.setSizes( 1, 0 );
+    tr.setNormalizationToStandardization( );
+    models[ q ].init( );
+    tr.train(
+      [&]( const unsigned long& i, const TScalar& Jtrain, const TScalar& Jtest )
+      {
+        std::cout
+          << std::scientific << std::setprecision( 4 )
+          << "\33[2K\rIteration: " << i
+          << "\tJtrain = " << Jtrain
+          << "\tJtest = " << Jtest
+          << " (epsilon = " << tr.epsilon( ) << ")"
+          << std::flush;
+      }
+      );
+    std::cout << std::endl;
+
     /* TODO
        models[ q ].init( true );
        models[ q ].train( Xbagg, Ybagg, alpha, lambda, &std::cout );

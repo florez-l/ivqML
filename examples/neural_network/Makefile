@@ -1,7 +1,7 @@
 INCLUDES=-I/usr/local/include/eigen3
 C_VERSION=c++17
 ## OPT_FLAGS=-g
-OPT_FLAGS=-Ofast
+OPT_FLAGS=-Ofast -fopenmp
 EXE_FLAGS=-std=$(C_VERSION) $(OPT_FLAGS) $(INCLUDES)
 OBJ_FLAGS=$(EXE_FLAGS) -c
 
