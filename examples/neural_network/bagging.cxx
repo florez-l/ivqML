@@ -2,8 +2,8 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
-#include "ActivationFunctions.h"
 #include "NeuralNetwork.h"
+#include "ClassificationTrainer.h"
 
 #include <fstream>
 #include <iostream>
@@ -15,6 +15,7 @@
 // -- Some typedefs
 using TScalar = double; // ** WARNING **: Do not modify this!
 using TAnn = NeuralNetwork< TScalar >;
+using TTrainer = ClassificationTrainer< TAnn >;
 
 // -- Helper functions
 void read_files(
@@ -119,7 +120,7 @@ int main( int argc, char** argv )
     << "---------------------------" << std::endl;
 
   // Prepare bagging models
-  std::vector< TAnn > models( Q, TAnn( 1e-6 ) );
+  std::vector< TAnn > models( Q, TAnn( ) );
   unsigned int Mtrain = Xtrain.rows( );
   for( unsigned int q = 0; q < Q; ++q )
   {
@@ -146,8 +147,10 @@ int main( int argc, char** argv )
     */
 
     // Train neural network
-    models[ q ].init( true );
-    models[ q ].train( Xbagg, Ybagg, alpha, lambda, &std::cout );
+    /* TODO
+       models[ q ].init( true );
+       models[ q ].train( Xbagg, Ybagg, alpha, lambda, &std::cout );
+    */
   } // end for
 
   // Test bagging
@@ -155,8 +158,7 @@ int main( int argc, char** argv )
   TScalar out_thr = 0.5;
   TAnn::TMatrix Yvote = TAnn::TMatrix::Zero( Ytrain.rows( ), P );
   for( unsigned int q = 0; q < Q; ++q )
-    Yvote.array( ) +=
-      ( models[ q ]( Xtrain ).array( ) >= out_thr ).template cast< TScalar >( );
+    Yvote += models[ q ].t( Xtrain.transpose( ) );
   TAnn::TMatrix Yfinal( Ytrain.rows( ), P );
   Yfinal.array( ) = ( Yvote.array( ) > hQ ).template cast< TScalar >( );
 

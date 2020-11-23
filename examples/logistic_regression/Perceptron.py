@@ -48,7 +48,7 @@ class Perceptron:
 
   # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   '''.'''
-  def __getitem__( self, x ):
+  def __getitem__( self, x ): # modelo[ ]
     if self( x ) < self.m_T:
       return False
     else:

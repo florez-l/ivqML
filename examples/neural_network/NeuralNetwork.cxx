@@ -4,301 +4,350 @@
 
 #include "NeuralNetwork.h"
 
-
-#include <iostream>
+#include <cassert>
+#include <map>
+#include <regex>
+#include <sstream>
+#include <boost/algorithm/string.hpp>
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-NeuralNetwork< _TScalar >::
-NeuralNetwork( const TScalar& epsilon )
-  : m_Epsilon( epsilon )
+template< class _TScl >
+NeuralNetwork< _TScl >::
+NeuralNetwork( )
 {
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-NeuralNetwork< _TScalar >::
-NeuralNetwork( const Self& other )
+template< class _TScl >
+NeuralNetwork< _TScl >::
+NeuralNetwork( const Self& o )
 {
   this->m_L.clear( );
-  this->m_L.insert( this->m_L.begin( ), other.m_L.begin( ), other.m_L.end( ) );
+  this->m_L.insert( this->m_L.begin( ), o.m_L.begin( ), o.m_L.end( ) );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-typename NeuralNetwork< _TScalar >::
-Self& NeuralNetwork< _TScalar >::
-operator=( const Self& other )
+template< class _TScl >
+typename NeuralNetwork< _TScl >::
+Self& NeuralNetwork< _TScl >::
+operator=( const Self& o )
 {
   this->m_L.clear( );
-  this->m_L.insert( this->m_L.begin( ), other.m_L.begin( ), other.m_L.end( ) );
+  this->m_L.insert( this->m_L.begin( ), o.m_L.begin( ), o.m_L.end( ) );
   return( *this );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-void NeuralNetwork< _TScalar >::
-add( unsigned int i, unsigned int o, const TActivation& f )
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+add( unsigned int i, unsigned int o, const std::string& f )
 {
   this->add( TLayer( i, o, f ) );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-void NeuralNetwork< _TScalar >::
-add( unsigned int o, const TActivation& f )
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+add( unsigned int o, const std::string& f )
 {
-  assert( this->m_L.size( ) > 0 );
+  assert( this->m_L.size( ) > 0 && "At least one layer is needed" );
+
   this->add( this->m_L.back( ).output_size( ), o, f );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-void NeuralNetwork< _TScalar >::
-add( const TMatrix& w, const TColVector& b, const TActivation& f )
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+add( const TMatrix& w, const TColVector& b, const std::string& f )
 {
   this->add( TLayer( w, b, f ) );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-void NeuralNetwork< _TScalar >::
+template< class _TScl >
+void NeuralNetwork< _TScl >::
 add( const TLayer& l )
 {
   if( this->m_L.size( ) > 0 )
-    assert( l.input_size( ) == this->m_L.back( ).output_size( ) );
+    assert(
+      l.input_size( ) == this->m_L.back( ).output_size( ) && "Invalid sizes"
+      );
   this->m_L.push_back( l );
+
+  // Normalization transforms
+  if( this->m_L.size( ) == 1 )
+  {
+    unsigned int n = this->m_L[ 0 ].input_size( );
+    this->m_NormalizationOffset = TColVector::Zero( n );
+    this->m_NormalizationScale = TMatrix::Identity( n, n );
+  } // end if
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-void NeuralNetwork< _TScalar >::
-init( bool randomly )
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+load_topology( std::istream& is )
 {
-  for( TLayer& l: this->m_L )
-    l.init( randomly );
+  unsigned int L;
+  std::map< unsigned int, unsigned long > K;
+  std::map< unsigned int, std::string > F;
+
+  // Read parameters
+  std::regex r( "\\s+" );
+  std::string line;
+  while( std::getline( is, line ) )
+  {
+    line = std::regex_replace( line, r, "" );
+    std::vector< std::string > tokens;
+    boost::algorithm::split( tokens, line, boost::is_any_of( "=" ) );
+    if( tokens.size( ) == 2 )
+    {
+      if( tokens[ 0 ] == "L" )
+      {
+        std::istringstream data( tokens[ 1 ] );
+        data >> L;
+      }
+      else
+      {
+        if( tokens[ 0 ][ 0 ] == 'k' )
+        {
+          std::istringstream i_str( tokens[ 0 ].substr( 1 ) );
+          std::istringstream k_str( tokens[ 1 ] );
+          unsigned int i;
+          unsigned long k;
+          i_str >> i;
+          k_str >> k;
+          K[ i ] = k;
+        }
+        else if( tokens[ 0 ][ 0 ] == 'f' )
+        {
+          std::istringstream i_str( tokens[ 0 ].substr( 1 ) );
+          unsigned int i;
+          i_str >> i;
+          F[ i ] = tokens[ 1 ];
+        } // end if
+      } // end if
+    } // end if
+  } // end while
+
+  // Real build
+  if( F.size( ) == L && K.size( ) == L + 1 )
+    for( unsigned int l = 0; l < L; ++l )
+      this->add( K[ l ], K[ l + 1 ], F[ l ] );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-typename NeuralNetwork< _TScalar >::
-TMatrix NeuralNetwork< _TScalar >::
-operator()( const TMatrix& x ) const
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+set( unsigned int l, const TMatrix& w, const TColVector& b )
+{
+  if( l < this->m_L.size( ) )
+  {
+    this->m_L[ l ].weights( ) = w;
+    this->m_L[ l ].biases( ) = b;
+  } // end if
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+unsigned int NeuralNetwork< _TScl >::
+number_of_layers( ) const
+{
+  return( this->m_L.size( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+typename NeuralNetwork< _TScl >::
+TMatrix& NeuralNetwork< _TScl >::
+weights( unsigned int l )
+{
+  static TMatrix w( 1, 1 );
+  if( l < this->m_L.size( ) )
+    return( this->m_L[ l ].weights( ) );
+  else
+    return( w );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+const typename NeuralNetwork< _TScl >::
+TMatrix& NeuralNetwork< _TScl >::
+weights( unsigned int l ) const
+{
+  static const TMatrix w( 1, 1 );
+  if( l < this->m_L.size( ) )
+    return( this->m_L[ l ].weights( ) );
+  else
+    return( w );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+typename NeuralNetwork< _TScl >::
+TColVector& NeuralNetwork< _TScl >::
+biases( unsigned int l )
+{
+  static TColVector b( 1 );
+  if( l < this->m_L.size( ) )
+    return( this->m_L[ l ].biases( ) );
+  else
+    return( b );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+const typename NeuralNetwork< _TScl >::
+TColVector& NeuralNetwork< _TScl >::
+biases( unsigned int l ) const
+{
+  static const TColVector b( 1 );
+  if( l < this->m_L.size( ) )
+    return( this->m_L[ l ].biases( ) );
+  else
+    return( b );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+typename NeuralNetwork< _TScl >::
+TActivation* NeuralNetwork< _TScl >::
+sigma( unsigned int l )
+{
+  if( l < this->m_L.size( ) )
+    return( this->m_L[ l ].sigma( ) );
+  else
+    return( nullptr );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+const typename NeuralNetwork< _TScl >::
+TActivation* NeuralNetwork< _TScl >::
+sigma( unsigned int l ) const
+{
+  if( l < this->m_L.size( ) )
+    return( this->m_L[ l ].sigma( ) );
+  else
+    return( nullptr );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+setNormalizationOffset( const TColVector& o )
+{
+  this->m_NormalizationOffset = o;
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+setNormalizationScale( const TMatrix& s )
+{
+  this->m_NormalizationScale = s;
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+init( )
+{
+  // Weights
+  for( TLayer& l: this->m_L )
+    l.init( );
+
+  // Normalization transforms
+  unsigned int n = this->m_L[ 0 ].input_size( );
+  this->m_NormalizationOffset = TColVector::Zero( n );
+  this->m_NormalizationScale = TMatrix::Identity( n, n );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+typename NeuralNetwork< _TScl >::
+TMatrix NeuralNetwork< _TScl >::
+f( const TMatrix& x ) const
 {
   typename TLayers::const_iterator lIt = this->m_L.begin( );
-  TMatrix z = lIt->operator()( x );
+  TMatrix z = lIt->f(
+    this->m_NormalizationScale *
+    ( x.colwise( ) + this->m_NormalizationOffset )
+    );
   for( lIt++; lIt != this->m_L.end( ); ++lIt )
-    z = lIt->operator()( z );
+    z = lIt->f( z );
   return( z );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-typename NeuralNetwork< _TScalar >::
-TScalar NeuralNetwork< _TScalar >::
-cost( const TMatrix& X, const TMatrix& Y ) const
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+f( std::vector< TMatrix >& a, std::vector< TMatrix >& z ) const
 {
-  static const TScalar _1 = TScalar( 1 );
+  typename TLayers::const_iterator lIt = this->m_L.begin( );
+  typename std::vector< TMatrix >::iterator aIt, bIt, zIt;
+  aIt = bIt = a.begin( );
+  zIt = z.begin( );
 
-  TMatrix Yr = this->operator()( X.transpose( ) ).transpose( );
-  auto y = ( Y.array( ) == _1 ).template cast< TScalar >( );
-  TScalar J = -( Eigen::log( Yr.array( ) ) * y ).sum( );
-  J -= ( Eigen::log( _1 - Yr.array( ) ) * ( _1 - y ) ).sum( );
-  J /= TScalar( X.rows( ) );
-  return( J );
+  for( bIt++; lIt != this->m_L.end( ); ++lIt, ++aIt, ++bIt, ++zIt )
+    *bIt = lIt->f( *aIt, *zIt );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-void NeuralNetwork< _TScalar >::
-train(
-  const TMatrix& X, const TMatrix& Y,
-  const TScalar& alpha, const TScalar& lambda,
-  std::ostream* os
-  )
+template< class _TScl >
+typename NeuralNetwork< _TScl >::
+TMatrix NeuralNetwork< _TScl >::
+t( const TMatrix& x ) const
 {
-  // Initialize temporary values
-  unsigned long L = this->m_L.size( );
-  std::vector< TMatrix > dw( L );
-  std::vector< TColVector > db( L ), a( L + 1 ), z( L ), d( L );
-  a.shrink_to_fit( );
-  z.shrink_to_fit( );
-  d.shrink_to_fit( );
-  dw.shrink_to_fit( );
-  db.shrink_to_fit( );
-
-  // First cost
-  TScalar J = this->_cost_and_gradient( dw, db, a, z, d, X, Y );
-  if( lambda != TScalar( 0 ) )
-    for( unsigned long l = 0; l < L; ++l )
-      J += this->m_L[ l ].regularization( ) * lambda;
-  TScalar dJ = J;
-
-  // Main loop
-  bool stop = false;
-  unsigned long nIter = 0;
-  while( !stop )
-  {
-    // Update parameters
-    for( unsigned long l = 0; l < L; ++l )
-    {
-      if( lambda != TScalar( 0 ) )
-        this->m_L[ l ].weights( ) -=
-          ( dw[ l ] * alpha ) +
-          ( this->m_L[ l ].weights( ) * lambda );
-      else
-        this->m_L[ l ].weights( ) -= dw[ l ] * alpha;
-      this->m_L[ l ].biases( ) -= db[ l ] * alpha;
-    } // end for
-
-    // Update cost
-    TScalar Jn = this->_cost_and_gradient( dw, db, a, z, d, X, Y );
-    if( lambda != TScalar( 0 ) )
-      for( unsigned long l = 0; l < L; ++l )
-        Jn += this->m_L[ l ].regularization( ) * lambda;
-    dJ = J - Jn;
-    if( dJ <= this->m_Epsilon )
-      stop = true;
-    if( nIter % 100 == 0 && os != nullptr )
-      *os
-        << "\33[2K\rIteration: " << nIter
-        << "\tJ = " << J
-        << "\tdJ = " << dJ
-        << std::flush;
-    J = Jn;
-    nIter++;
-  } // end while
-
-  if( os != nullptr )
-    *os
-      << std::endl
-      << "********************************************" << std::endl
-      << "** ANN trained in " << nIter << " iterations" << std::endl
-      << "** Final J  : " << J << std::endl
-      << "** Final dJ : " << dJ << std::endl
-      << "** Alpha    : " << alpha << std::endl
-      << "** Lambda   : " << lambda << std::endl
-      << "** Epsilon  : " << this->m_Epsilon << std::endl
-      << "********************************************" << std::endl;
+  return( this->m_L.back( ).sigma( )->t( this->f( x ) ) );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-typename NeuralNetwork< _TScalar >::
-TMatrix NeuralNetwork< _TScalar >::
-confusion_matrix( const TMatrix& X, const TMatrix& Y ) const
+template< class _TScl >
+typename NeuralNetwork< _TScl >::
+TMatrix NeuralNetwork< _TScl >::
+_d( const unsigned int& l, const TMatrix& z ) const
 {
-  TMatrix K = TMatrix::Zero( 2, 2 );
-  auto R =
-    ( this->operator()( X.transpose( ) ).array( ) >= 0.5 ).
-    template cast< TScalar >( ).transpose( );
-  auto RpY = Y.array( ) + R.array( );
-  auto RmY = Y.array( ) - R.array( );
-  K( 0, 0 ) = ( RpY == 0 ).template cast< TScalar >( ).sum( );
-  K( 1, 1 ) = ( RpY == 2 ).template cast< TScalar >( ).sum( );
-  K( 0, 1 ) = ( RmY < 0 ).template cast< TScalar >( ).sum( );
-  K( 1, 0 ) = ( RmY > 0 ).template cast< TScalar >( ).sum( );
-  return( K );
+  assert( l < this->m_L.size( ) && "Layer does not exist" );
+
+  return( this->m_L[ l ].sigma( )->d( z ) );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-typename NeuralNetwork< _TScalar >::
-TScalar NeuralNetwork< _TScalar >::
-_cost_and_gradient(
-  std::vector< TMatrix >& dw,
-  std::vector< TColVector >& db,
-  std::vector< TColVector >& a,
-  std::vector< TColVector >& z,
-  std::vector< TColVector >& d,
-  const TMatrix& X, const TMatrix& Y
-  ) const
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+_read_from( std::istream& i )
 {
-  static const TScalar _0 = TScalar( 0 );
-  static const TScalar _1 = TScalar( 1 );
-
-  long L = this->m_L.size( );
-  unsigned long m = X.rows( );
-  TScalar sm = TScalar( m );
-  TScalar J = _0;
-
-  for( unsigned long i = 0; i < m; ++i )
-  {
-    // Fwd propagation
-    a[ 0 ] = X.row( i ).transpose( );
-    for( long l = 0; l < L; ++l )
-    {
-      z[ l ] = this->m_L[ l ].linear_fwd( a[ l ] );
-      a[ l + 1 ] = this->m_L[ l ].sigma_fwd( z[ l ] );
-    } // end for
-
-    // Update cost
-    auto y = ( Y.row( i ).array( ) == _1 ).template cast< TScalar >( );
-
-    J -= ( Eigen::log( a[ L ].transpose( ).array( ) ) * y ).sum( ) / sm;
-    J -= ( Eigen::log( _1 - a[ L ].transpose( ).array( ) ) * ( _1 - y ) ).sum( ) / sm;
-
-    // Output error
-    d[ L - 1 ] =
-      ( a[ L ] - Y.row( i ).transpose( ) ).array( ) *
-      this->m_L[ L - 1 ].sigma( )( z[ L - 1 ], true ).array( );
-    if( i == 0 )
-    {
-      dw[ L - 1 ]  = ( d[ L - 1 ] * a[ L - 1 ].transpose( ) ) / sm;
-      db[ L - 1 ]  = d[ L - 1 ] / sm;
-    }
-    else
-    {
-      dw[ L - 1 ] += ( d[ L - 1 ] * a[ L - 1 ].transpose( ) ) / sm;
-      db[ L - 1 ] += d[ L - 1 ] / sm;
-    } // end if
-
-    // Bck propagation
-    for( long l = L - 2; l >= 0; --l )
-    {
-      d[ l ] =
-        ( this->m_L[ l + 1 ].weights( ).transpose( ) * d[ l + 1 ] ).array( ) *
-        this->m_L[ l ].sigma( )( z[ l ], true ).array( );
-      if( i == 0 )
-      {
-        dw[ l ]  = ( d[ l ] * a[ l ].transpose( ) ) / sm;
-        db[ l ]  = d[ l ] / sm;
-      }
-      else
-      {
-        dw[ l ] += ( d[ l ] * a[ l ].transpose( ) ) / sm;
-        db[ l ] += d[ l ] / sm;
-      } // end if
-    } // end for
-  } // end for
-
-  // Ok, we're done!
-  return( J );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
-void NeuralNetwork< _TScalar >::
-_ReadFrom( std::istream& i )
-{
-  unsigned int N;
-  i >> N;
-  for( unsigned int n = 0; n < N; ++n )
+  unsigned int L;
+  i >> L;
+  for( unsigned int n = 0; n < L; ++n )
   {
     TLayer l;
     i >> l;
     this->add( l );
   } // end for
+
+  // Read normalization parameters
+  unsigned int N = this->m_L[ 0 ].input_size( );
+  this->m_NormalizationOffset = TColVector::Zero( N );
+  this->m_NormalizationScale = TMatrix::Identity( N, N );
+  for( unsigned int n = 0; n < N; ++n )
+    i >> this->m_NormalizationOffset( n, 0 );
+  for( unsigned int x = 0; x < N; ++x )
+    for( unsigned int y = 0; y < N; ++y )
+      i >> this->m_NormalizationScale( x, y );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-void NeuralNetwork< _TScalar >::
-_CopyTo( std::ostream& o ) const
+template< class _TScl >
+void NeuralNetwork< _TScl >::
+_copy_to( std::ostream& o ) const
 {
   o << this->m_L.size( ) << std::endl;
   for( const TLayer& l: this->m_L )
     o << l << std::endl;
+  o << this->m_NormalizationOffset << std::endl;
+  o << this->m_NormalizationScale << std::endl;
 }
 
 // -------------------------------------------------------------------------

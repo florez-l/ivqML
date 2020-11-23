@@ -12,13 +12,13 @@ clean:
 test: ActivationFunctions.o Layer.o NeuralNetwork.o test.cxx
 	g++ $(EXE_FLAGS) -o $@ $^
 
-binary_classifier: CSVReader.o ActivationFunctions.o Layer.o NeuralNetwork.o binary_classifier.cxx
+binary_classifier: CSVReader.o ActivationFunctions.o Layer.o NeuralNetwork.o ClassificationTrainer.o binary_classifier.cxx
 	g++ $(EXE_FLAGS) -o $@ $^
 
-experiment: CSVReader.o ActivationFunctions.o Layer.o NeuralNetwork.o experiment.cxx
+experiment: CSVReader.o ActivationFunctions.o Layer.o NeuralNetwork.o ClassificationTrainer.o experiment.cxx
 	g++ $(EXE_FLAGS) -o $@ $^
 
-bagging: CSVReader.o ActivationFunctions.o Layer.o NeuralNetwork.o bagging.cxx
+bagging: CSVReader.o ActivationFunctions.o Layer.o NeuralNetwork.o ClassificationTrainer.o bagging.cxx
 	g++ $(EXE_FLAGS) -o $@ $^
 
 %.o: %.cxx

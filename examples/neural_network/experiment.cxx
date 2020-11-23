@@ -1,116 +1,83 @@
+// =========================================================================
+// @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
+// =========================================================================
 
-#include "ActivationFunctions.h"
 #include "NeuralNetwork.h"
+#include "ClassificationTrainer.h"
 #include "CSVReader.h"
-
-#include <iomanip>
+#include <fstream>
 #include <iostream>
+#include <iomanip>
+#include <limits>
+#include <sstream>
 
-using TScalar = long double;
+// -- Some typedefs
+using TPixel = unsigned short;
+using TScalar = double;
 using TAnn = NeuralNetwork< TScalar >;
+using TTrainer = ClassificationTrainer< TAnn >;
 
+// -- Main function
 int main( int argc, char** argv )
 {
-  if( argc < 6 )
+  if( argc < 7 )
   {
     std::cerr
-      << "Usage: " << argv[ 0 ] << " train test validation alpha lambda" 
+      << "Usage: "
+      << argv[ 0 ]
+      << " input_examples.csv train test y_size alpha lambda" 
       << std::endl;
     return( 1 );
   } // end if
-
-  std::string train_file = argv[ 1 ];
-  std::string test_file = argv[ 2 ];
-  std::string validation_file = argv[ 3 ];
-  TScalar alpha = std::atof( argv[ 4 ] );
-  TScalar lambda = std::atof( argv[ 5 ] );
+  std::string input_examples = argv[ 1 ];
+  TScalar train_size = std::atof( argv[ 2 ] );
+  TScalar test_size = std::atof( argv[ 3 ] );
+  unsigned long p = std::atoi( argv[ 4 ] );
+  TScalar alpha = std::atof( argv[ 5 ] );
+  TScalar lambda = std::atof( argv[ 6 ] );
 
   // Read data
-  CSVReader train_reader( train_file, "," );
-  train_reader.read( );
-  TAnn::TMatrix X_train, Y_train;
-  train_reader.cast( X_train, Y_train, 1 );
+  CSVReader reader( input_examples, "," );
+  reader.read( );
+  TAnn::TMatrix X, Y;
+  reader.cast( X, Y, p );
 
-  CSVReader test_reader( test_file, "," );
-  test_reader.read( );
-  TAnn::TMatrix X_test, Y_test;
-  test_reader.cast( X_test, Y_test, 1 );
+  // Create an empty artifical neural network
+  TAnn ann;
+  ann.add( X.cols( ), X.cols( ) * 4, "relu" );
+  ann.add( X.cols( ) * 3, "relu" );
+  ann.add( X.cols( ) * 2, "relu" );
+  ann.add( p, "logistic" );
 
-  CSVReader validation_reader( validation_file, "," );
-  validation_reader.read( );
-  TAnn::TMatrix X_validation, Y_validation;
-  validation_reader.cast( X_validation, Y_validation, 1 );
-
-  // Normalization
-  TAnn::TRowVector min_D = X_train.colwise( ).minCoeff( );
-  TAnn::TRowVector max_D = X_train.colwise( ).maxCoeff( );
-  TAnn::TRowVector dif_D = max_D - min_D;
-  X_train.rowwise( ) -= min_D;
-  X_train.array( ).rowwise( ) /= dif_D.array( );
-
-  X_test.rowwise( ) -= min_D;
-  X_test.array( ).rowwise( ) /= dif_D.array( );
-
-  X_validation.rowwise( ) -= min_D;
-  X_validation.array( ).rowwise( ) /= dif_D.array( );
-
-  // Create
-  TAnn ann( 5e-6 );
-  ann.add( X_train.cols( ), 8, ActivationFunctions::ReLU< TScalar >( ) );
-  ann.add( 1, ActivationFunctions::Logistic< TScalar >( ) );
-
-  // Train
-  ann.init( true );
-  ann.train( X_train, Y_train, alpha, lambda, &std::cout );
-
-  // Evaluate trained results
-  TAnn::TMatrix K_train = ann.confusion_matrix( X_train, Y_train );
+  // Train the neural network
+  TTrainer tr( &ann );
+  tr.setData( X.transpose( ), Y.transpose( ) );
+  tr.setEpsilon( std::numeric_limits< float >::epsilon( ) );
+  tr.setLearningRate( alpha );
+  tr.setRegularization( lambda );
+  tr.setBatchSize( 0 );
+  tr.setSizes( train_size, test_size );
+  tr.setNormalizationToStandardization( );
+  ann.init( );
+  tr.train(
+    [&]( const unsigned long& i, const TScalar& Jtrain, const TScalar& Jtest )
+    {
+      if( i % 1000 == 0 )
+        std::cout
+          << std::scientific << std::setprecision( 4 )
+          << "\33[2K\rIteration: " << i
+          << "\tJtrain = " << Jtrain
+          << "\tJtest = " << Jtest
+          << " (epsilon = " << tr.epsilon( ) << ")"
+          << std::flush;
+    }
+    );
+  std::cout << std::endl << "done!" << std::endl;
   std::cout
-    << "****************************" << std::endl
-    << "***** Training results *****" << std::endl
-    << "****************************" << std::endl
-    << "* Confusion matrix:" << std::endl << K_train << std::endl
-    << std::setprecision( 4 )
-    << "* Sen (0) : "
-    << ( 100.0 * ( K_train( 0, 0 ) / ( K_train( 0, 0 ) + K_train( 1, 0 ) ) ) )
-    << "%" << std::endl
-    << "* PPV (0) : "
-    << ( 100.0 * ( K_train( 0, 0 ) / ( K_train( 0, 0 ) + K_train( 0, 1 ) ) ) )
-    << "%" << std::endl
-    << "* Spe (1) : "
-    << ( 100.0 * ( K_train( 1, 1 ) / ( K_train( 1, 1 ) + K_train( 0, 1 ) ) ) )
-    << "%" << std::endl
-    << "* NPV (1) : "
-    << ( 100.0 * ( K_train( 1, 1 ) / ( K_train( 1, 1 ) + K_train( 1, 0 ) ) ) )
-    << "%" << std::endl
-    << "* F1      : "
-    << ( ( 2.0 * K_train( 0, 0 ) ) / ( ( 2.0 * K_train( 0, 0 ) ) + K_train( 0, 1 ) + K_train( 1, 0 ) ) )
-    << std::endl
-    << "*******************" << std::endl;
-
-  TAnn::TMatrix K_test = ann.confusion_matrix( X_test, Y_test );
-  std::cout
-    << "****************************" << std::endl
-    << "***** Testing results *****" << std::endl
-    << "****************************" << std::endl
-    << "* Confusion matrix:" << std::endl << K_test << std::endl
-    << std::setprecision( 4 )
-    << "* Sen (0) : "
-    << ( 100.0 * ( K_test( 0, 0 ) / ( K_test( 0, 0 ) + K_test( 1, 0 ) ) ) )
-    << "%" << std::endl
-    << "* PPV (0) : "
-    << ( 100.0 * ( K_test( 0, 0 ) / ( K_test( 0, 0 ) + K_test( 0, 1 ) ) ) )
-    << "%" << std::endl
-    << "* Spe (1) : "
-    << ( 100.0 * ( K_test( 1, 1 ) / ( K_test( 1, 1 ) + K_test( 0, 1 ) ) ) )
-    << "%" << std::endl
-    << "* NPV (1) : "
-    << ( 100.0 * ( K_test( 1, 1 ) / ( K_test( 1, 1 ) + K_test( 1, 0 ) ) ) )
-    << "%" << std::endl
-    << "* F1      : "
-    << ( ( 2.0 * K_test( 0, 0 ) ) / ( ( 2.0 * K_test( 0, 0 ) ) + K_test( 0, 1 ) + K_test( 1, 0 ) ) )
-    << std::endl
-    << "*******************" << std::endl;
+    << std::fixed << std::setprecision( 4 )
+    << "*** Train F1      = " << tr.FtrainScore( ) << " ***" << std::endl
+    << "*** Test F1       = " << tr.FtestScore( ) << " ***" << std::endl
+    << "*** Validation F1 = " << tr.FvalidScore( ) << " ***" << std::endl;
 
   return( 0 );
 }

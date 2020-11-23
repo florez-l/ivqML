@@ -9,82 +9,83 @@
 
 #include "Layer.h"
 
+// -- Some fwd decls
+template< class _TANN > class ClassificationTrainer;
+
 /**
  */
-template< class _TScalar >
+template< class _TScl >
 class NeuralNetwork
 {
 public:
   using Self    = NeuralNetwork;
-  using TScalar = _TScalar;
-  using TLayer  = Layer< TScalar >;
+  using TLayer  = Layer< _TScl >;
 
-  using TMatrix     = typename TLayer::TMatrix;
-  using TRowVector  = typename TLayer::TRowVector;
+  using TScalar     = typename TLayer::TScalar;
   using TColVector  = typename TLayer::TColVector;
+  using TRowVector  = typename TLayer::TRowVector;
+  using TMatrix     = typename TLayer::TMatrix;
   using TActivation = typename TLayer::TActivation;
 
   using TLayers = std::vector< TLayer >;
 
 public:
-  NeuralNetwork(
-    const TScalar& epsilon =
-    std::numeric_limits< TScalar >::epsilon( ) * TScalar( 10 )
-    );
-  NeuralNetwork( const Self& other );
+  NeuralNetwork( );
+  NeuralNetwork( const Self& o );
   virtual ~NeuralNetwork( ) = default;
-  Self& operator=( const Self& other );
+  Self& operator=( const Self& o );
 
-  void add( unsigned int i, unsigned int o, const TActivation& f );
-  void add( unsigned int o, const TActivation& f );
-  void add( const TMatrix& w, const TColVector& b, const TActivation& f );
+  void add( unsigned int i, unsigned int o, const std::string& f );
+  void add( unsigned int o, const std::string& f );
+  void add( const TMatrix& w, const TColVector& b, const std::string& f );
   void add( const TLayer& l );
+  void load_topology( std::istream& is );
 
-  void init( bool randomly = true );
+  void set( unsigned int l, const TMatrix& w, const TColVector& b );
 
-  TMatrix operator()( const TMatrix& x ) const;
+  unsigned int number_of_layers( ) const;
+  TMatrix& weights( unsigned int l );
+  const TMatrix& weights( unsigned int l ) const;
+  TColVector& biases( unsigned int l );
+  const TColVector& biases( unsigned int l ) const;
+  TActivation* sigma( unsigned int l );
+  const TActivation* sigma( unsigned int l ) const;
 
-  TScalar cost( const TMatrix& X, const TMatrix& Y ) const;
+  void setNormalizationOffset( const TColVector& o );
+  void setNormalizationScale( const TMatrix& s );
 
-  void train(
-    const TMatrix& X, const TMatrix& Y,
-    const TScalar& alpha,
-    const TScalar& lambda = TScalar( 0 ),
-    std::ostream* os = nullptr
-    );
-  TMatrix confusion_matrix( const TMatrix& X, const TMatrix& Y ) const;
+  void init( );
 
-protected:
-  TScalar _cost_and_gradient(
-    std::vector< TMatrix >& dw,
-    std::vector< TColVector >& db,
-    std::vector< TColVector >& a,
-    std::vector< TColVector >& z,
-    std::vector< TColVector >& d,
-    const TMatrix& X, const TMatrix& Y
-    ) const;
-
-  void _ReadFrom( std::istream& i );
-  void _CopyTo( std::ostream& o ) const;
+  TMatrix f( const TMatrix& x ) const;
+  void f( std::vector< TMatrix >& a, std::vector< TMatrix >& z ) const;
+  TMatrix t( const TMatrix& x ) const;
 
 protected:
-  TScalar m_Epsilon;
+  TMatrix _d( const unsigned int& l, const TMatrix& z ) const;
+  void _read_from( std::istream& i );
+  void _copy_to( std::ostream& o ) const;
+
+protected:
   TLayers m_L;
+  TColVector m_NormalizationOffset;
+  TMatrix    m_NormalizationScale;
 
 public:
   ///!
   friend std::istream& operator>>( std::istream& i, Self& n )
     {
-      n._ReadFrom( i );
+      n._read_from( i );
       return( i );
     }
 
   ///!
   friend std::ostream& operator<<( std::ostream& o, const Self& n )
     {
-      n._CopyTo( o );
+      n._copy_to( o );
       return( o );
     }
+
+  friend class ClassificationTrainer< Self >;
 };
 
 #endif // __PUJ_ML__NeuralNetwork__h__

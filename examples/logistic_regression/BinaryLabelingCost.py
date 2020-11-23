@@ -70,7 +70,7 @@ class BinaryLabelingCost:
   @input b bias real number
   @output J(w,b)
   '''
-  def __call__( self, w, b ):
+  def __call__( self, w, b ): ## trainer( w, b ) <- Cost
     assert isinstance( b, ( int, float, numpy.float128 ) ), \
            "Invalid bias type."
 

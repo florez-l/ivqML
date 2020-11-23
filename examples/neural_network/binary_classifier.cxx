@@ -2,8 +2,8 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
-#include "ActivationFunctions.h"
 #include "NeuralNetwork.h"
+#include "ClassificationTrainer.h"
 #include "CSVReader.h"
 #include <fstream>
 #include <iostream>
@@ -15,6 +15,7 @@
 using TPixel = unsigned short;
 using TScalar = double; // float | double | long double
 using TAnn = NeuralNetwork< TScalar >;
+using TTrainer = ClassificationTrainer< TAnn >;
 
 // -- Main function
 int main( int argc, char** argv )
@@ -42,89 +43,43 @@ int main( int argc, char** argv )
   reader.cast( X, Y, p );
 
   // Create an empty artifical neural network
-  TAnn ann( 1e-6 );
-  /* TODO
-     ann.add( X.cols( ), X.cols( ) * 4, ActivationFunctions::ReLU< TScalar >( ) );
-     ann.add( X.cols( ) * 3, ActivationFunctions::ReLU< TScalar >( ) );
-     ann.add( X.cols( ) * 2, ActivationFunctions::ReLU< TScalar >( ) );
-     ann.add( p, ActivationFunctions::Logistic< TScalar >( ) );
-  */
-  ann.add( X.cols( ), p, ActivationFunctions::Logistic< TScalar >( ) );
-
-  // Initialize the ANN with random weights and biases
-  ann.init( true );
+  TAnn ann;
+  ann.add( X.cols( ), X.cols( ) * 4, "relu" );
+  ann.add( X.cols( ) * 3, "relu" );
+  ann.add( X.cols( ) * 2, "relu" );
+  ann.add( p, "logistic" );
 
   // Train the neural network
-  ann.train( X, Y, alpha, lambda, &std::cout );
-
-  // Evaluate trained results
-  TAnn::TMatrix K = ann.confusion_matrix( X, Y );
+  TTrainer tr( &ann );
+  tr.setData( X.transpose( ), Y.transpose( ) );
+  tr.setEpsilon( std::numeric_limits< float >::epsilon( ) );
+  tr.setLearningRate( alpha );
+  tr.setRegularization( lambda );
+  tr.setBatchSize( 0 );
+  tr.setSizes( 1, 0 );
+  tr.setNormalizationToNone( );
+  ann.init( );
+  tr.train(
+    [&]( const unsigned long& i, const TScalar& Jtrain, const TScalar& Jtest )
+    {
+      if( i % 1000 == 0 )
+        std::cout
+          << std::scientific << std::setprecision( 4 )
+          << "\33[2K\rIteration: " << i
+          << "\tJtrain = " << Jtrain
+          << "\tJtest = " << Jtest
+          << " (epsilon = " << tr.epsilon( ) << ")"
+          << std::flush;
+    }
+    );
+  std::cout << std::endl << "done!" << std::endl;
   std::cout
-    << "*******************" << std::endl
-    << "***** Results *****" << std::endl
-    << "*******************" << std::endl
-    << "* Confusion matrix:" << std::endl << K << std::endl
-    << std::setprecision( 4 )
-    << "* Sen (0) : "
-    << ( 100.0 * ( K( 0, 0 ) / ( K( 0, 0 ) + K( 1, 0 ) ) ) )
-    << "%" << std::endl
-    << "* PPV (0) : "
-    << ( 100.0 * ( K( 0, 0 ) / ( K( 0, 0 ) + K( 0, 1 ) ) ) )
-    << "%" << std::endl
-    << "* Spe (1) : "
-    << ( 100.0 * ( K( 1, 1 ) / ( K( 1, 1 ) + K( 0, 1 ) ) ) )
-    << "%" << std::endl
-    << "* NPV (1) : "
-    << ( 100.0 * ( K( 1, 1 ) / ( K( 1, 1 ) + K( 1, 0 ) ) ) )
-    << "%" << std::endl
-    << "* F1      : "
-    << ( ( 2.0 * K( 0, 0 ) ) / ( ( 2.0 * K( 0, 0 ) ) + K( 0, 1 ) + K( 1, 0 ) ) )
-    << std::endl
-    << "*******************" << std::endl;
-
-  /* TODO
-     if( X.cols( ) == 2 )
-     {
-     auto minX = X.colwise( ).minCoeff( );
-     auto maxX = X.colwise( ).maxCoeff( );
-     auto difX = maxX - minX;
-
-     unsigned long samples = 100;
-     std::vector< TPixel > data( 3 * samples * samples );
-     unsigned long k = 0;
-     for( unsigned long j = 0; j < samples; ++j )
-     {
-     TScalar dj = difX( 0, 1 ) * TScalar( j ) / TScalar( samples );
-     dj += minX( 0, 1 );
-     for( unsigned long i = 0; i < samples; ++i )
-     {
-     TScalar di = difX( 0, 0 ) * TScalar( i ) / TScalar( samples );
-     di += minX( 0, 0 );
-     TAnn::TColVector x( X.cols( ) );
-     x << di, dj;
-     data[ k ] =
-     TPixel(
-     ann( x )( 0, 0 ) *
-     TScalar( std::numeric_limits< TPixel >::max( ) )
-     );
-     data[ k + 1 ] = data[ k + 2 ] = data[ k ];
-     k += 3;
-     } // end for
-     } // end for
-
-     // Save a file
-     std::ofstream out( "ann.ppm" );
-     out
-     << "P6" << std::endl
-     << "# Result of a 2-class ANN" << std::endl
-     << samples << " " << samples << std::endl
-     << std::numeric_limits< TPixel >::max( ) << std::endl;
-     out.write( reinterpret_cast< char* >( data.data( ) ), 3 * samples * samples );
-     out.close( );
-     } // end if
-  */
+    << std::fixed << std::setprecision( 4 )
+    << "*** Train F1      = " << tr.FtrainScore( ) << " ***" << std::endl
+    << "*** Test F1       = " << tr.FtestScore( ) << " ***" << std::endl
+    << "*** Validation F1 = " << tr.FvalidScore( ) << " ***" << std::endl;
 
   return( 0 );
 }
 
-// eof
+// eof - $RCSfile$

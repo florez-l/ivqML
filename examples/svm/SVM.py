@@ -17,8 +17,8 @@ X = D[ : , 0 : D.shape[ 1 ] - 1 ]
 Y = D[ : , D.shape[ 1 ] - 1 : ]
 
 # Initial parameters
-w = numpy.matrix( [ 0, 0 ] )
-b = 0
+w = numpy.matrix( [ 1, 0 ] )
+b = 0.01
 alpha = 1e-2
 L = 1
 
@@ -41,7 +41,7 @@ H = numpy.multiply( Y.T, ( w @ X.T ) - b )
 mH = numpy.array( H < 1 ).flatten( ).tolist( )
 Xp = X[ mH, : ]
 Yp = Y[ mH, : ]
-J = ( ( w @ w.T ) * L ) + ( ( 1 - H[ : , mH ] ).sum( ) / m )
+J = ( ( w @ w.T ) * L ) + ( b * b * L ) + ( ( 1 - H[ : , mH ] ).sum( ) / m )
 
 # Main loop
 stop = False
@@ -50,7 +50,7 @@ while not stop:
 
   dw = ( 2 * L * w ) - \
        numpy.multiply( Yp, Xp ).sum( axis = 0 )
-  db = Yp.sum( ) * b
+  db = ( Yp.sum( ) * b ) + ( 2 * b * L )
 
   w = w - ( ( alpha / m ) * dw )
   b = b - ( ( alpha / m ) * db )
