@@ -29,6 +29,9 @@ retention = v / v.sum( )
 
 # Projection onto PCA
 pX = ( ( X - m ) @ R )[ : , : 1 ]
+
+# ---> Usar pX como los datos de entrada para la RN, SVM, Arbol, Bagg...
+
 pX = numpy.append( pX, numpy.zeros( ( pX.shape[ 0 ], 1 ) ), axis = 1 )
 
 # Backprojection from PCA
