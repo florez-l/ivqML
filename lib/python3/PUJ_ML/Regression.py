@@ -7,7 +7,7 @@ import numpy, sys
 ## -------------------------------------------------------------------------
 '''
 '''
-class MSE:
+class MSECost:
 
   '''
   '''
@@ -43,33 +43,33 @@ class MSE:
   # end def
 
   def VectorSize( self ):
-    return self.m_N
+    return self.m_N + 1
   # end def
 
   '''
   '''
   def AnalyticSolve( self ):
-      x = numpy.append( self.m_Xby, numpy.array( [ self.m_uy ] ), axis = 0 )
-      B = numpy.append( self.m_uX, numpy.matrix( [ 1 ] ), axis = 1 )
-      A = numpy.append( self.m_XtX, self.m_uX.T, axis = 1 )
-      A = numpy.append( A, B, axis = 0 )
-      Wb = x @ numpy.linalg.inv( A )
-      return [ Wb[ :, 0 : Wb.shape[ 1 ] - 1 ], Wb[ : , -1 ] ]
+    x = numpy.append( numpy.array( [ self.m_uy ] ), self.m_Xby, axis = 0 )
+    B = numpy.append( numpy.matrix( [ 1 ] ), self.m_uX, axis = 1 )
+    A = numpy.append( self.m_uX.T, self.m_XtX, axis = 1 )
+    return x @ numpy.linalg.inv( numpy.append( B, A, axis = 0 ) )
   # end def
 
   '''
   '''
-  def CostAndDerivatives( self, W, b ):
+  def CostAndDerivatives( self, theta ):
+    b = theta[ : , 0 ]
+    w = theta[ : , 1 : ]
     J = \
-      ( W @ self.m_XtX @ W.T ) + \
-      ( 2.0 * b * ( W @ self.m_uX.T ) ) + \
+      ( w @ self.m_XtX @ w.T ) + \
+      ( 2.0 * b * ( w @ self.m_uX.T ) ) + \
       ( b * b ) - \
-      ( 2.0 * ( W @ self.m_Xby.T ) ) - \
+      ( 2.0 * ( w @ self.m_Xby.T ) ) - \
       ( 2.0 * b * self.m_uy ) + \
       self.m_yty
-    dW = 2.0 * ( ( W @ self.m_XtX ) + ( b * self.m_uX ) - self.m_Xby )
-    db = 2.0 * ( ( W @ self.m_uX.T ) + b - self.m_uy )
-    return [ J, dW, db ]
+    dw = 2.0 * ( ( w @ self.m_XtX ) + ( b * self.m_uX ) - self.m_Xby )
+    db = 2.0 * ( ( w @ self.m_uX.T ) + b - self.m_uy )
+    return [ J[ 0, 0 ], numpy.concatenate( ( db, dw ), axis = 1 ) ]
   # end def
 
 # end class
@@ -77,7 +77,7 @@ class MSE:
 ## -------------------------------------------------------------------------
 '''
 '''
-class MaximumLikelihood:
+class MaximumLikelihoodCost:
 
   '''
   '''

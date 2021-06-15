@@ -2,14 +2,14 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-import math, numpy
+import math, numpy, sys
 
 ## -------------------------------------------------------------------------
 def Solve(
     cost_function,
     learning_rate = 1e-2,
     max_iterations = 1000,
-    epsilon = 1e-8,
+    epsilon = sys.float_info.epsilon,
     debug_step = 1000
     ):
   W = numpy.random.uniform( -1e-1, 1e-1, ( 1, cost_function.VectorSize( ) ) )

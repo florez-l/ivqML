@@ -1,0 +1,747 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation landscape
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1cm
+\topmargin 1cm
+\rightmargin 1cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Linear regression
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $m\in\mathbb{N}$
+\end_inset
+
+, number of examples.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $n\in\mathbb{N}$
+\end_inset
+
+, example size.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $A\bowtie B$
+\end_inset
+
+, element-wise using broadcasting (python like).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{X}\in\mathbb{R}^{m\times n}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{x}_{i}\in\mathbb{R}^{1\times n}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{y}\in\mathbb{R}^{m\times1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{w}\in\mathbb{R}^{1\times n}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+b\in\mathbb{R}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Cost function
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\mathbf{w}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}\mathbf{w}^{\top}+2b\mathbf{w}\mathbf{x}_{i}^{\top}+b^{2}-2\mathbf{w}\mathbf{x}_{i}^{\top}y_{i}-2by_{i}+y_{i}^{2}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\left[\frac{1}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+2b\mathbf{w}\frac{1}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}+\frac{1}{m}\sum_{i=1}^{m}b^{2}-2\mathbf{w}\frac{1}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}y_{i}-2b\frac{1}{m}\sum_{i=1}^{m}y_{i}+\frac{1}{m}\sum_{i=1}^{m}y_{i}^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boxed{J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]\mathbf{w}^{\top}+2b\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b^{2}-2\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\bowtie\mathbf{y}\right)-2b\mu\left(\mathbf{y}\right)+\frac{1}{m}\mathbf{y}^{\top}\mathbf{y}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Gradient (weights)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\frac{\partial}{\partial w^{(j)}}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\frac{\partial}{\partial w^{(j)}}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\left(\frac{\partial}{\partial w^{(j)}}\mathbf{w}\mathbf{x}_{i}^{\top}+\frac{\partial}{\partial w^{(j)}}b-\frac{\partial}{\partial w^{(j)}}y_{i}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\left(\frac{\partial}{\partial w^{(j)}}\mathbf{w}\mathbf{x}_{i}^{\top}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b-y_{i}\right)x_{i}^{(j)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\frac{2}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}x_{i}^{(j)}+b\frac{2}{m}\sum_{i=1}^{m}x_{i}^{(j)}-\frac{2}{m}\sum_{i=1}^{m}y_{i}x_{i}^{(j)}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\left[\begin{array}{c}
+\mathbf{w}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}x_{i}^{(1)}\\
+\mathbf{w}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}x_{i}^{(2)}\\
+\vdots\\
+\mathbf{w}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}x_{i}^{(n)}
+\end{array}\right]+\frac{2b}{m}\left[\begin{array}{c}
+\sum_{i=1}^{m}x_{i}^{(1)}\\
+\sum_{i=1}^{m}x_{i}^{(2)}\\
+\vdots\\
+\sum_{i=1}^{m}x_{i}^{(n)}
+\end{array}\right]-\frac{2}{m}\left[\begin{array}{c}
+\sum_{i=1}^{m}y_{i}x_{i}^{(1)}\\
+\sum_{i=1}^{m}y_{i}x_{i}^{(2)}\\
+\vdots\\
+\sum_{i=1}^{m}y_{i}x_{i}^{(n)}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\mathbf{w}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}+\frac{2b}{m}\sum_{i=1}^{m}\mathbf{x}_{i}-\frac{2}{m}\sum_{i=1}^{m}y_{i}\mathbf{x}_{i}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boxed{\frac{\partial}{\partial\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=2\left(\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Gradient (bias)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\frac{\partial}{\partial b}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\frac{\partial}{\partial b}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\left(\frac{\partial}{\partial b}\mathbf{w}\mathbf{x}_{i}^{\top}+\frac{\partial}{\partial b}b-\frac{\partial}{\partial b}y_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\left(\frac{\partial}{\partial b}b\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b-y_{i}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\frac{2}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}+\frac{2}{m}\sum_{i=1}^{m}b-\frac{2}{m}\sum_{i=1}^{m}y_{i}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boxed{\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=2\left(\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b-\mu\left(\mathbf{y}\right)\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Analitic solution
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=0=2\left(\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b-\mu\left(\mathbf{y}\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{0}=2\left(\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[\begin{array}{c}
+\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b-\mu\left(\mathbf{y}\right)\\
+\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
+\end{array}\right]=\left[\begin{array}{c}
+0\\
+\mathbf{0}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left[\begin{array}{c}
+\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b\\
+\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)
+\end{array}\right]=\left[\begin{array}{c}
+\mu\left(\mathbf{y}\right)\\
+\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left[\begin{array}{c}
+b+\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)\\
+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)+\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]
+\end{array}\right]=\left[\begin{array}{c}
+\mu\left(\mathbf{y}\right)\\
+\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left[\begin{array}{cc}
+b & \mathbf{w}\end{array}\right]\left[\begin{array}{cc}
+1 & \boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)\\
+\boldsymbol{\mu}_{2}\left(\mathbf{X}\right) & \left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]
+\end{array}\right]=\left[\begin{array}{c}
+\mu\left(\mathbf{y}\right)\\
+\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boxed{\left[\begin{array}{cc}
+b & \mathbf{w}\end{array}\right]=\left[\begin{array}{c}
+\mu\left(\mathbf{y}\right)\\
+\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
+\end{array}\right]\left[\begin{array}{cc}
+1 & \boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)\\
+\boldsymbol{\mu}_{2}\left(\mathbf{X}\right) & \left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]
+\end{array}\right]^{-1}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Logistic regression
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $m\in\mathbb{N}$
+\end_inset
+
+, number of examples.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $n\in\mathbb{N}$
+\end_inset
+
+, example size.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{X}\in\mathbb{R}^{m\times n}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{x}_{i}\in\mathbb{R}^{1\times n}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{y}\in\mathbb{B}^{m\times1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{w}\in\mathbb{R}^{1\times n}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+b\in\mathbb{R}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\sigma\left(z\right)=\left(1+e^{-z}\right)^{-1}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\sigma'\left(z\right)=\sigma\left(z\right)\left(1-\sigma\left(z\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Cost function
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\sum_{i=1}^{m}\left(y_{i}\log\left(\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)+\left(1-y_{i}\right)\log\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boxed{J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\log\left(\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)+\sum_{i=1}^{m\land y_{i}=0}\log\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Gradient (weights)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\frac{\partial}{\partial w^{(j)}}\log\left(\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)+\sum_{i=1}^{m\land y_{i}=0}\frac{\partial}{\partial w^{(j)}}\log\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\frac{1}{\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}\frac{\partial}{\partial w^{(j)}}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)+\sum_{i=1}^{m\land y_{i}=0}\frac{\partial}{\partial w^{(j)}}\log\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\frac{1}{\cancel{\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}}\left(\cancel{\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right)\frac{\partial}{\partial w^{(j)}}\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)+\sum_{i=1}^{m\land y_{i}=0}\frac{\partial}{\partial w^{(j)}}\log\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\left(x_{i}^{(j)}-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}\right)+\sum_{i=1}^{m\land y_{i}=0}\frac{\partial}{\partial w^{(j)}}\log\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\left(x_{i}^{(j)}-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}\right)+\sum_{i=1}^{m\land y_{i}=0}\frac{1}{1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}\frac{\partial}{\partial w^{(j)}}\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\left(x_{i}^{(j)}-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}\right)-\sum_{i=1}^{m\land y_{i}=0}\frac{1}{1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}\left(\frac{\partial}{\partial w^{(j)}}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\left(x_{i}^{(j)}-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}\right)-\sum_{i=1}^{m\land y_{i}=0}\frac{1}{\cancel{1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}}\left(\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\cancel{\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)}\frac{\partial}{\partial w^{(j)}}\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\left(x_{i}^{(j)}-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}\right)-\sum_{i=1}^{m\land y_{i}=0}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m}y_{i}\left(x_{i}^{(j)}-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}\right)-\sum_{i=1}^{m}\left(1-y_{i}\right)\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\sum_{i=1}^{m}\left[x_{i}^{(j)}y_{i}\cancel{-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}y_{i}}\cancel{+\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}y_{i}}-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left[\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)x_{i}^{(j)}-x_{i}^{(j)}y_{i}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}x_{i}^{(j)}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)-\frac{1}{m}\sum_{i=1}^{m}x_{i}^{(j)}y_{i}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}x_{i}^{(j)}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)-\boldsymbol{\mu}_{1}\left(\mathbf{X}\bowtie\mathbf{y}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boxed{\frac{\partial}{\partial\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\boldsymbol{\mu}_{1}\left(\mathbf{X}\bowtie\boldsymbol{\sigma}\left(\mathbf{X}\mathbf{w}^{\top}+\mathbf{b}\right)\right)-\boldsymbol{\mu}_{1}\left(\mathbf{X}\bowtie\mathbf{y}\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Gradient (bias)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\frac{\partial}{\partial b}\log\left(\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)+\sum_{i=1}^{m\land y_{i}=0}\frac{\partial}{\partial b}\log\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\frac{1}{\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}\frac{\partial}{\partial b}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)+\sum_{i=1}^{m\land y_{i}=0}\frac{1}{1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}\frac{\partial}{\partial b}\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=-\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=1}\frac{1}{\cancel{\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}}\left(\cancel{\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right)-\sum_{i=1}^{m\land y_{i}=0}\frac{1}{\cancel{1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}}\left(\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\cancel{\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)}\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\left[\sum_{i=1}^{m\land y_{i}=0}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)-\sum_{i=1}^{m\land y_{i}=1}\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\left[\sum_{i=1}^{m}\left(1-y_{i}\right)\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)-y_{i}\left(1-\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\left[\sum_{i=1}^{m}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)\cancel{-y_{i}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}-y_{i}\cancel{+y_{i}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boxed{\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\sigma\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b\right)-\mu\left(\mathbf{y}\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
