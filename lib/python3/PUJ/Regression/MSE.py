@@ -11,15 +11,17 @@ class MSE:
   '''
   '''
   def __init__( self, in_X, in_y ):
-    assert isinstance( in_X, ( list, numpy.matrix ) ), "Invalid X type."
-    assert isinstance( in_y, ( list, numpy.matrix ) ), "Invalid y type."
+    assert isinstance( in_X, ( list, numpy.matrix, numpy.ndarray ) ), \
+      "Invalid X type."
+    assert isinstance( in_y, ( list, numpy.matrix, numpy.ndarray ) ), \
+      "Invalid y type."
     
-    if type( in_X ) is list:
+    if type( in_X ) is list or type( in_X ) is numpy.ndarray:
       X = numpy.matrix( in_X )
     else:
       X = in_X
     # end if
-    if type( in_y ) is list:
+    if type( in_y ) is list or type( in_y ) is numpy.ndarray:
       y = numpy.matrix( in_y ).T
     else:
       y = in_y
