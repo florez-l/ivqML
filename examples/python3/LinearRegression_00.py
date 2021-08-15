@@ -12,14 +12,14 @@ import PUJ.Debug.Polynomial
 
 ## -------------------------------------------------------------------------
 number_of_samples = 20
-min_value = -10
+min_value = -1
 max_value =  10
 polynomial = [ 0, -0.21, -3 ]
 
-learning_rate = 1e-4
+learning_rate = 1e-1
 maximum_iterations = 10000
 epsilon = 1e-8
-debug_step = 1
+debug_step = 100
 init_theta = 0
 
 ## -------------------------------------------------------------------------

@@ -49,6 +49,9 @@ def GradientDescent( cost, **kwargs ):
     i += 1
 
   # end while
+  if df != None:
+    df( J, dJ, t, i, True )
+  # end if
   
   return ( t, i )
 # end def

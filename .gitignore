@@ -1,3 +1,4 @@
 build*
+Sandbox.*
 *.o
 __pycache__

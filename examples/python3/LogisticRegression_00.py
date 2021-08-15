@@ -5,9 +5,9 @@
 import os, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 
-import matplotlib.pyplot, numpy
+import numpy
 import PUJ.Model.Logistic, PUJ.Regression.MaximumLikelihood
-import PUJ.Optimizer.GradientDescent
+import PUJ.Normalize, PUJ.Optimizer.GradientDescent
 import PUJ.Debug.Labeling
 
 ## -------------------------------------------------------------------------
@@ -18,7 +18,7 @@ max_value =  10
 learning_rate = 1e-1
 maximum_iterations = 10000
 epsilon = 1e-8
-debug_step = 100
+debug_step = 10
 init_theta = [ 0.0, 1.0, 1.0 ]
 
 ## -------------------------------------------------------------------------
@@ -42,6 +42,7 @@ x0 = D[ : , : 2 ]
 y0 = D[ : , -1 : ]
 
 # Prepare regression
+x0, x0_off, x0_div = PUJ.Normalize.Standardize( x0 )
 cost = PUJ.Regression.MaximumLikelihood( x0, y0 )
 
 # Prepare debug
