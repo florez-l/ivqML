@@ -62,7 +62,7 @@ class Labeling:
   def __call__( self, J, dJ, t, i, show ):
 
     self.m_CostX += [ i ]
-    self.m_CostY += [ dJ ]
+    self.m_CostY += [ J ]
 
     if show:
       z = PUJ.Model.Logistic( t )( self.m_Data ).reshape( self.m_DX.shape )

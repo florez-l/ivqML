@@ -3,48 +3,23 @@
 ## =========================================================================
 
 import numpy
+from .Base import *
 
 '''
 '''
-class MSE:
+class MSE( Base ):
 
   '''
   '''
   def __init__( self, in_X, in_y ):
-    assert isinstance( in_X, ( list, numpy.matrix, numpy.ndarray ) ), \
-      "Invalid X type."
-    assert isinstance( in_y, ( list, numpy.matrix, numpy.ndarray ) ), \
-      "Invalid y type."
-    
-    if type( in_X ) is list or type( in_X ) is numpy.ndarray:
-      X = numpy.matrix( in_X )
-    else:
-      X = in_X
-    # end if
-    if type( in_y ) is list or type( in_y ) is numpy.ndarray:
-      y = numpy.matrix( in_y ).T
-    else:
-      y = in_y
-    # end if
-    assert X.shape[ 0 ] == y.shape[ 0 ], "Invalid X,y sizes."
-    assert y.shape[ 1 ] == 1, "Invalid y size."
+    super( ).__init__( in_X, in_y )
 
-    self.m_M = X.shape[ 0 ]
-    self.m_N = X.shape[ 1 ]
-
-    self.m_XtX = ( X.T / float( self.m_M ) ) @ X
-    self.m_Xby = ( numpy.array( X ) * numpy.array( y ) ).mean( axis = 0 )
-    self.m_uX = X.mean( axis = 0 )
-    self.m_uy = y.mean( )
-    self.m_yty = ( y.T / float( self.m_M ) ) @ y
-  # end def
-
-  def NumberOfExamples( self ):
-    return self.m_M
-  # end def
-
-  def VectorSize( self ):
-    return self.m_N + 1
+    self.m_XtX = ( self.m_X.T / float( self.m_M ) ) @ self.m_X
+    self.m_Xby = \
+      ( numpy.array( self.m_X ) * numpy.array( self.m_y ) ).mean( axis = 0 )
+    self.m_uX = self.m_X.mean( axis = 0 )
+    self.m_uy = self.m_y.mean( )
+    self.m_yty = ( self.m_y.T / float( self.m_M ) ) @ self.m_y
   # end def
 
   '''

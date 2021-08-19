@@ -35,7 +35,7 @@ class Polynomial:
   def __call__( self, J, dJ, t, i, show ):
 
     self.m_CostX += [ i ]
-    self.m_CostY += [ dJ ]
+    self.m_CostY += [ J ]
 
     if show:
 

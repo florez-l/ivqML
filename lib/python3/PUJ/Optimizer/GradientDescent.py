@@ -7,6 +7,8 @@ import math, numpy
 ## -------------------------------------------------------------------------
 def GradientDescent( cost, **kwargs ):
   a = 1e-1
+  l = 0.0
+  lt = 'ridge'
   I = 1e10
   e = 1e-8
   ds = 100
@@ -15,7 +17,9 @@ def GradientDescent( cost, **kwargs ):
   t = numpy.random.rand( 1, n ) * 1e-1
 
   if 'learning_rate' in kwargs: a = float( kwargs[ 'learning_rate' ] )
-  if 'maximum_iterations' in kwargs: I = int( kwargs[ 'maximum_iterations' ] )
+  if 'regularization' in kwargs: l = float( kwargs[ 'regularization' ] )
+  if 'reg_type' in kwargs: lt = kwargs[ 'reg_type' ]
+  if 'max_iter' in kwargs: I = int( kwargs[ 'max_iter' ] )
   if 'epsilon' in kwargs: e = float( kwargs[ 'epsilon' ] )
   if 'debug_step' in kwargs: ds = int( kwargs[ 'debug_step' ] )
   if 'debug_function' in kwargs: df = kwargs[ 'debug_function' ]
@@ -32,6 +36,16 @@ def GradientDescent( cost, **kwargs ):
 
   # Init loop
   [ J, gt ] = cost.CostAndGradient( t )
+  if l > 0:
+    if lt == 'ridge':
+      J += l * ( t @ t.T )
+      gt += 2.0 * l * t
+    elif lt == 'lasso':
+      J += l * numpy.abs( t ).sum( )
+      gt += l * ( t > 0 ).astype( gt.dtype ).sum( )
+      gt -= l * ( t < 0 ).astype( gt.dtype ).sum( )
+    # end if
+  # end if
   dJ = math.inf
   i = 0
   while dJ > e and i < I:
@@ -39,6 +53,16 @@ def GradientDescent( cost, **kwargs ):
     # Step forward
     t -= gt * a
     [ Jn, gt ] = cost.CostAndGradient( t )
+    if l > 0:
+      if lt == 'ridge':
+        Jn += l * ( t @ t.T )[ 0, 0 ]
+        gt += 2.0 * l * t
+      elif lt == 'lasso':
+        Jn += l * numpy.abs( t ).sum( )
+        gt += l * ( t > 0 ).astype( gt.dtype ).sum( )
+        gt -= l * ( t < 0 ).astype( gt.dtype ).sum( )
+      # end if
+    # end if
     dJ = J - Jn
     J = Jn
 

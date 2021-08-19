@@ -5,22 +5,25 @@
 import os, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 
-import numpy
+import numpy, random
 import PUJ.Model.Linear, PUJ.Regression.MSE
-import PUJ.Optimizer.GradientDescent
+import PUJ.Normalize, PUJ.Optimizer.GradientDescent
 import PUJ.Debug.Polynomial
 
 ## -------------------------------------------------------------------------
 number_of_samples = 20
-min_value = -1
+min_value = -2
 max_value =  10
 polynomial = [ 0, -0.21, -3 ]
 
-learning_rate = 1e-1
-maximum_iterations = 10000
+learning_rate = 1e-4
+regularization = 0
+reg_type = 'lasso'
+max_iter = 10000
 epsilon = 1e-8
 debug_step = 100
-init_theta = 0
+init_theta = \
+  [ random.uniform( -1, 1 ) for i in range( len( polynomial ) ) ]
 
 ## -------------------------------------------------------------------------
 
@@ -37,12 +40,13 @@ for i in range( 1, model.Dimensions( ) ):
     axis = 1
     )
 # end for
-y0 = model( x0 )
+D = numpy.append( x0, model( x0 ), axis = 1 )
+numpy.random.shuffle( D )
 
-# Shuffle data
-p = numpy.random.permutation( x0.shape[ 0 ] )
-x0 = x0[ p ]
-y0 = y0[ p ]
+# Prepare data
+D, D_min, D_div = PUJ.Normalize.Nothing( D )
+x0 = D[ : , : -1 ]
+y0 = D[ : , -1 : ]
 
 # Prepare regression
 cost = PUJ.Regression.MSE( x0, y0 )
@@ -57,8 +61,10 @@ debug = PUJ.Debug.Polynomial( x0[ : , 0 ], y0 )
 tI, nI = PUJ.Optimizer.GradientDescent(
   cost,
   learning_rate = learning_rate,
+  regularization = regularization,
+  reg_type = reg_type,
   init_theta = init_theta,
-  maximum_iterations = maximum_iterations,
+  max_iter = max_iter,
   epsilon = epsilon,
   debug_step = debug_step,
   debug_function = debug
