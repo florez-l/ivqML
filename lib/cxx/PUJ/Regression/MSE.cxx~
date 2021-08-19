@@ -11,7 +11,7 @@ PUJ::Regression::MSE< _TScalar >::
 MSE( const TMatrix& X, const TMatrix& y )
   : Superclass( X, y )
 {
-  TScalar m = TScalar( this->NumberOfExamples( ) );
+  TScalar m = TScalar( this->m_X.rows( ) );
   this->m_XtX = ( this->m_X.transpose( ) * this->m_X ) / m;
 
   this->m_Xby = ( this->m_X.array( ) * this->m_y.array( ) ).colwise( ).mean( );

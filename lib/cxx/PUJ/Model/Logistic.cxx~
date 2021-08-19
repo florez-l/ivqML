@@ -4,6 +4,9 @@
 
 #include <PUJ/Model.h>
 
+#include <iostream>
+
+
 // -------------------------------------------------------------------------
 template< class _TScalar >
 PUJ::Model::Logistic< _TScalar >::
