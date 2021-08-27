@@ -4,6 +4,7 @@
 
 import numpy
 from .Base import *
+import PUJ.Model.Logistic
 
 '''
 '''
@@ -25,17 +26,24 @@ class MaximumLikelihood( Base ):
 
   '''
   '''
-  def CostAndGradient( self, theta ):
-    b = theta[ : , 0 ]
-    w = theta[ : , 1 : ]
-    z = 1.0 / ( 1.0 + numpy.exp( -( ( self.m_X @ w.T ) + b ) ) )
+  def Cost( self, theta, z = numpy.matrix( ( 0, 0 ) ) ):
+    if z.shape[ 0 ] == 0:
+      z = PUJ.Model.Logistic( theta )( self.m_X, threshold = False )
+    # end if
     p = numpy.log(
       z[ numpy.where( self.m_y[ : , 0 ] == 1 )[ 0 ] , : ] + self.m_Eps
       ).sum( )
     n = numpy.log(
       1 - z[ numpy.where( self.m_y[ : , 0 ] == 0 )[ 0 ] , : ] + self.m_Eps
       ).sum( )
-    J = -( p + n ) / self.m_M
+    return -( p + n ) / float( self.m_M )
+  # end def
+
+  '''
+  '''
+  def CostAndGradient( self, theta ):
+    z = PUJ.Model.Logistic( theta )( self.m_X, threshold = False )
+    J = self.Cost( theta, z )
     dw = numpy.matrix(
       ( numpy.array( self.m_X ) * numpy.array( z ) ).mean( axis = 0 ) -
         self.m_Xby

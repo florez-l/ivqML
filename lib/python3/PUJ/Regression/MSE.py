@@ -33,7 +33,7 @@ class MSE( Base ):
 
   '''
   '''
-  def CostAndGradient( self, theta ):
+  def Cost( self, theta ):
     b = theta[ : , 0 ]
     w = theta[ : , 1 : ]
     J = \
@@ -43,9 +43,17 @@ class MSE( Base ):
       ( 2.0 * ( w @ self.m_Xby.T ) ) - \
       ( 2.0 * b * self.m_uy ) + \
       self.m_yty
+    return J[ 0, 0 ]
+  # end def
+
+  '''
+  '''
+  def CostAndGradient( self, theta ):
+    b = theta[ : , 0 ]
+    w = theta[ : , 1 : ]
     dw = 2.0 * ( ( w @ self.m_XtX ) + ( b * self.m_uX ) - self.m_Xby )
     db = 2.0 * ( ( w @ self.m_uX.T ) + b - self.m_uy )
-    return [ J[ 0, 0 ], numpy.concatenate( ( db, dw ), axis = 1 ) ]
+    return [ self.Cost( theta ), numpy.concatenate( ( db, dw ), axis = 1 ) ]
   # end def
 
 # end class

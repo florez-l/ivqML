@@ -10,7 +10,7 @@ class Base:
 
   '''
   '''
-  def __init__( self, in_X, in_y ):
+  def __init__( self, in_X, in_y, in_Xtra = None, in_ytra = None ):
     assert isinstance( in_X, ( list, numpy.matrix, numpy.ndarray ) ), \
       "Invalid X type."
     assert isinstance( in_y, ( list, numpy.matrix, numpy.ndarray ) ), \
@@ -21,7 +21,7 @@ class Base:
     else:
       self.m_X = in_X
     # end if
-    if type( in_y ) is list or type( in_y ) is numpy.ndarray:
+    if type( in_y ) is list:
       self.m_y = numpy.matrix( in_y ).T
     else:
       self.m_y = in_y

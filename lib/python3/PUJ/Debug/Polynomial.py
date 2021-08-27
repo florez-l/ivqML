@@ -75,7 +75,7 @@ class Polynomial:
           self.m_CostAxes.plot( self.m_CostX, self.m_CostY, color = 'green' )
       # end if
 
-      self.m_CostLine.set_label( 'Cost diff ({:.3e})'.format( J ) )
+      self.m_CostLine.set_label( 'Cost ({:.3e})'.format( J ) )
       self.m_CostLine.set_xdata( self.m_CostX )
       self.m_CostLine.set_ydata( self.m_CostY )
       self.m_CostAxes.relim( )

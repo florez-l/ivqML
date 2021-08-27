@@ -5,9 +5,9 @@
 import argparse, numpy, os, random, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 
-import PUJ.Model.Linear, PUJ.Regression.MSE
+import PUJ.Regression.MaximumLikelihood
 import PUJ.Data.Normalize, PUJ.Optimizer.GradientDescent
-import PUJ.Debug.Polynomial
+import PUJ.Debug.Cost
 
 ## -- Parse command line arguments
 parser = argparse.ArgumentParser( )
@@ -32,9 +32,9 @@ if args.epsilon != None: e = args.epsilon
 if args.init != None: init = args.init
 
 # -- Data
-reader = PUJ.Data.Reader( 0.5 )
+reader = PUJ.Data.Reader( train_size = 0.6, test_size = 0.3 )
 D = reader.FromCSV( args.filename, output_size = 1, shuffle = True )
-x0 = D[ 0 ]
+x0, x0_off, x0_div = PUJ.Data.Normalize.Standardize( D[ 0 ] )
 y0 = D[ 1 ]
 
 # -- Initial parameters
@@ -48,13 +48,10 @@ else:
 # end if
 
 # -- Prepare regression
-cost = PUJ.Regression.MSE( x0, y0 )
-
-# -- Analitical solution
-tA = cost.AnalyticSolve( )
+cost = PUJ.Regression.MaximumLikelihood( x0, y0 )
 
 # -- Prepare debug
-debug = PUJ.Debug.Polynomial( x0[ : , 0 ], y0 )
+debug = PUJ.Debug.Cost( )
 
 # -- Iterative solution
 tI, nI = PUJ.Optimizer.GradientDescent(
@@ -68,12 +65,9 @@ tI, nI = PUJ.Optimizer.GradientDescent(
   )
 
 print( '=================================================================' )
-print( '* Analitical solution  :', tA )
-print( '* Iterative solution   :', tI )
-print(
-  '* Difference           :',
-  ( ( tI - tA ) @ ( tI - tA ).T )[ 0, 0 ] ** 0.5
-  )
+print( '* Normalization offset :', x0_off )
+print( '* Normalization scale  :', x0_div )
+print( '* Solution             :', tI )
 print( '* Number of iterations :', nI )
 print( '=================================================================' )
 
