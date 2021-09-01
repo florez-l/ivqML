@@ -142,7 +142,7 @@ b\in\mathbb{R}
 
 \begin_inset Formula 
 \[
-h\left(\mathbf{x}\right)=\sigma\left(\mathbf{w}\mathbf{x}^{\top}+b\right)
+h\left(\mathbf{z}\right)=\sigma\left(\mathbf{x}\mathbf{W}^{\top}+b\right)
 \]
 
 \end_inset
@@ -158,7 +158,7 @@ Layer model
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \align center
@@ -207,7 +207,7 @@ Layer schema
 
 \begin_inset Formula 
 \[
-\mathbf{a},\mathbf{z},\mathbf{b}\in\mathbb{R}^{m\times1}
+\mathbf{a},\mathbf{z},\mathbf{b}\in\mathbb{R}^{1\times m}
 \]
 
 \end_inset
@@ -218,7 +218,7 @@ Layer schema
 \begin_layout Standard
 \begin_inset Formula 
 \[
-z_{j}=\mathbf{w}_{j}\mathbf{x}^{\top}+b_{j}
+z_{j}=\mathbf{x}\mathbf{w}_{j}^{\top}+b_{j}
 \]
 
 \end_inset
@@ -234,7 +234,7 @@ a_{j}=\sigma\left(z_{j}\right)
 
 \begin_inset Formula 
 \[
-\mathbf{z}=\mathbf{W}\mathbf{x}^{\top}+\mathbf{b}
+\mathbf{z}=\mathbf{x}\mathbf{W}^{\top}+\mathbf{b}
 \]
 
 \end_inset
@@ -291,7 +291,7 @@ Multi-layer schema
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\mathbf{a}_{0}=\mathbf{x}^{\top}\in\mathbb{R}^{n\times1}
+\mathbf{a}_{0}=\mathbf{x}\in\mathbb{R}^{1\times n}
 \]
 
 \end_inset
@@ -310,7 +310,7 @@ l_{0}=n
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\mathbf{W}_{i}\in\mathbb{R}^{l_{i}\times l_{i-1}};\mathbf{b}_{i}\in\mathbb{R}^{l_{i}\times1}
+\mathbf{W}_{i}\in\mathbb{R}^{l_{i-1}\times l_{i}};\mathbf{b}_{i}\in\mathbb{R}^{1\times l_{i}}
 \]
 
 \end_inset
@@ -326,7 +326,7 @@ l_{0}=n
 
 \begin_inset Formula 
 \[
-\mathbf{z}_{i}=\mathbf{W}_{i}\mathbf{a}_{i-1}+\mathbf{b}_{i}
+\mathbf{z}_{i}=\mathbf{a}_{i-1}\mathbf{W}_{i}^{\top}+\mathbf{b}_{i}
 \]
 
 \end_inset
@@ -342,7 +342,7 @@ l_{0}=n
 
 \begin_inset Formula 
 \[
-\mathbf{h}\left(\mathbf{x}\right)=\sigma_{L}\left(\mathbf{W}_{L}\mathbf{a}_{L-1}+\mathbf{b}_{L}\right)
+\mathbf{h}\left(\mathbf{x}\right)=\sigma_{L}\left(\mathbf{a}_{L-1}\mathbf{W}_{L}^{\top}+\mathbf{b}_{L}\right)
 \]
 
 \end_inset
@@ -350,7 +350,7 @@ l_{0}=n
 
 \begin_inset Formula 
 \[
-\mathbf{h}\left(\mathbf{x}\right)=\sigma_{L}\left(\mathbf{W}_{L}\sigma_{L-1}\left(\mathbf{W}_{L-1}\mathbf{a}_{L-2}+\mathbf{b}_{L-1}\right)+\mathbf{b}_{L}\right)
+\mathbf{h}\left(\mathbf{x}\right)=\sigma_{L}\left(\sigma_{L-1}\left(\mathbf{a}_{L-2}\mathbf{W}_{L-1}^{\top}+\mathbf{b}_{L-1}\right)\mathbf{W}_{L}^{\text{\ensuremath{\top}}}+\mathbf{b}_{L}\right)
 \]
 
 \end_inset
@@ -358,7 +358,7 @@ l_{0}=n
 
 \begin_inset Formula 
 \[
-\mathbf{h}\left(\mathbf{x}\right)=\sigma_{L}\left(\mathbf{W}_{L}\sigma_{L-1}\left(\mathbf{W}_{L-1}\cdots\left(\sigma_{1}\left(\mathbf{W}_{1}\mathbf{a}_{0}+\mathbf{b}_{1}\right)\cdots\right)+\mathbf{b}_{L-1}\right)+\mathbf{b}_{L}\right)
+\mathbf{h}\left(\mathbf{x}\right)=\sigma_{L}\left(\sigma_{L-1}\left(\cdots\left(\sigma_{1}\left(\mathbf{a}_{0}\mathbf{W}_{1}^{\text{\ensuremath{\top}}}+\mathbf{b}_{1}\right)\cdots\right)\mathbf{W}_{L-1}^{\text{\ensuremath{\top}}}+\mathbf{b}_{L-1}\right)\mathbf{W}_{L}^{\top}+\mathbf{b}_{L}\right)
 \]
 
 \end_inset
@@ -470,7 +470,27 @@ State
 \end_inset
 
 
-\begin_inset Formula $\mathbf{a}\leftarrow\sigma_{1}\left(\mathbf{W}_{1}\mathbf{x}^{\top}+\mathbf{b}_{1}\right)$
+\begin_inset Formula $\mathbf{z}\leftarrow\mathbf{x}\mathbf{W}_{1}^{\text{\ensuremath{\top}}}+\mathbf{b}_{1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+  
+\backslash
+State
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $\mathbf{a}\leftarrow\sigma_{1}\left(\mathbf{z}\right)$
 \end_inset
 
 
@@ -540,7 +560,27 @@ State
 \end_inset
 
 
-\begin_inset Formula $\mathbf{a}\leftarrow\sigma_{i}\left(\mathbf{W}_{i}\mathbf{a}+\mathbf{b}_{i}\right)$
+\begin_inset Formula $\mathbf{z}\leftarrow\mathbf{a}\mathbf{W}_{i}^{\text{\ensuremath{\top}}}+\mathbf{b}_{i}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+    
+\backslash
+State
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $\mathbf{a}\leftarrow\sigma_{i}\left(\mathbf{z}\right)$
 \end_inset
 
 
