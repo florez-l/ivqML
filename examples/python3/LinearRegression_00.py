@@ -109,6 +109,7 @@ print(
   '* Difference           :',
   ( ( tI - tA ) @ ( tI - tA ).T )[ 0, 0 ] ** 0.5
   )
+print( '* Final cost           :', cost.Cost( tI ) )
 print( '* Number of iterations :', nI )
 print( '=================================================================' )
 

@@ -51,7 +51,7 @@ else:
 cost = PUJ.Regression.MaximumLikelihood( x0, y0 )
 
 # -- Prepare debug
-debug = PUJ.Debug.Labeling( x0[ : , : 2 ], y0 )
+debug = PUJ.Debug.Labeling( x0, y0 )
 
 # -- Iterative solution
 tI, nI = PUJ.Optimizer.GradientDescent(
@@ -69,6 +69,7 @@ print( '* Normalization offset :', x0_off )
 print( '* Normalization scale  :', x0_div )
 print( '* Solution             :', tI )
 print( '* Number of iterations :', nI )
+print( '* Final cost           :', cost.Cost( tI ) )
 print( '=================================================================' )
 
 debug.KeepFigures( )

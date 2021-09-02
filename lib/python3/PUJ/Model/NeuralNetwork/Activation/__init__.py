@@ -9,6 +9,7 @@ from .Identity import *
 from .Logistic import *
 from .RandomReLU import *
 from .ReLU import *
+from .SoftMax import *
 from .Tanh import *
 
 ## eof - $RCSfile$

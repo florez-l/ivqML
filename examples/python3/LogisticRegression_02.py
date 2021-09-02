@@ -34,28 +34,35 @@ if args.init != None: init = args.init
 # -- Data
 reader = PUJ.Data.Reader( train_size = 0.6, test_size = 0.3 )
 D = reader.FromCSV( args.filename, output_size = 1, shuffle = True )
-x0, x0_off, x0_div = PUJ.Data.Normalize.Standardize( D[ 0 ] )
-y0 = D[ 1 ]
+Xtra, X_off, X_div = PUJ.Data.Normalize.Standardize( D[ 0 ] )
+Xtst = ( D[ 2 ] - X_off ) / X_div
+Xval = ( D[ 4 ] - X_off ) / X_div
+
+ytra = D[ 1 ]
+ytst = D[ 3 ]
+yval = D[ 5 ]
 
 # -- Initial parameters
 if init == 'zeros':
-  init_theta = numpy.zeros( x0.shape[ 1 ] + 1 )
+  init_theta = numpy.zeros( Xtra.shape[ 1 ] + 1 )
 elif init == 'ones':
-  init_theta = numpy.ones( x0.shape[ 1 ] + 1 )
+  init_theta = numpy.ones( Xtra.shape[ 1 ] + 1 )
 else:
   init_theta = \
-    numpy.random.uniform( low = -1.0, high = 1.0, size = x0.shape[ 1 ] + 1 )
+    numpy.random.uniform( low = -1.0, high = 1.0, size = Xtra.shape[ 1 ] + 1 )
 # end if
 
 # -- Prepare regression
-cost = PUJ.Regression.MaximumLikelihood( x0, y0 )
+cost_tra = PUJ.Regression.MaximumLikelihood( Xtra, ytra )
+cost_tst = PUJ.Regression.MaximumLikelihood( Xtst, ytst )
+cost_val = PUJ.Regression.MaximumLikelihood( Xval, yval )
 
 # -- Prepare debug
-debug = PUJ.Debug.Cost( )
+debug = PUJ.Debug.Cost( cost_tst )
 
 # -- Iterative solution
 tI, nI = PUJ.Optimizer.GradientDescent(
-  cost,
+  cost_tra,
   learning_rate = lr,
   init_theta = init_theta,
   max_iter = I,
@@ -65,10 +72,13 @@ tI, nI = PUJ.Optimizer.GradientDescent(
   )
 
 print( '=================================================================' )
-print( '* Normalization offset :', x0_off )
-print( '* Normalization scale  :', x0_div )
-print( '* Solution             :', tI )
-print( '* Number of iterations :', nI )
+print( '* Normalization offset  :', X_off )
+print( '* Normalization scale   :', X_div )
+print( '* Solution              :', tI )
+print( '* Number of iterations  :', nI )
+print( '* Final training cost   :', cost_tra.Cost( tI ) )
+print( '* Final testing cost    :', cost_tst.Cost( tI ) )
+print( '* Final validation cost :', cost_val.Cost( tI ) )
 print( '=================================================================' )
 
 debug.KeepFigures( )

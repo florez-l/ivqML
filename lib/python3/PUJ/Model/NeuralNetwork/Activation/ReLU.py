@@ -21,7 +21,7 @@ class ReLU( Base ):
     if derivative:
       return ( z >= 0.0 ).astype( z.dtype )
     else:
-      return z * ( z >= 0.0 ).astype( z.dtype )
+      return numpy.array( z ) * numpy.array( ( z >= 0.0 ).astype( z.dtype ) )
     # end if
   # end def
 

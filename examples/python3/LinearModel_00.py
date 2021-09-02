@@ -11,10 +11,10 @@ import PUJ.Model.Linear
 m = PUJ.Model.Linear( [ 1, 2 ] )
 n = PUJ.Model.Linear( [ 2 ], 1 )
 
-x = numpy.random.rand( 30, 1 )
+x = numpy.random.uniform( -10, 10, ( 10, 1 ) )
 
-print( m( 3 ) )
-print( n( 3 ) )
+print( m( 3.141592 ) )
+print( n( 3.141592 ) )
 print( m( x ) )
 
 ## eof - $RCSfile$

@@ -11,8 +11,8 @@ class Logistic( Linear ):
 
   '''
   '''
-  def __init__( self, w, b = None ):
-    super( ).__init__( w, b )
+  def __init__( self, w, b = None, o = None, D = None, T = None ):
+    super( ).__init__( w, b, o, D, T )
   # end def
 
   '''

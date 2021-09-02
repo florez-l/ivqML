@@ -16,6 +16,12 @@ class Base( ABC ):
 
   '''
   '''
+  def __str__( self ):
+    return type( self ).__name__
+  # end def
+
+  '''
+  '''
   @abstractmethod
   def __call__( self, z, derivative = False ):
     return None

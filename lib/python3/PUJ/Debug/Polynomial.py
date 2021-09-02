@@ -5,37 +5,29 @@
 import numpy
 import matplotlib.pyplot as plot
 import PUJ.Model.Linear
+from .Cost import *
 
 '''
 '''
-class Polynomial:
+class Polynomial( Cost ):
 
   '''
   '''
-  def __init__( self, x, y ):
+  def __init__( self, x, y, test_function = None ):
+    super( ).__init__( test_function = test_function, nrows = 1, ncols = 2 )
 
-    plot.ion( )
-    self.m_Fig, self.m_Axes = plot.subplots( 1, 2, sharey = False )
-    self.m_DataAxes = self.m_Axes[ 0 ]
-    self.m_CostAxes = self.m_Axes[ 1 ]
+    self.m_DataAxis = self.m_Axes[ 1 ]
 
     self.m_DataLine = None
-    self.m_CostLine = None
-
     self.m_DataX = []
-    self.m_CostX = []
-    self.m_CostY = []
-
-    self.m_DataAxes.scatter( [ x ], [ y ], color = 'red', marker = 'x' )
+    self.m_DataAxis.scatter( [ x ], [ y ], color = 'red', marker = 'x' )
 
   # end def
 
   '''
   '''
   def __call__( self, J, dJ, t, i, show ):
-
-    self.m_CostX += [ i ]
-    self.m_CostY += [ J ]
+    super( ).__call__( J, dJ, t, i, show )
 
     if show:
 
@@ -43,7 +35,7 @@ class Polynomial:
       model = PUJ.Model.Linear( t )
       if not isinstance( self.m_DataX, ( numpy.matrix ) ):
         n = 50
-        l = self.m_DataAxes.get_xlim( )
+        l = self.m_DataAxis.get_xlim( )
         d = l[ 1 ] - l[ 0 ]
         self.m_DataX = \
           numpy.matrix(
@@ -60,42 +52,16 @@ class Polynomial:
               axis = 1
               )
         # end for
-        self.m_DataLine, = self.m_DataAxes.plot(
+        self.m_DataLine, = self.m_DataAxis.plot(
           self.m_DataX[ : , 0 ], model( self.m_DataX ),
           label = 'Iterative solution',
           color = 'blue', linewidth = 0.5
           )
       # end if
       self.m_DataLine.set_ydata( model( self.m_DataX ) )
-      self.m_DataAxes.legend( )
-
-      # Update cost figure
-      if self.m_CostLine == None:
-        self.m_CostLine, = \
-          self.m_CostAxes.plot( self.m_CostX, self.m_CostY, color = 'green' )
-      # end if
-
-      self.m_CostLine.set_label( 'Cost ({:.3e})'.format( J ) )
-      self.m_CostLine.set_xdata( self.m_CostX )
-      self.m_CostLine.set_ydata( self.m_CostY )
-      self.m_CostAxes.relim( )
-      self.m_CostAxes.autoscale_view( )
-      self.m_CostAxes.legend( )
-    
-      self.m_Fig.canvas.draw( )
-      self.m_Fig.canvas.flush_events( )
-
+      self.m_DataAxis.legend( )
     # end if
 
-    # end if
-
-  # end def
-
-  '''
-  '''
-  def KeepFigures( self ):
-    plot.ioff( )
-    plot.show( )
   # end def
 
 # end class

@@ -26,8 +26,8 @@ class MaximumLikelihood( Base ):
 
   '''
   '''
-  def Cost( self, theta, z = numpy.matrix( ( 0, 0 ) ) ):
-    if z.shape[ 0 ] == 0:
+  def Cost( self, theta, z = None ):
+    if z is None:
       z = PUJ.Model.Logistic( theta )( self.m_X, threshold = False )
     # end if
     p = numpy.log(
