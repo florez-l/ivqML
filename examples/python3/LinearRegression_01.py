@@ -5,75 +5,59 @@
 import argparse, numpy, os, random, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 
-import PUJ.Model.Linear, PUJ.Regression.MSE
-import PUJ.Data.Normalize, PUJ.Optimizer.GradientDescent
+import PUJ.Helpers.ArgParse
+import PUJ.Data.Algorithms
+import PUJ.Model.Linear
+import PUJ.Regression.MSE
+import PUJ.Optimizer.GradientDescent
 import PUJ.Debug.Polynomial
 
 ## -- Parse command line arguments
-parser = argparse.ArgumentParser( )
+parser = PUJ.Helpers.ArgParse( )
 parser.add_argument( 'filename', type = str )
-parser.add_argument( '-a', '--learning_rate', type = float )
-parser.add_argument( '-I', '--max_iterations', type = int )
-parser.add_argument( '-D', '--debug_step', type = int )
-parser.add_argument( '-e', '--epsilon', type = float )
-parser.add_argument( '--init', type = str, choices = [ 'zeros', 'ones', 'random' ] )
 args = parser.parse_args( )
 
-lr = 1e-2
-I = 1000
-e = 1e-8
-d = 10
-init = 'zeros'
+## -- Data
+D = numpy.loadtxt( args.filename, delimiter = ',' )
+numpy.random.shuffle( D )
+X, y, *_ = PUJ.Data.Algorithms.SplitData( D, 1 )
 
-if args.learning_rate != None: lr = args.learning_rate
-if args.max_iterations != None: I = args.max_iterations
-if args.debug_step != None: d = args.debug_step
-if args.epsilon != None: e = args.epsilon
-if args.init != None: init = args.init
+## -- Prepare regression
+cost = PUJ.Regression.MSE( X, y )
 
-# -- Data
-reader = PUJ.Data.Reader( 0.5 )
-D = reader.FromCSV( args.filename, output_size = 1, shuffle = True )
-x0 = D[ 0 ]
-y0 = D[ 1 ]
-
-# -- Initial parameters
-if init == 'zeros':
-  init_theta = numpy.zeros( x0.shape[ 1 ] + 1 )
-elif init == 'ones':
-  init_theta = numpy.ones( x0.shape[ 1 ] + 1 )
-else:
-  init_theta = \
-    numpy.random.uniform( low = -1.0, high = 1.0, size = x0.shape[ 1 ] + 1 )
-# end if
-
-# -- Prepare regression
-cost = PUJ.Regression.MSE( x0, y0 )
-
-# -- Analitical solution
+## -- Analitical solution
 tA = cost.AnalyticSolve( )
 
-# -- Prepare debug
-debug = PUJ.Debug.Polynomial( x0[ : , 0 ], y0 )
+## -- Init parameters
+if args.init == 'zeros':
+  t0 = numpy.zeros( X.shape[ 1 ] )
+elif args.init == 'ones':
+  t0 = numpy.ones( X.shape[ 1 ] )
+else:
+  t0 = numpy.random.uniform( low = 0, high = 1, size = X.shape[ 1 ] )
+# end if
 
-# -- Iterative solution
+## -- Prepare debug
+debug = PUJ.Debug.Polynomial( X, y )
+
+## -- Iterative solution
 tI, nI = PUJ.Optimizer.GradientDescent(
   cost,
-  learning_rate = lr,
-  init_theta = init_theta,
-  max_iter = I,
-  epsilon = e,
-  debug_step = d,
+  learning_rate = args.learning_rate,
+  init_theta = t0,
+  max_iter = args.max_iterations,
+  epsilon = args.epsilon,
+  debug_step = args.debug_step,
   debug_function = debug
   )
 
+## -- Show results
+tD = tI - tA
 print( '=================================================================' )
 print( '* Analitical solution  :', tA )
 print( '* Iterative solution   :', tI )
-print(
-  '* Difference           :',
-  ( ( tI - tA ) @ ( tI - tA ).T )[ 0, 0 ] ** 0.5
-  )
+print( '* Difference           :', ( tD @ tD.T )[ 0 , 0 ] ** 0.5 )
+print( '* Final cost           :', cost.Cost( tI ) )
 print( '* Number of iterations :', nI )
 print( '=================================================================' )
 

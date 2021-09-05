@@ -20,7 +20,7 @@ class Polynomial( Cost ):
 
     self.m_DataLine = None
     self.m_DataX = []
-    self.m_DataAxis.scatter( [ x ], [ y ], color = 'red', marker = 'x' )
+    self.m_DataAxis.scatter( [ x[ : , 0 ] ], [ y ], color = 'red', marker = 'x' )
 
   # end def
 

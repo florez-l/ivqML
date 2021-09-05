@@ -7,10 +7,10 @@ import numpy
 '''
 @input D is a [m x n] real matrix of m examples with n measures.
 '''
-def SplitData( D, output_size, train_size, test_size ):
+def SplitData( D, output_size, train_size = 1.0, test_size = 0.0 ):
 
   # -- Check preconditions
-  assert isinstance( D, ( numpy.matrix ) ), 'Invalid input data'
+  assert isinstance( D, ( numpy.matrix, numpy.ndarray ) ), 'Invalid input data'
   assert isinstance( output_size, ( int ) ), 'Invalid output size'
   assert isinstance( train_size, ( float ) ), 'Invalid train size'
   assert isinstance( test_size, ( float ) ), 'Invalid test size'
@@ -44,12 +44,23 @@ def SplitData( D, output_size, train_size, test_size ):
 
 '''
 '''
+def CategorizeLabels( labels ):
+  assert isinstance( labels, ( numpy.matrix ) ), 'Invalid input.'
+  assert labels.shape[ 1 ] == 1, 'Invalid labels.'
+
+  u = numpy.unique( labels )
+  P = numpy.eye( len( u ) )
+  return P[ labels , ].reshape( labels.shape[ 0 ], len( u ) )
+# end def
+
+'''
+'''
 def ConfusionMatrix( y_true, y_meas ):
   assert y_true.shape == y_meas.shape, 'Invalid shapes'
 
   if y_true.shape[ 1 ] == 1:
-    y_true_ = numpy.append( y_true, 1 - y_true, axis = 1 )
-    y_meas_ = numpy.append( y_meas, 1 - y_meas, axis = 1 )
+    y_true_ = CategorizeLabels( y_true )
+    y_meas_ = CategorizeLabels( y_meas )
   else:
     y_true_ = y_true
     y_meas_ = y_meas
@@ -64,6 +75,5 @@ def Accuracy( y_true, y_meas ):
   K = ConfusionMatrix( y_true, y_meas )
   return numpy.diag( K ).sum( ) / K.sum( )
 # end def
-
 
 ## eof - $RCSfile$

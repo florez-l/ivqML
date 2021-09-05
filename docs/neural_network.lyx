@@ -291,15 +291,7 @@ Multi-layer schema
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\mathbf{a}_{0}=\mathbf{x}\in\mathbb{R}^{1\times n}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-l_{0}=n
+\mathbf{a}_{0}=\mathbf{x}\in\mathbb{R}^{1\times n_{0}}
 \]
 
 \end_inset
@@ -310,7 +302,7 @@ l_{0}=n
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\mathbf{W}_{i}\in\mathbb{R}^{l_{i-1}\times l_{i}};\mathbf{b}_{i}\in\mathbb{R}^{1\times l_{i}}
+\mathbf{W}_{i}\in\mathbb{R}^{n_{i-1}\times n_{i}};\mathbf{b}_{i}\in\mathbb{R}^{1\times n_{i}}
 \]
 
 \end_inset
@@ -358,7 +350,7 @@ l_{0}=n
 
 \begin_inset Formula 
 \[
-\mathbf{h}\left(\mathbf{x}\right)=\sigma_{L}\left(\sigma_{L-1}\left(\cdots\left(\sigma_{1}\left(\mathbf{a}_{0}\mathbf{W}_{1}^{\text{\ensuremath{\top}}}+\mathbf{b}_{1}\right)\cdots\right)\mathbf{W}_{L-1}^{\text{\ensuremath{\top}}}+\mathbf{b}_{L-1}\right)\mathbf{W}_{L}^{\top}+\mathbf{b}_{L}\right)
+\mathbf{h}\left(\mathbf{x}\right)=\sigma_{L}\left(\sigma_{L-1}\left(\cdots\left(\sigma_{1}\left(\mathbf{a}_{0}\mathbf{W}_{1}^{\text{\ensuremath{\top}}}+\mathbf{b}_{1}\right)\cdots\right)\mathbf{W}_{L-1}^{\text{\ensuremath{\top}}}+\mathbf{b}_{L-1}\right)\mathbf{W}_{L}^{\top}+\mathbf{b}_{L}\right)=\mathbf{a}_{L}
 \]
 
 \end_inset
@@ -668,7 +660,79 @@ Feed forward algorithm.
 
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Model derivatives for one output neuron
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathcal{L}_{MSE}\left(\mathbf{x}_{i},y_{i}\right)=\left(h\left(\mathbf{x}_{i}\right)-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathcal{L}_{CE}\left(\mathbf{x}_{i},y_{i}\right)=-y_{i}\log\left(h\left(\mathbf{x}_{i}\right)\right)-\left(1-y_{i}\right)\log\left(1-h\left(\mathbf{x}_{i}\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J_{MSE}\left(\mathbf{X},\mathbf{y}\right)=\frac{1}{m}\sum_{i=1}^{m}\left(h\left(\mathbf{x}_{i}\right)-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J_{CE}\left(\mathbf{X},\mathbf{y}\right)=-\frac{1}{m}\sum_{i=1}^{m}\left[y_{i}\log\left(h\left(\mathbf{x}_{i}\right)\right)+\left(1-y_{i}\right)\log\left(1-h\left(\mathbf{x}_{i}\right)\right)\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
 \begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename final_layer_one_neuron.png
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Final layer schema for one neuron.
+\end_layout
+
+\end_inset
+
 
 \end_layout
 
@@ -677,8 +741,592 @@ Feed forward algorithm.
 
 \end_layout
 
+\begin_layout Subsection
+Mean square error
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{y}\right)}{\partial w_{L}^{j}}=\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}\cdot\frac{\partial a_{L}}{\partial z_{L}}\cdot\frac{\partial z_{L}}{\partial w_{L}^{j}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+a_{L}=\sigma\left(z_{L}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+z_{L}=\mathbf{a}_{L-1}\mathbf{w}^{\top}+b_{L-1}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}=\frac{\partial}{\partial a_{L}}\left[\frac{1}{m}\sum_{i=1}^{m}\left(a_{L}-y_{i}\right)^{2}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}=\frac{1}{m}\sum_{i=1}^{m}\frac{\partial}{\partial a_{L}}\left(a_{L}-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}=\frac{2}{m}\sum_{i=1}^{m}\left(a_{L}-y_{i}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial a_{L}}{\partial z_{L}}=\frac{\partial}{\partial z_{L}}\sigma\left(z_{L}\right)=\sigma'\left(z_{L}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial z_{L}}{\partial w_{L}^{j}}=a_{L-1}^{j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial z_{L}}{\partial b_{L}}=1
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{y}\right)}{\partial w_{L}^{j}}=\underbrace{\frac{2}{m}\sum_{i=1}^{m}\left(a_{L}-y_{i}\right)\cdot\sigma'\left(z_{L}\right)}_{\delta_{L}}\cdot a_{L-1}^{j}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{y}\right)}{\partial w_{L}^{j}}=\delta_{L}\cdot a_{L-1}^{j}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\mathbf{w}_{L}}J_{MSE}\left(\mathbf{X},\mathbf{y}\right)=\delta_{L}\mathbf{a}_{L-1}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{y}\right)}{\partial b_{L}}=\delta_{L}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Binary cross entropy
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\sigma\left(z\right)$
+\end_inset
+
+ is the logistic sigmoid.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial w_{L}^{j}}=\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}\cdot\frac{\partial a_{L}}{\partial z_{L}}\cdot\frac{\partial z_{L}}{\partial w_{L}^{j}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+a_{L}=\sigma\left(z_{L}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+z_{L}=\mathbf{a}_{L-1}\mathbf{w}^{\top}+b_{L-1}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}=\frac{\partial}{\partial a_{L}}\left[-\frac{1}{m}\sum_{i=1}^{m}\left[y_{i}\log\left(a_{L}\right)+\left(1-y_{i}\right)\log\left(1-a_{L}\right)\right]\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}=-\frac{1}{m}\sum_{i=1}^{m}\left[y_{i}\frac{\partial}{\partial a_{L}}\log\left(a_{L}\right)+\left(1-y_{i}\right)\frac{\partial}{\partial a_{L}}\log\left(1-a_{L}\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}=-\frac{1}{m}\sum_{i=1}^{m}\left[y_{i}\frac{1}{a_{L}}-\frac{1-y_{i}}{1-a_{L}}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}=\frac{1}{m}\sum_{i=1}^{m}\left(\frac{1-y_{i}}{1-a_{L}}-\frac{y_{i}}{a_{L}}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial a_{L}}=\frac{1}{m}\sum_{i=1}^{m}\left(\frac{a_{L}-y_{i}}{a_{L}\left(1-a_{L}\right)}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{e^{z_{k}}}{\sum_{f=1}^{n_{L}}e^{z_{f}}}\frac{\partial a_{L}}{\partial z_{L}}=\frac{\partial}{\partial z_{L}}\sigma\left(z_{L}\right)=\sigma'\left(z_{L}\right)=\sigma\left(z_{L}\right)\left(1-\sigma\left(z_{L}\right)\right)=a_{L}\left(1-a_{L}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial z_{L}}{\partial w_{L}^{j}}=a_{L-1}^{j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial z_{L}}{\partial b_{L}}=1
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial w_{L}^{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(\frac{a_{L}-y_{i}}{a_{L}\left(1-a_{L}\right)}\right)\cdot a_{L}\left(1-a_{L}\right)\cdot a_{L-1}^{j}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial w_{L}^{j}}=\underbrace{\frac{1}{m}\sum_{i=1}^{m}\left(a_{L}-y_{i}\right)}_{\delta_{L}}\cdot a_{L-1}^{j}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial b_{L}}=\frac{1}{m}\sum_{i=1}^{m}\left(a_{L}-y_{i}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\mathbf{w}_{L}}J_{CE}\left(\mathbf{X},\mathbf{y}\right)=\delta_{L}\mathbf{a}_{L-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{y}\right)}{\partial b_{L}}=\delta_{L}
+\]
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
-Model derivatives
+Model derivatives for multiple output neurons
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathcal{L}_{MSE}\left(\mathbf{x}_{i},\mathbf{y}_{i}\right)=\left|h\left(\mathbf{x}_{i}\right)-\mathbf{y}_{i}\right|^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathcal{L}_{CE}\left(\mathbf{x}_{i},\mathbf{y}_{i}\right)=-\sum_{k=1}^{n_{L}}y_{i}^{k}\log\left(h^{k}\left(\mathbf{x}_{i}\right)\right)-\left(1-y_{i}^{k}\right)\log\left(1-h^{k}\left(\mathbf{x}_{i}\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J_{MSE}\left(\mathbf{X},\mathbf{y}\right)=\frac{1}{m}\sum_{i=1}^{m}\left|h\left(\mathbf{x}_{i}\right)-y_{i}\right|^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J_{CE}\left(\mathbf{X},\mathbf{y}\right)=-\frac{1}{m}\sum_{i=1}^{m}\sum_{k=1}^{n_{L}}\left[y_{i}^{k}\log\left(h^{k}\left(\mathbf{x}_{i}\right)\right)-\left(1-y_{i}^{k}\right)\log\left(1-h^{k}\left(\mathbf{x}_{i}\right)\right)\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename final_layer_multiple_neurons.png
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Final layer schema for multiple neurons.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Mean square error
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{a}_{L}\in\mathbb{R}^{1\times n_{L}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{z}_{L}\in\mathbb{R}^{1\times n_{L}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\delta_{L}^{k}=\frac{2}{m}\sum_{i=1}^{m}\left(a_{L}^{k}-y_{i}^{k}\right)\cdot\sigma'\left(z_{L}^{k}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boldsymbol{\delta}_{L}=\frac{2}{m}\sum_{i=1}^{m}\left(\mathbf{a}_{L}-\mathbf{y}_{i}\right)\odot\sigma'\left(\mathbf{z}_{L}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boldsymbol{\delta}_{L}\in\mathbb{R}^{1\times n_{L}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{a}_{L-1}\in\mathbb{R}^{1\times n_{L-1}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{W}_{L}\in\mathbb{R}^{n_{L-1}\times n_{L}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\mathbf{w}_{L}^{k}}J_{MSE}\left(\mathbf{X},\mathbf{Y}\right)=\delta_{L}^{k}\mathbf{a}_{L-1}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\mathbf{W}_{L}}J_{MSE}\left(\mathbf{X},\mathbf{Y}\right)=\mathbf{a}_{L-1}^{\top}\boldsymbol{\delta}_{L}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{Y}\right)}{\partial b_{L}^{k}}=\delta_{L}^{k}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{MSE}\left(\mathbf{X},\mathbf{Y}\right)}{\partial\mathbf{b}_{L}}=\boldsymbol{\delta}_{L}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Binary cross entropy
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\delta_{L}^{k}=\frac{1}{m}\sum_{i=1}^{m}\left(a_{L}^{k}-y_{i}^{k}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boldsymbol{\delta}_{L}=\frac{1}{m}\sum_{i=1}^{m}\left(\mathbf{a}_{L}-\mathbf{y}_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla_{\mathbf{w}_{L}^{k}}J_{CE}\left(\mathbf{X},\mathbf{Y}\right)=\delta_{L}^{k}\mathbf{a}_{L-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla_{\mathbf{W}_{L}}J_{CE}\left(\mathbf{X},\mathbf{Y}\right)=\mathbf{a}_{L-1}^{\top}\boldsymbol{\delta}_{L}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial J_{CE}\left(\mathbf{X},\mathbf{Y}\right)}{\partial\mathbf{b}_{L}}=\boldsymbol{\delta}_{L}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Categorized cross entropy
+\end_layout
+
+\begin_layout Standard
+Softmax activations function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\sigma\left(z_{k}\right)=\frac{e^{z_{k}}}{{\displaystyle \sum_{f=1}^{n_{L}}e^{z_{f}}}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial\sigma\left(z_{i}\right)}{\partial z_{j}}=\left\{ \begin{array}{rcl}
+\sigma\left(z_{i}\right)\left(1-\sigma\left(z_{i}\right)\right) & ; & i=j\\
+\\
+-\sigma\left(z_{i}\right)\sigma\left(z_{j}\right) & ; & i\neq j
+\end{array}\right.
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathcal{L}_{CCE}\left(\mathbf{x}_{i},\mathbf{y}_{i}\right)=-\sum_{k=1}^{n_{L}}y_{i}^{k}\log\left(\frac{e^{z_{k}}}{{\displaystyle \sum_{f=1}^{n_{L}}e^{z_{f}}}}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J_{CCE}\left(\mathbf{X},\mathbf{Y}\right)=-\frac{1}{m}\sum_{i=1}^{m}\sum_{k=1}^{n_{L}}y_{i}^{k}\log\left(\frac{e^{z_{k}}}{{\displaystyle \sum_{f=1}^{n_{L}}e^{z_{f}}}}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CCE}\left(\mathbf{X},\mathbf{Y}\right)}{\partial w_{L}^{j,k}}=\frac{\partial J_{CCE}\left(\mathbf{X},\mathbf{Y}\right)}{\partial a_{L}^{k}}\cdot\frac{\partial a_{L}^{k}}{\partial z_{L}^{k}}\cdot\frac{\partial z_{L}^{k}}{\partial w_{L}^{j,k}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CCE}\left(\mathbf{X},\mathbf{Y}\right)}{\partial a_{L}^{k}}=-\frac{1}{m}\sum_{i=1}^{m}\sum_{k=1}^{n_{L}}y_{i}^{k}\frac{\partial}{\partial a_{L}^{k}}\log\left(a_{L}^{k}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J_{CCE}\left(\mathbf{X},\mathbf{Y}\right)}{\partial\mathbf{a}_{L}}=\boldsymbol{\delta}_{L}=\frac{1}{m}\sum_{i=1}^{m}\left(\mathbf{a}_{L}-\mathbf{y}_{i}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\mathbf{W}_{L}}J_{CCE}\left(\mathbf{X},\mathbf{Y}\right)=\mathbf{a}_{L-1}^{\top}\boldsymbol{\delta}_{L}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial J_{CCE}\left(\mathbf{X},\mathbf{Y}\right)}{\partial\mathbf{b}_{L}}=\boldsymbol{\delta}_{L}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \end_body
