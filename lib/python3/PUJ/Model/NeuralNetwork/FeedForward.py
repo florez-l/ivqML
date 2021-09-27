@@ -25,7 +25,7 @@ class FeedForward:
   '''
   def __init__( self, input_size = 1 ):
     assert isinstance( input_size, ( int ) ) and input_size > 0, \
-	    'Invalid input size'
+            'Invalid input size'
     self.m_InputSize = input_size
   # end def
 
@@ -33,7 +33,7 @@ class FeedForward:
   '''
   def AddLayer( self, output_size, activation, theta = None ):
     assert isinstance( output_size, ( int ) ) and output_size > 0, \
-	    'Invalid output size'
+            'Invalid output size'
 
     input_size = self.m_InputSize
     if len( self.m_Weights ) > 0:
@@ -152,34 +152,43 @@ class FeedForward:
       ' +', ' ', ''.join( hnd.readlines( ) ).replace( '\n', ' ' )
       ).split( )
 
-    input_size = int( data[ 0 ] )
-    self.m_InputSize = input_size
-    output_size = int( data[ 1 ] )
-    i = 2
-    while input_size > 0 and output_size > 0:
+    is_draft = False
+    i = 0
+    if data[ 0 ] == 'draft':
+      is_draft = True
+      i = 1
+    # end if
 
-      # Read data
-      is_os = input_size * output_size
-      w = numpy.reshape(
-        numpy.matrix(
-          [ float( v ) for v in data[ i : i + is_os ] ]
-          ), ( input_size, output_size )
-        )
-      b = numpy.reshape(
-        numpy.matrix(
-          [ float( v ) for v in data[ i + is_os : i + is_os + output_size ] ]
-          ), ( 1, output_size )
-        )
-      a = data[ i + is_os + output_size ]
+    in_size = int( data[ i ] )
+    self.m_InputSize = in_size
+    out_size = int( data[ i + 1 ] )
+    i += 2
+    while in_size > 0 and out_size > 0:
 
-      # Add layer
-      self.AddLayer( output_size, a, ( w, b ) )
+      if not is_draft:
 
-      # Process next layer
-      i = i + is_os + output_size + 1
-      input_size = int( data[ i ] )
-      output_size = int( data[ i + 1 ] )
+        is_os = in_size * out_size
+        wl = [ float( v ) for v in data[ i : i + is_os ] ]
+        bl = [ float( v ) for v in data[ i + is_os : i + is_os + out_size ] ]
+        w = numpy.matrix( wl ).reshape( ( in_size, out_size ) )
+        b = numpy.matrix( bl ).reshape( ( 1, out_size ) )
+        a = data[ i + is_os + out_size ]
+
+        self.AddLayer( out_size, a, ( w, b ) )
+        i += is_os + out_size + 3
+
+      else:
+
+        a = data[ i ]
+        self.AddLayer( out_size, a, 'random' )
+        i += 1
+
+      # end if
+
+      in_size = int( data[ i ] )
+      out_size = int( data[ i + 1 ] )
       i += 2
+
     # end while
 
     if isinstance( fname_or_handle, ( str ) ):
@@ -197,7 +206,7 @@ class FeedForward:
     else:
       hnd = fname_or_handle
     # end if
-    
+
     for i in range( len( self.m_Weights ) ):
       hnd.write( str( self.m_Weights[ i ].shape[ 0 ] ) + ' ' )
       hnd.write( str( self.m_Weights[ i ].shape[ 1 ] ) + '\n' )
@@ -236,6 +245,58 @@ class FeedForward:
       a = self.m_Activations[ i ]( z )
     # end for
     return a
+  # end def
+
+  '''
+  '''
+  def BackPropagate( self, X, Y, propagation_type = 'cce' ):
+
+    # Forward propagation
+    A = [ X ]
+    Z = []
+    for i in range( len( self.m_Weights ) ):
+      Z += [ ( A[ i ] @ self.m_Weights[ i ] ) + self.m_Biases[ i ] ]
+      A += [ self.m_Activations[ i ]( Z[ i ] ) ]
+    # end for
+
+    # Compute last layer delta
+    D = None
+    d = numpy.array( A[ -1 ] - Y )
+    if propagation_type == 'mse':
+      dL = \
+         numpy.array( d ) * \
+         numpy.array( self.m_Activations[ i ]( Z[ -1 ] ), derivative = True )
+      D = [ 2.0 * dL ]
+    elif propagation_type == 'bce' or propagation_type == 'cce':
+      D = [ d ]
+    else:
+      raise TypeError( 'Invalid propagation type (' + propagation_type + ')' )
+    # end if
+
+    # Compute other layers delta
+    L = self.GetNumberOfLayers( )
+    for l in range( L - 2, -1, -1 ):
+      d = \
+        numpy.array( self.m_Weights[ l + 1 ] @ D[ L - l - 2 ].T ).T * \
+        numpy.array( self.m_Activations[ l ]( Z[ l ], derivative = True ) )
+      D += [ d ]
+    # end for
+    D.reverse( )
+
+    # Flatten matrices
+    G = None
+    for l in range( L ):
+      gW = ( ( A[ l ].T @ D[ l ] ) / float( X.shape[ 0 ] ) ).flatten( )
+      if G is None:
+        G = gW
+      else:
+        G = numpy.append( G, gW )
+      # end if
+      G = numpy.append( G, D[ l ].mean( axis = 0 ).flatten( ) )
+    # end for
+
+    return G
+
   # end def
 
   '''
