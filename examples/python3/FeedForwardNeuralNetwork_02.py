@@ -6,32 +6,47 @@ import os, random, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 
 import numpy
+import PUJ.Data.Algorithms, PUJ.Data.Normalize
 import PUJ.Model.NeuralNetwork.FeedForward
+import PUJ.Optimizer.GradientDescent
 
 # -- Configure network
 fwd_nn = PUJ.Model.NeuralNetwork.FeedForward( )
 fwd_nn.LoadParameters( sys.argv[ 1 ] )
-
-print( '===================================' )
-print( fwd_nn )
-print( '===================================' )
 
 # -- Data
 D = numpy.genfromtxt( sys.argv[ 2 ], delimiter = ',' )
 numpy.random.shuffle( D )
 X_real = D[ : , 0 : 2 ]
 y_real = D[ : , 2 : 3 ]
+X_real, X_min, X_off = PUJ.Data.Normalize.MinMax( X_real )
 
 # -- Train
-g = fwd_nn.BackPropagate( X_real, y_real, 'bce' )
+cost_tra = PUJ.Model.NeuralNetwork.FeedForward.Cost( X_real, y_real, fwd_nn )
+cost_tra.SetPropagationTypeToBinaryCrossEntropy( )
 
-print( g )
+# -- Iterative solution
+tI, nI = PUJ.Optimizer.GradientDescent(
+  cost_tra,
+  learning_rate = 1e-4,
+  init_theta = 'none',
+  max_iter = 100000,
+  epsilon = 1e-8,
+  debug_step = 1000,
+  debug_function = None
+  )
 
-# n = fwd_nn.GetLayerInputSize( 0 )
-# print( '===================================' )
-# print( fwd_nn( [ random.randint( -10, 10 ) for i in range( n ) ] ) )
-# print( '===================================' )
-# print( fwd_nn( numpy.random.uniform( -10, 10, ( 10, n ) ) ) )
-# print( '===================================' )
+print( '===================================' )
+print( fwd_nn )
+print( '===================================' )
+
+## fwd_nn.SaveParameters( 'leo.nn' )
+
+## y_estim = ( fwd_nn( X_real ) >= 0.5 ).astype( D.dtype )
+## K, acc = PUJ.Data.Algorithms.Accuracy( y_real, y_estim )
+
+## print( K )
+## print( 'Accuracy: ' + str( acc * 100 ) + '%' )
+
 
 ## eof - $RCSfile$

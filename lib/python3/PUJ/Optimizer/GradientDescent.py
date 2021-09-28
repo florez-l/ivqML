@@ -31,6 +31,10 @@ def GradientDescent( cost, **kwargs ):
       t = numpy.matrix( t0 )
     elif isinstance( t0, numpy.matrix ):
       t = t0
+    elif isinstance( t0, str ):
+      if t0 == 'none':
+        t = cost.GetInitialParameters( )
+      # end if
     # end if
   # end if
 

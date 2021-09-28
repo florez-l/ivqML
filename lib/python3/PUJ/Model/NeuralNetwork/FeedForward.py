@@ -2,7 +2,7 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-import numpy, re
+import math, numpy, re
 import PUJ.Model.NeuralNetwork.Activation as Activation
 
 '''
@@ -16,16 +16,16 @@ class FeedForward:
   '''
   Weight matrices are kept in tranposed form.
   '''
-  m_Weights     = []
-  m_Biases      = []
-  m_Activations = []
-  m_InputSize   = 0
+  m_W = []
+  m_B = []
+  m_S = []
+  m_InputSize = 0
 
   '''
   '''
   def __init__( self, input_size = 1 ):
     assert isinstance( input_size, ( int ) ) and input_size > 0, \
-            'Invalid input size'
+           'Invalid input size'
     self.m_InputSize = input_size
   # end def
 
@@ -33,22 +33,22 @@ class FeedForward:
   '''
   def AddLayer( self, output_size, activation, theta = None ):
     assert isinstance( output_size, ( int ) ) and output_size > 0, \
-            'Invalid output size'
+           'Invalid output size'
 
     input_size = self.m_InputSize
-    if len( self.m_Weights ) > 0:
-      input_size = self.m_Weights[ -1 ].shape[ 1 ]
+    if len( self.m_W ) > 0:
+      input_size = self.m_W[ -1 ].shape[ 1 ]
     # end if
 
     if isinstance( activation, ( str ) ):
-      self.m_Activations += [ getattr( Activation, activation )( ) ]
+      self.m_S += [ getattr( Activation, activation )( ) ]
     else:
-      self.m_Activations += [ activation ]
+      self.m_S += [ activation ]
     # end if
 
     if theta is None:
-      self.m_Weights += [ numpy.zeros( ( input_size, output_size ) ) ]
-      self.m_Biases  += [ numpy.zeros( ( 1, output_size ) ) ]
+      self.m_W += [ numpy.zeros( ( input_size, output_size ) ) ]
+      self.m_B  += [ numpy.zeros( ( 1, output_size ) ) ]
     elif isinstance( theta, ( tuple ) ):
       if len( theta ) == 2:
         w, b = theta
@@ -56,23 +56,23 @@ class FeedForward:
                w.shape == ( input_size, output_size ) and \
                b.shape == ( 1, output_size ), \
                'Invalid sizes'
-        self.m_Weights += [ w ]
-        self.m_Biases  += [ b ]
+        self.m_W += [ w ]
+        self.m_B  += [ b ]
       else:
         pass
       # end if
     elif isinstance( theta, ( str ) ):
       if theta == 'random':
-        self.m_Weights += \
+        self.m_W += \
           [ numpy.random.uniform( size = ( input_size, output_size ) ) ]
-        self.m_Biases += \
+        self.m_B += \
           [ numpy.random.uniform( size = ( 1, output_size ) ) ]
       elif theta == 'ones':
-        self.m_Weights += [ numpy.ones( ( input_size, output_size ) ) ]
-        self.m_Biases  += [ numpy.ones( ( 1, output_size ) ) ]
+        self.m_W += [ numpy.ones( ( input_size, output_size ) ) ]
+        self.m_B  += [ numpy.ones( ( 1, output_size ) ) ]
       elif theta == 'zeros':
-        self.m_Weights += [ numpy.zeros( ( input_size, output_size ) ) ]
-        self.m_Biases  += [ numpy.zeros( ( 1, output_size ) ) ]
+        self.m_W += [ numpy.zeros( ( input_size, output_size ) ) ]
+        self.m_B  += [ numpy.zeros( ( 1, output_size ) ) ]
       else:
         pass
       # end if
@@ -85,14 +85,14 @@ class FeedForward:
   '''
   '''
   def GetNumberOfLayers( self ):
-    return len( self.m_Weights )
+    return len( self.m_W )
   # end def
 
   '''
   '''
   def GetLayerInputSize( self, i ):
-    if i < len( self.m_Weights ):
-      return self.m_Weights[ i ].shape[ 0 ]
+    if i < len( self.m_W ):
+      return self.m_W[ i ].shape[ 0 ]
     else:
       return 0
     # end if
@@ -101,8 +101,8 @@ class FeedForward:
   '''
   '''
   def GetLayerOutputSize( self, i ):
-    if i < len( self.m_Weights ):
-      return self.m_Weights[ i ].shape[ 1 ]
+    if i < len( self.m_W ):
+      return self.m_W[ i ].shape[ 1 ]
     else:
       return 0
     # end if
@@ -111,8 +111,8 @@ class FeedForward:
   '''
   '''
   def GetLayerWeights( self, i ):
-    if i < len( self.m_Weights ):
-      return self.m_Weights[ i ]
+    if i < len( self.m_W ):
+      return self.m_W[ i ]
     else:
       return None
     # end if
@@ -121,8 +121,8 @@ class FeedForward:
   '''
   '''
   def GetLayerBiases( self, i ):
-    if i < len( self.m_Biases ):
-      return self.m_Biases[ i ]
+    if i < len( self.m_B ):
+      return self.m_B[ i ]
     else:
       return None
     # end if
@@ -131,11 +131,55 @@ class FeedForward:
   '''
   '''
   def GetLayerActivation( self, i ):
-    if i < len( self.m_Activations ):
-      return self.m_Activations[ i ]
+    if i < len( self.m_S ):
+      return self.m_S[ i ]
     else:
       return None
     # end if
+  # end def
+
+  '''
+  '''
+  def GetNumberOfParameters( self ):
+    n = 0
+    for w in self.m_W:
+      n += ( w.shape[ 0 ] + 1 ) * w.shape[ 1 ]
+    # end for
+    return n
+  # end def
+
+  '''
+  '''
+  def SetParameters( self, theta ):
+    i = 0
+    for l in range( len( self.m_W ) ):
+
+      ws = self.m_W[ l ].shape
+      wl = i + ws[ 0 ] * ws[ 1 ]
+      bl = ws[ 1 ]
+      bs = ( 1, bl )
+
+      self.m_W[ l ] = theta[ i : wl ].reshape( ws )
+      self.m_B[ l ] = theta[ wl : wl + bl ].reshape( bs )
+
+      i = wl + bl
+      
+    # end for
+  # end def
+
+  '''
+  '''
+  def Flatten( self ):
+    f = None
+    for l in range( len( self.m_W ) ):
+      if f is None:
+        f = self.m_W[ l ].flatten( )
+      else:
+        f = numpy.append( f, self.m_W[ l ].flatten( ) )
+      # end if
+      f = numpy.append( f, self.m_B[ l ].flatten( ) )
+    # end for
+    return f
   # end def
 
   '''
@@ -207,12 +251,12 @@ class FeedForward:
       hnd = fname_or_handle
     # end if
 
-    for i in range( len( self.m_Weights ) ):
-      hnd.write( str( self.m_Weights[ i ].shape[ 0 ] ) + ' ' )
-      hnd.write( str( self.m_Weights[ i ].shape[ 1 ] ) + '\n' )
-      numpy.savetxt( hnd, self.m_Weights[ i ], fmt = '%.8e' )
-      numpy.savetxt( hnd, self.m_Biases[ i ], fmt = '%.8e' )
-      hnd.write( str( self.m_Activations[ i ] ) + '\n' )
+    for i in range( len( self.m_W ) ):
+      hnd.write( str( self.m_W[ i ].shape[ 0 ] ) + ' ' )
+      hnd.write( str( self.m_W[ i ].shape[ 1 ] ) + '\n' )
+      numpy.savetxt( hnd, self.m_W[ i ], fmt = '%.8e' )
+      numpy.savetxt( hnd, self.m_B[ i ], fmt = '%.8e' )
+      hnd.write( str( self.m_S[ i ] ) + '\n' )
     # end for
     hnd.write( '0 0\n' )
 
@@ -236,79 +280,161 @@ class FeedForward:
     else:
       x = numpy.matrix( list( cargs ) )
     # end if
-    assert x.shape[ 1 ] == self.m_InputSize, 'Input size is not compatible.'
+    assert x.shape[ 1 ] == self.m_W[ 0 ].shape[ 0 ], \
+           'Input size is not compatible.'
 
-    z = ( x @ self.m_Weights[ 0 ] ) + self.m_Biases[ 0 ]
-    a = self.m_Activations[ 0 ]( z )
-    for i in range( 1, len( self.m_Weights ) ):
-      z = ( a @ self.m_Weights[ i ] ) + self.m_Biases[ i ]
-      a = self.m_Activations[ i ]( z )
+    z = ( x @ self.m_W[ 0 ] ) + self.m_B[ 0 ]
+    a = self.m_S[ 0 ]( z )
+    for i in range( 1, len( self.m_W ) ):
+      z = ( a @ self.m_W[ i ] ) + self.m_B[ i ]
+      a = self.m_S[ i ]( z )
     # end for
     return a
   # end def
 
   '''
   '''
-  def BackPropagate( self, X, Y, propagation_type = 'cce' ):
+  class Cost:
+    '''
+    '''
+    m_Eps = 1e-8
 
-    # Forward propagation
-    A = [ X ]
-    Z = []
-    for i in range( len( self.m_Weights ) ):
-      Z += [ ( A[ i ] @ self.m_Weights[ i ] ) + self.m_Biases[ i ] ]
-      A += [ self.m_Activations[ i ]( Z[ i ] ) ]
-    # end for
+    '''
+    '''
+    def __init__( self, in_X, in_Y, model ):
+      assert model.GetLayerInputSize( 0 ) == in_X.shape[ 1 ], \
+             'Invalid input size'
+      
+      self.m_X = in_X
+      self.m_Y = in_Y
+      self.m_Model = model
+      self.SetPropagationTypeToMinimumSquareError( )
+    # end def
 
-    # Compute last layer delta
-    D = None
-    d = numpy.array( A[ -1 ] - Y )
-    if propagation_type == 'mse':
-      dL = \
-         numpy.array( d ) * \
-         numpy.array( self.m_Activations[ i ]( Z[ -1 ] ), derivative = True )
-      D = [ 2.0 * dL ]
-    elif propagation_type == 'bce' or propagation_type == 'cce':
-      D = [ d ]
-    else:
-      raise TypeError( 'Invalid propagation type (' + propagation_type + ')' )
-    # end if
+    '''
+    '''
+    def SetPropagationTypeToMinimumSquareError( self ):
+      self.m_Propagation = 'mse'
+    # end def
 
-    # Compute other layers delta
-    L = self.GetNumberOfLayers( )
-    for l in range( L - 2, -1, -1 ):
-      d = \
-        numpy.array( self.m_Weights[ l + 1 ] @ D[ L - l - 2 ].T ).T * \
-        numpy.array( self.m_Activations[ l ]( Z[ l ], derivative = True ) )
-      D += [ d ]
-    # end for
-    D.reverse( )
+    '''
+    '''
+    def SetPropagationTypeToBinaryCrossEntropy( self ):
+      self.m_Propagation = 'bce'
+    # end def
 
-    # Flatten matrices
-    G = None
-    for l in range( L ):
-      gW = ( ( A[ l ].T @ D[ l ] ) / float( X.shape[ 0 ] ) ).flatten( )
-      if G is None:
-        G = gW
-      else:
-        G = numpy.append( G, gW )
+    '''
+    '''
+    def SetPropagationTypeToCategoricalCrossEntropy( self ):
+      self.m_Propagation = 'cce'
+    # end def
+
+
+    def VectorSize( self ):
+      return self.m_Model.GetNumberOfParameters( )
+    # end def
+
+    '''
+    '''
+    def GetInitialParameters( self ):
+      return self.m_Model.Flatten( )
+    # end def
+
+    '''
+    '''
+    def _Cost( self, Yp ):
+      J = math.inf
+      if self.m_Propagation == 'mse':
+        d = Yp - self.m_Y
+        J = ( d.T @ d )[ 0, 0 ] / float( self.m_Y.shape[ 0 ] )
+      elif self.m_Propagation == 'bce':
+        p = numpy.log(
+          Yp[ numpy.where( self.m_Y[ : , 0 ] == 1 )[ 0 ] , : ] + self.m_Eps
+          ).sum( )
+        n = numpy.log(
+          1 - Yp[ numpy.where( self.m_Y[ : , 0 ] == 0 )[ 0 ] , : ] + self.m_Eps
+          ).sum( )
+        J = -( p + n ) / float( self.m_Y.shape[ 0 ] )
+      elif self.m_Propagation == 'cce':
+        pass
       # end if
-      G = numpy.append( G, D[ l ].mean( axis = 0 ).flatten( ) )
-    # end for
 
-    return G
+      return J
+    # end def
 
-  # end def
+    '''
+    '''
+    def Cost( self, theta ):
+      self.m_Model.SetParameters( theta )
+      return self._Cost( self.m_Model( self.m_X ) )
+    # end def
+
+    '''
+    '''
+    def CostAndGradient( self, theta ):
+      self.m_Model.SetParameters( theta )
+
+      # Forward propagation
+      A = [ self.m_X ]
+      Z = []
+      for l in range( len( self.m_Model.m_W ) ):
+        Z += [ ( A[ l ] @ self.m_Model.m_W[ l ] ) + self.m_Model.m_B[ l ] ]
+        A += [ self.m_Model.m_S[ l ]( Z[ l ] ) ]
+      # end for
+      J = self._Cost( A[ -1 ] )
+
+      # Compute last layer delta
+      D = None
+      d = numpy.array( A[ -1 ] - self.m_Y )
+      if self.m_Propagation == 'mse':
+        d = \
+          2.0 * \
+          numpy.array( d ) * \
+          numpy.array( self.m_Model.m_S[ -1 ]( Z[ -1 ] ), derivative = True )
+        D = [ d ]
+      elif self.m_Propagation == 'bce' or self.m_Propagation == 'cce':
+        D = [ d ]
+      else:
+        raise TypeError( 'Invalid propagation type (' + self.m_Propagation + ')' )
+      # end if
+
+      # Compute other layers deltas
+      L = len( self.m_Model.m_W )
+      for l in range( L - 2, -1, -1 ):
+        d = \
+          numpy.array( self.m_Model.m_W[ l + 1 ] @ D[ L - l - 2 ].T ).T * \
+          numpy.array( self.m_Model.m_S[ l ]( Z[ l ], derivative = True ) )
+        D += [ d ]
+      # end for
+      D.reverse( )
+
+      # Flatten matrices
+      G = None
+      for l in range( L ):
+        gW = ( ( A[ l ].T @ D[ l ] ) / float( self.m_X.shape[ 0 ] ) ).flatten( )
+        if G is None:
+          G = gW
+        else:
+          G = numpy.append( G, gW )
+        # end if
+        G = numpy.append( G, D[ l ].mean( axis = 0 ).flatten( ) )
+      # end for
+
+      return [ J, G ]
+
+    # end def
+  # end class
 
   '''
   '''
   def __str__( self ):
     r  = '***********************************\n'
     r += '*** Feed forward neural network ***\n'
-    for i in range( len( self.m_Weights ) ):
+    for i in range( len( self.m_W ) ):
       r += 'Layer ' + str( i ) + '\n'
-      r += '  Input size  = ' + str( self.m_Weights[ i ].shape[ 0 ] ) + '\n'
-      r += '  Output size = ' + str( self.m_Weights[ i ].shape[ 1 ] ) + '\n'
-      r += '  Activation  = ' + str( self.m_Activations[ i ] ) + '\n'
+      r += '  Input size  = ' + str( self.m_W[ i ].shape[ 0 ] ) + '\n'
+      r += '  Output size = ' + str( self.m_W[ i ].shape[ 1 ] ) + '\n'
+      r += '  Activation  = ' + str( self.m_S[ i ] ) + '\n'
     # end for
     r += '***********************************'
     return r

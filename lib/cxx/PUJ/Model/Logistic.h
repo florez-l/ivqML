@@ -54,7 +54,7 @@ namespace PUJ
 
       protected:
         TMatrix m_X;
-        TRow    m_y;
+        TCol    m_y;
         TRow    m_Xy;
         TScalar m_uy;
         std::vector< unsigned long long > m_Zeros;

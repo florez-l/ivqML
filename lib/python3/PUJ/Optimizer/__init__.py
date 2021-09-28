@@ -3,5 +3,7 @@
 ## =========================================================================
 
 from .GradientDescent import *
+from .KMeans import *
+from .MixtureOfGaussians import *
 
 ## eof - $RCSfile$

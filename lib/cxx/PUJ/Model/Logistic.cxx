@@ -11,6 +11,7 @@
 #include <PUJ/Model/Logistic.h>
 #include <Eigen/Dense>
 #include <cmath>
+#include <random>
 
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
@@ -79,7 +80,7 @@ operator()( const TRow& x, bool threshold ) const
   TScalar z = this->m_Linear->operator()( x );
   if( z > TScalar( 40 ) )
     return( TScalar( 1 ) );
-  if( z < -TScalar( 40 ) )
+  else if( z < -TScalar( 40 ) )
     return( TScalar( 0 ) );
   else
   {
@@ -97,18 +98,26 @@ typename PUJ::Model::Logistic< _TScalar, _TTraits >::
 TCol PUJ::Model::Logistic< _TScalar, _TTraits >::
 operator()( const TMatrix& x, bool threshold ) const
 {
-  TCol a =
-    TScalar( 1 ) /
-    (
-      TScalar( 1 ) +
-      Eigen::exp( -this->m_Linear->operator()( x ).array( ) )
-      );
-  if( threshold )
-    return(
-      TCol( ( a.array( ) >= TScalar( 0.5 ) ).template cast< TScalar >( ) )
-      );
-  else
-    return( a );
+  TCol z = this->m_Linear->operator()( x );
+  return(
+    z.unaryExpr(
+      [=]( TScalar v ) -> TScalar
+      {
+        if( v > TScalar( 40 ) )
+          return( TScalar( 1 ) );
+        else if( v < -TScalar( 40 ) )
+          return( TScalar( 0 ) );
+        else
+        {
+          TScalar r = TScalar( 1 ) / ( TScalar( 1 ) + std::exp( -v ) );
+          if( threshold )
+            return( TScalar( ( r < TScalar( 0.5 ) )? 0: 1 ) );
+          else
+            return( r );
+        } // end if
+      }
+      )
+    );
 }
 
 // -------------------------------------------------------------------------
@@ -116,21 +125,41 @@ template< class _TScalar, class _TTraits >
 PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
 Cost( const TMatrix& X, const TCol& y )
 {
-  this->m_X = X;
-  this->m_y = y;
-  this->m_Xy = ( X.array( ).colwise( ) * y.array( ) ).colwise( ).mean( );
-  this->m_uy = y.mean( );
-
   this->m_Zeros.clear( );
   this->m_Ones.clear( );
   PUJ::visit_lambda(
-    this->m_y,
+    y,
     [&]( TScalar v, int i, int j )
     {
       if( v == 0 ) this->m_Zeros.push_back( i );
       else         this->m_Ones.push_back( i );
     }
     );
+
+  /* TODO
+     unsigned long long m =
+     ( this->m_Zeros.size( ) < this->m_Ones.size( ) )?
+     this->m_Zeros.size( ):
+     this->m_Ones.size( );
+
+     this->m_Zeros.resize( m );
+     this->m_Ones.resize( m );
+
+     std::vector< unsigned long long > all;
+     all.insert( all.end( ), this->m_Zeros.begin( ), this->m_Zeros.end( ) );
+     all.insert( all.end( ), this->m_Ones.begin( ), this->m_Ones.end( ) );
+
+     auto rd = std::random_device {}; 
+     auto rng = std::default_random_engine { rd() };
+     std::shuffle( std::begin( all ), std::end( all ), rng );
+  */
+  this->m_X = X; // ( all, Eigen::placeholders::all );
+  this->m_y = y; // ( all );
+
+  this->m_Xy =
+    ( this->m_X.array( ).colwise( ) * this->m_y.array( ) ).
+    colwise( ).mean( );
+  this->m_uy = this->m_y.mean( );
 }
 
 // -------------------------------------------------------------------------
@@ -139,13 +168,13 @@ typename PUJ::Model::Logistic< _TScalar, _TTraits >::
 TScalar PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
 operator()( const TRow& t, TRow* g ) const
 {
-  static const TScalar eps = std::numeric_limits< TScalar >::epsilon( );
+  static const TScalar eps = 1e-8; // std::numeric_limits< TScalar >::epsilon( );
 
   unsigned long long n = this->m_X.cols( );
   unsigned long long m = this->m_X.rows( );
   TCol a = Self( t.block( 0, 1, 1, n ), t( 0, 0 ) )( this->m_X, false );
-  TScalar o = Eigen::log( eps + a( this->m_Ones ).array( ) ).sum( );
-  TScalar z = Eigen::log( 1.0 + eps - a( this->m_Zeros ).array( ) ).sum( );
+  TScalar o = Eigen::log( a( this->m_Ones ).array( ) + eps ).sum( );
+  TScalar z = Eigen::log( 1.0 - a( this->m_Zeros ).array( ) + eps ).sum( );
 
   if( g != nullptr )
   {
@@ -154,7 +183,20 @@ operator()( const TRow& t, TRow* g ) const
 
     g->operator()( 0, 0 ) = a.mean( ) - this->m_uy;
     g->block( 0, 1, 1, n ) =
-      ( this->m_X.array( ).colwise( ) * a.array( ) ).colwise( ).mean( );
+      ( this->m_X.array( ).colwise( ) * a.array( ) ).colwise( ).mean( ) -
+      this->m_Xy.array( );
+
+    /* TODO
+       TMatrix lll( this->m_Ones.size( ), 2 );
+       lll.block( 0, 0, this->m_Ones.size( ), 1 ) = a( this->m_Ones );
+       lll.block( 0, 1, this->m_Ones.size( ), 1 ) = Eigen::log( a( this->m_Ones ).array( ) + eps );
+
+       std::cout << lll << std::endl;
+       std::cout << t << std::endl;
+       std::cout << o << " " << z << " " << m << " : " << *g << std::endl;
+       std::exit( 1 );
+    */
+
   } // end if
   return( -( o + z ) / TScalar( m ) );
 }

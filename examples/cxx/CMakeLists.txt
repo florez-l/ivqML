@@ -7,6 +7,7 @@ set(
   LinearModel_00
   LinearModel_01
   LogisticModel_00
+  LogisticModel_01
   )
 
 include_directories(

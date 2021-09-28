@@ -45,12 +45,11 @@ def SplitData( D, output_size, train_size = 1.0, test_size = 0.0 ):
 '''
 '''
 def CategorizeLabels( labels ):
-  assert isinstance( labels, ( numpy.matrix ) ), 'Invalid input.'
   assert labels.shape[ 1 ] == 1, 'Invalid labels.'
 
   u = numpy.unique( labels )
   P = numpy.eye( len( u ) )
-  return P[ labels , ].reshape( labels.shape[ 0 ], len( u ) )
+  return P[ labels.astype( numpy.ubyte ) , ].reshape( labels.shape[ 0 ], len( u ) )
 # end def
 
 '''
@@ -73,7 +72,7 @@ def ConfusionMatrix( y_true, y_meas ):
 '''
 def Accuracy( y_true, y_meas ):
   K = ConfusionMatrix( y_true, y_meas )
-  return numpy.diag( K ).sum( ) / K.sum( )
+  return K, numpy.diag( K ).sum( ) / K.sum( )
 # end def
 
 ## eof - $RCSfile$
