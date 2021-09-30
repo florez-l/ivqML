@@ -8,8 +8,8 @@ sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 import numpy
 import PUJ.Model.Linear
 
-m = PUJ.Model.Linear( [ 1, 2 ] )
-n = PUJ.Model.Linear( [ 2 ], 1 )
+m = PUJ.Model.Linear( bias = 1, weights = 2 )
+n = PUJ.Model.Linear( parameters = [ 1, 2 ] )
 
 x = numpy.random.uniform( -10, 10, ( 10, 1 ) )
 

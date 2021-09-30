@@ -47,8 +47,11 @@ def SplitData( D, output_size, train_size = 1.0, test_size = 0.0 ):
 def CategorizeLabels( labels ):
   assert labels.shape[ 1 ] == 1, 'Invalid labels.'
 
-  u = numpy.unique( labels )
+  u = numpy.unique( labels.flatten( ).all( ) )
   P = numpy.eye( len( u ) )
+  print( labels )
+  print( P )
+  print( u )
   return P[ labels.astype( numpy.ubyte ) , ].reshape( labels.shape[ 0 ], len( u ) )
 # end def
 

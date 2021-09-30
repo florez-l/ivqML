@@ -2,68 +2,54 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-# import os, sys
-# sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
+import argparse, numpy, os, random, sys
+sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 
-# import numpy
-# import PUJ.Model.Logistic, PUJ.Regression.MaximumLikelihood
-# import PUJ.Normalize, PUJ.Optimizer.GradientDescent
-# import PUJ.Debug.Labeling
+import PUJ.Helpers.ArgParse
+import PUJ.Data.Normalize
+import PUJ.Optimizer.GradientDescent
+import PUJ.Debug.Labeling
 
-# ## -------------------------------------------------------------------------
-# number_of_samples = 20
-# min_value = -10
-# max_value =  10
+## -- Parse command line arguments
+parser = PUJ.Helpers.ArgParse( )
+parser.add_argument( 'filename', type = str )
+args = parser.parse_args( )
 
-# learning_rate = 1e-1
-# maximum_iterations = 10000
-# epsilon = 1e-8
-# debug_step = 10
-# init_theta = [ 0.0, 1.0, 1.0 ]
+# -- Data
+D = numpy.loadtxt( args.filename, delimiter = ',' )
+numpy.random.shuffle( D )
+X, y, *_ = PUJ.Data.Algorithms.SplitData( D, 1 )
+X, X_off, X_div = PUJ.Data.Normalize.Center( X )
 
-# ## -------------------------------------------------------------------------
+## -- Prepare regression
+model = PUJ.Model.Logistic(
+  parameters = args.init,
+  size = X.shape[ 1 ]
+  )
+cost = PUJ.Model.Logistic.Cost( X, y, model )
 
-# # Synthetic data
-# off_value = max_value - min_value
-# x0 = ( numpy.random.rand( number_of_samples, 2 ) * off_value ) + min_value
-# y0 = numpy.matrix( ( x0[ : , 0 ] < 0 ).astype( x0.dtype ) ).T
-# xN = x0[ numpy.where( y0[ : , 0 ] == 0 )[ 0 ] , : ]
-# xP = x0[ numpy.where( y0[ : , 0 ] == 1 )[ 0 ] , : ]
-# min_samples = min( xN.shape[ 0 ], xP.shape[ 0 ] )
-# numpy.random.shuffle( xN )
-# numpy.random.shuffle( xP )
-# xN = xN[ : min_samples , : ]
-# xP = xP[ : min_samples , : ]
-# xN = numpy.append( xN, numpy.zeros( ( min_samples, 1 ) ), axis = 1 )
-# xP = numpy.append( xP, numpy.ones( ( min_samples, 1 ) ), axis = 1 )
-# D = numpy.append( xN, xP, axis = 0 )
-# numpy.random.shuffle( D )
-# x0 = D[ : , : 2 ]
-# y0 = D[ : , -1 : ]
+## -- Prepare debug
+debug = PUJ.Debug.Labeling( X, y )
 
-# # Prepare regression
-# x0, x0_off, x0_div = PUJ.Normalize.Standardize( x0 )
-# cost = PUJ.Regression.MaximumLikelihood( x0, y0 )
+## -- Iterative solution
+PUJ.Optimizer.GradientDescent(
+  cost,
+  learning_rate = args.learning_rate,
+  max_iter = args.max_iterations,
+  epsilon = args.epsilon,
+  debug_step = args.debug_step,
+  debug_function = debug
+  )
 
-# # Prepare debug
-# debug = PUJ.Debug.Labeling( x0[ : , 0 : 2 ], y0 )
-
-# # Iterative solution
-# tI, nI = PUJ.Optimizer.GradientDescent(
-#   cost,
-#   learning_rate = learning_rate,
-#   init_theta = init_theta,
-#   maximum_iterations = maximum_iterations,
-#   epsilon = epsilon,
-#   debug_step = debug_step,
-#   debug_function = debug
-#   )
-
-# print( '=================================================================' )
-# print( '* Iterative solution   :', tI )
-# print( '* Number of iterations :', nI )
-# print( '=================================================================' )
-
-# debug.KeepFigures( )
+## -- Show results
+K, acc = PUJ.Data.Algorithms.Accuracy( y, model( X, threshold = True ) )
+print( '=================================================================' )
+print( '* Solution             :', model )
+print( '* Number of iterations :', debug.GetNumberOfIterations( ) )
+print( '* Accuracy             :', acc )
+print( '* Confusion matrix     :' )
+print( K )
+print( '=================================================================' )
+debug.KeepFigures( )
 
 ## eof - $RCSfile$

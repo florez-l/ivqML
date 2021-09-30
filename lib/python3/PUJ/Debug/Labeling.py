@@ -4,7 +4,6 @@
 
 import numpy
 import matplotlib.pyplot as plot
-import PUJ.Model.Logistic
 from .Cost import *
 
 '''
@@ -13,8 +12,8 @@ class Labeling( Cost ):
 
   '''
   '''
-  def __init__( self, x, y, test_function = None ):
-    super( ).__init__( test_function = test_function, nrows = 1, ncols = 2 )
+  def __init__( self, x, y ):
+    super( ).__init__( nrows = 1, ncols = 2 )
 
     self.m_DataAxis = self.m_Axes[ 1 ]
     min0 = x[ : , 0 ].min( ) - 1
@@ -50,11 +49,11 @@ class Labeling( Cost ):
 
   '''
   '''
-  def __call__( self, J, dJ, t, i, show ):
-    super( ).__call__( J, dJ, t, i, show )
+  def __call__( self, model, J, dJ, i, show ):
+    super( ).__call__( model, J, dJ, i, show )
 
     if show:
-      z = PUJ.Model.Logistic( t )( self.m_Data ).reshape( self.m_DX.shape )
+      z = model( self.m_Data ).reshape( self.m_DX.shape )
       if self.m_DataContour != None:
         for c in self.m_DataContour.collections:
           c.remove( )
