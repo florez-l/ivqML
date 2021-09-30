@@ -56,7 +56,7 @@ class Cost:
           self.m_CostAxis.plot( self.m_CostX, self.m_CostY, color = 'red' )
       # end if
 
-      self.m_CostLine.set_label( 'Training cost (dJ = {:.3e})'.format( dJ ) )
+      self.m_CostLine.set_label( 'Training cost (J = {:.3e})'.format( J ) )
       self.m_CostLine.set_xdata( self.m_CostX )
       self.m_CostLine.set_ydata( self.m_CostY )
       self.m_CostAxis.relim( )

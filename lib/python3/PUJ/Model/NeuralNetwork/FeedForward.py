@@ -64,9 +64,9 @@ class FeedForward:
     elif isinstance( theta, ( str ) ):
       if theta == 'random':
         self.m_W += \
-          [ numpy.random.uniform( size = ( input_size, output_size ) ) ]
+          [ numpy.random.uniform( low = -1.0, high = 1.0, size = ( input_size, output_size ) ) ]
         self.m_B += \
-          [ numpy.random.uniform( size = ( 1, output_size ) ) ]
+          [ numpy.random.uniform( low = -1.0, high = 1.0, size = ( 1, output_size ) ) ]
       elif theta == 'ones':
         self.m_W += [ numpy.ones( ( input_size, output_size ) ) ]
         self.m_B  += [ numpy.ones( ( 1, output_size ) ) ]
@@ -301,14 +301,29 @@ class FeedForward:
 
     '''
     '''
-    def __init__( self, in_X, in_Y, model ):
+    def __init__( self, in_X, in_Y, model, batch_size = 0 ):
       assert model.GetLayerInputSize( 0 ) == in_X.shape[ 1 ], \
              'Invalid input size'
       
-      self.m_X = in_X
-      self.m_Y = in_Y
       self.m_Model = model
       self.SetPropagationTypeToMinimumSquareError( )
+
+      if batch_size < 1:
+        self.m_Batches = [ ( in_X, in_Y ) ]
+      else:
+        m = in_X.shape[ 0 ]
+        batch_count = int( math.ceil( float( m ) / float( batch_size ) ) )
+        self.m_Batches = []
+        for b in range( batch_count ):
+          start = batch_size * b
+          end = start + batch_size
+          if end > m:
+            end = m
+          # end if
+          self.m_Batches += \
+            [ ( in_X[ start : end , : ], in_Y[ start : end , : ] ) ]
+        # end for
+      # end if
     # end def
 
     '''
@@ -348,19 +363,25 @@ class FeedForward:
 
     '''
     '''
-    def _Cost( self, Yp ):
+    def GetNumberOfBatches( self ):
+      return len( self.m_Batches )
+    # end if
+
+    '''
+    '''
+    def _Cost( self, Yp, batch ):
       J = math.inf
       if self.m_Propagation == 'mse':
-        d = Yp - self.m_Y
-        J = ( d.T @ d )[ 0, 0 ] / float( self.m_Y.shape[ 0 ] )
+        d = Yp - self.m_Batches[ batch ][ 1 ]
+        J = ( d.T @ d )[ 0, 0 ] / float( self.m_Batches[ batch ][ 1 ].shape[ 0 ] )
       elif self.m_Propagation == 'bce':
         p = numpy.log(
-          Yp[ numpy.where( self.m_Y[ : , 0 ] == 1 )[ 0 ] , : ] + self.m_Eps
+          Yp[ numpy.where( self.m_Batches[ batch ][ 1 ][ : , 0 ] == 1 )[ 0 ] , : ] + self.m_Eps
           ).sum( )
         n = numpy.log(
-          1 - Yp[ numpy.where( self.m_Y[ : , 0 ] == 0 )[ 0 ] , : ] + self.m_Eps
+          1 - Yp[ numpy.where( self.m_Batches[ batch ][ 1 ][ : , 0 ] == 0 )[ 0 ] , : ] + self.m_Eps
           ).sum( )
-        J = -( p + n ) / float( self.m_Y.shape[ 0 ] )
+        J = -( p + n ) / float( self.m_Batches[ batch ][ 1 ].shape[ 0 ] )
       elif self.m_Propagation == 'cce':
         pass
       # end if
@@ -370,28 +391,28 @@ class FeedForward:
 
     '''
     '''
-    def Cost( self, theta ):
+    def Cost( self, theta, batch ):
       self.m_Model.SetParameters( theta )
-      return self._Cost( self.m_Model( self.m_X ) )
+      return self._Cost( self.m_Model( self.m_Batches[ batch ][ 0 ] ), batch )
     # end def
 
     '''
     '''
-    def CostAndGradient( self, theta ):
+    def CostAndGradient( self, theta, batch ):
       self.m_Model.SetParameters( theta )
 
       # Forward propagation
-      A = [ self.m_X ]
+      A = [ self.m_Batches[ batch ][ 0 ] ]
       Z = []
       for l in range( len( self.m_Model.m_W ) ):
         Z += [ ( A[ l ] @ self.m_Model.m_W[ l ] ) + self.m_Model.m_B[ l ] ]
         A += [ self.m_Model.m_S[ l ]( Z[ l ] ) ]
       # end for
-      J = self._Cost( A[ -1 ] )
+      J = self._Cost( A[ -1 ], batch )
 
       # Compute last layer delta
       D = None
-      d = numpy.array( A[ -1 ] - self.m_Y )
+      d = numpy.array( A[ -1 ] - self.m_Batches[ batch ][ 1 ] )
       if self.m_Propagation == 'mse':
         d = \
           2.0 * \
@@ -417,7 +438,7 @@ class FeedForward:
       # Flatten matrices
       G = None
       for l in range( L ):
-        gW = ( ( A[ l ].T @ D[ l ] ) / float( self.m_X.shape[ 0 ] ) ).flatten( )
+        gW = ( ( A[ l ].T @ D[ l ] ) / float( self.m_Batches[ batch ][ 0 ].shape[ 0 ] ) ).flatten( )
         if G is None:
           G = gW
         else:

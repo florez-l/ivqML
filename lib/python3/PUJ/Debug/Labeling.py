@@ -12,8 +12,10 @@ class Labeling( Cost ):
 
   '''
   '''
-  def __init__( self, x, y ):
+  def __init__( self, x, y, threshold = None ):
     super( ).__init__( nrows = 1, ncols = 2 )
+
+    self.m_Threshold = threshold
 
     self.m_DataAxis = self.m_Axes[ 1 ]
     min0 = x[ : , 0 ].min( ) - 1
@@ -53,7 +55,11 @@ class Labeling( Cost ):
     super( ).__call__( model, J, dJ, i, show )
 
     if show:
-      z = model( self.m_Data ).reshape( self.m_DX.shape )
+      z = model( self.m_Data )
+      if not self.m_Threshold is None:
+        z = ( z >= self.m_Threshold ).astype( self.m_DX.dtype )
+      # end if
+      z = z.reshape( self.m_DX.shape )
       if self.m_DataContour != None:
         for c in self.m_DataContour.collections:
           c.remove( )
@@ -65,28 +71,5 @@ class Labeling( Cost ):
   # end def
 
 # end class
-
-
-
-
-#   # end def
-
-#   '''
-#   '''
-#   def __call__( self, J, dJ, t, i, show ):
-
-#     self.m_CostX += [ i ]
-#     self.m_CostY += [ J ]
-
-#   # end def
-
-#   '''
-#   '''
-#   def KeepFigures( self ):
-#     plot.ioff( )
-#     plot.show( )
-#   # end def
-
-# # end class
 
 ## eof - $RCSfile$

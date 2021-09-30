@@ -6,20 +6,6 @@ import math, numpy
 
 '''
 '''
-def Regularize( T, G, lt ):
-  if lt == 'ridge':
-    rJ = T @ T.T
-    rG = 2.0 * T
-  elif lt == 'lasso':
-    rJ = numpy.abs( T ).sum( )
-    rG = \
-      ( T > 0 ).astype( G.dtype ).sum( ) - ( T < 0 ).astype( G.dtype ).sum( )
-  # end if
-  return rJ, rG
-# end def
-
-'''
-'''
 def GradientDescent( cost, **kwargs ):
   a = 1e-1
   l = 0.0
@@ -39,39 +25,44 @@ def GradientDescent( cost, **kwargs ):
   if 'debug_function' in kwargs: df = kwargs[ 'debug_function' ]
 
   # Init loop
-  J, G = cost.CostAndGradient( T )
-  if l > 0:
-    rJ, rG = Regularize( T, G, lt )
-    J += rJ
-    G += rG
-  # end if
+  J = math.inf
   dJ = math.inf
   i = 0
   stop = False
+
+  # Main loop
   while dJ > e and i < I and not stop:
 
-    # Step forward
-    T -= G * a
-    Jn, G = cost.CostAndGradient( T )
-    if l > 0:
-      rJ, rG = Regularize( T, G, lt )
-      J += rJ
-      G += rG
-    # end if
+    # Batch loop
+    for b in range( cost.GetNumberOfBatches( ) ):
 
-    # Stop criterion and debug
-    dJ = J - Jn
-    J = Jn
-    if df != None:
+      # Compute gradients
+      J, G = cost.CostAndGradient( T, b )
+      if l > 0:
+        if lt == 'ridge':
+          J += T @ T.T
+          G += 2.0 * T
+        elif lt == 'lasso':
+          J += numpy.abs( T ).sum( )
+          G += ( T > 0 ).astype( G.dtype ).sum( )
+          G -= ( T < 0 ).astype( G.dtype ).sum( )
+        # end if
+      # end if
+
+      # Step forward
+      T -= G * a
+
+    # end for
+
+    if not df is None:
       stop = df( cost.GetModel( ), J, dJ, i, i % ds == 0 )
     # end if
+
+    # TODO: Stop criterion and debug
     i += 1
 
   # end while
 
-  if df != None:
-    stop = df( cost.GetModel( ), J, dJ, i, i % ds == 0 )
-  # end if
 # end def
 
 ## eof - $RCSfile$
