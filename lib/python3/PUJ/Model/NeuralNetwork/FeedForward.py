@@ -342,6 +342,12 @@ class FeedForward:
 
     '''
     '''
+    def GetModel( self ):
+      return self.m_Model
+    # end def
+
+    '''
+    '''
     def _Cost( self, Yp ):
       J = math.inf
       if self.m_Propagation == 'mse':

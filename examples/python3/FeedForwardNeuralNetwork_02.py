@@ -2,51 +2,96 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-import os, random, sys
+import numpy, os, random, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 
-import numpy
-import PUJ.Data.Algorithms, PUJ.Data.Normalize
+import PUJ.Helpers.ArgParse
+import PUJ.Data.Normalize
 import PUJ.Model.NeuralNetwork.FeedForward
 import PUJ.Optimizer.GradientDescent
+import PUJ.Debug.Labeling
 
-def debug( J, dJ, t, i, show ):
-  if show:
-    print( i, dJ )
-  # end if
-# end def
-
-# -- Configure network
-fwd_nn = PUJ.Model.NeuralNetwork.FeedForward( )
-fwd_nn.LoadParameters( 'D:/GitHub/PUJ_ML/examples/data/generic_2d_3_layer_fwd.nn' )
+## -- Parse command line arguments
+parser = PUJ.Helpers.ArgParse( )
+parser.add_argument( 'network_descriptor', type = str )
+parser.add_argument( 'datafile', type = str )
+args = parser.parse_args( )
 
 # -- Data
-D = numpy.genfromtxt( 'D:/GitHub/PUJ_ML/examples/data/input_01.csv', delimiter = ',' )
+D = numpy.loadtxt( args.datafile, delimiter = ',' )
 numpy.random.shuffle( D )
-X_real = D[ : , 0 : 2 ]
-y_real = D[ : , 2 : 3 ]
-X_real, X_min, X_off = PUJ.Data.Normalize.MinMax( X_real )
+X, y, *_ = PUJ.Data.Algorithms.SplitData( D, 1 )
+X, X_off, X_div = PUJ.Data.Normalize.Center( X )
 
-print( X_real.shape, y_real.shape )
+# -- Configure network
+nn = PUJ.Model.NeuralNetwork.FeedForward( )
+nn.LoadParameters( args.network_descriptor )
 
-# -- Train
-cost_tra = PUJ.Model.NeuralNetwork.FeedForward.Cost( X_real, y_real, fwd_nn )
-cost_tra.SetPropagationTypeToBinaryCrossEntropy( )
+# -- Configure cost
+cost = PUJ.Model.NeuralNetwork.FeedForward.Cost( X, y, nn )
+cost.SetPropagationTypeToBinaryCrossEntropy( )
 
-# -- Iterative solution
-tI, nI = PUJ.Optimizer.GradientDescent(
-  cost_tra,
-  learning_rate = 1e-4,
-  init_theta = 'none',
-  max_iter = 100000,
-  epsilon = 1e-8,
-  debug_step = 1000,
+## -- Prepare debug
+debug = PUJ.Debug.Labeling( X, y )
+
+## -- Iterative solution
+PUJ.Optimizer.GradientDescent(
+  cost,
+  learning_rate = args.learning_rate,
+  max_iter = args.max_iterations,
+  epsilon = args.epsilon,
+  debug_step = args.debug_step,
   debug_function = debug
   )
 
-print( '===================================' )
-print( fwd_nn )
-print( '===================================' )
+## -- Show results
+#K, acc = PUJ.Data.Algorithms.Accuracy( y, nn( X, threshold = True ) )
+#print( '=================================================================' )
+#print( '* Solution             :', model )
+#print( '* Number of iterations :', debug.GetNumberOfIterations( ) )
+#print( '* Accuracy             : {:.1f}%'.format( acc * 100 ) )
+#print( '* Confusion matrix     :' )
+#print( K )
+#print( '=================================================================' )
+debug.KeepFigures( )
+
+##import numpy
+##import PUJ.Data.Algorithms, PUJ.Data.Normalize
+
+##
+##
+##def debug( J, dJ, t, i, show ):
+##  if show:
+##    print( i, dJ )
+##  # end if
+### end def
+##
+### -- Configure network
+##
+### -- Data
+##D = numpy.loadtxt( args.filename, delimiter = ',' )
+##numpy.random.shuffle( D )
+##X, y, *_ = PUJ.Data.Algorithms.SplitData( D, 1 )
+##X, X_off, X_div = PUJ.Data.Normalize.Center( X )
+##
+### -- Train
+##cost_tra = PUJ.Model.NeuralNetwork.FeedForward.Cost( X_real, y_real, fwd_nn )
+##cost_tra.SetPropagationTypeToBinaryCrossEntropy( )
+##
+### -- Iterative solution
+##tI, nI = PUJ.Optimizer.GradientDescent(
+##  cost_tra,
+##  learning_rate = 1e-4,
+##  init_theta = 'none',
+##  max_iter = 100000,
+##  epsilon = 1e-8,
+##  debug_step = 1000,
+##  debug_function = debug
+##  )
+##
+##print( '===================================' )
+##print( fwd_nn )
+##print( '===================================' )
 
 ## fwd_nn.SaveParameters( 'leo.nn' )
 

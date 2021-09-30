@@ -2,7 +2,7 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-import argparse, numpy, os, random, sys
+import numpy, os, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 
 import PUJ.Helpers.ArgParse
@@ -46,7 +46,7 @@ K, acc = PUJ.Data.Algorithms.Accuracy( y, model( X, threshold = True ) )
 print( '=================================================================' )
 print( '* Solution             :', model )
 print( '* Number of iterations :', debug.GetNumberOfIterations( ) )
-print( '* Accuracy             :', acc )
+print( '* Accuracy             : {:.1f}%'.format( acc * 100 ) )
 print( '* Confusion matrix     :' )
 print( K )
 print( '=================================================================' )
