@@ -28,7 +28,7 @@ nn = PUJ.Model.NeuralNetwork.FeedForward( )
 nn.LoadParameters( args.network_descriptor )
 
 # -- Configure cost
-cost = PUJ.Model.NeuralNetwork.FeedForward.Cost( X, y, nn, batch_size = 0 )
+cost = PUJ.Model.NeuralNetwork.FeedForward.Cost( X, y, nn, batch_size = 1 )
 cost.SetPropagationTypeToBinaryCrossEntropy( )
 
 ## -- Prepare debug
@@ -40,6 +40,8 @@ PUJ.Optimizer.GradientDescent(
   learning_rate = args.learning_rate,
   max_iter = args.max_iterations,
   epsilon = args.epsilon,
+  regularization = args.regularization,
+  reg_type = args.reg_type,
   debug_step = args.debug_step,
   debug_function = debug
   )

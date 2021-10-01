@@ -40,12 +40,12 @@ def GradientDescent( cost, **kwargs ):
       J, G = cost.CostAndGradient( T, b )
       if l > 0:
         if lt == 'ridge':
-          J += T @ T.T
-          G += 2.0 * T
+          J += l * T @ T.T
+          G += 2.0 * l * T
         elif lt == 'lasso':
-          J += numpy.abs( T ).sum( )
-          G += ( T > 0 ).astype( G.dtype ).sum( )
-          G -= ( T < 0 ).astype( G.dtype ).sum( )
+          J += l * numpy.abs( T ).sum( )
+          G += l * ( T > 0 ).astype( G.dtype ).sum( )
+          G -= l * ( T < 0 ).astype( G.dtype ).sum( )
         # end if
       # end if
 
