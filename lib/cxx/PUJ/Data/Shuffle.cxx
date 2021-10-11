@@ -4,6 +4,7 @@
 
 #include <PUJ/Data/Algorithms.h>
 #include <Eigen/Dense>
+#include <algorithm>
 #include <random>
 #include <iostream>
 // -------------------------------------------------------------------------
@@ -22,12 +23,8 @@ Shuffle( _TMatrix& M, bool columns )
 
   _TP p( m );
   p.setIdentity( );
-  std::random_shuffle(
-    p.indices( ).data( ), p.indices( ).data( ) + p.indices( ).size( ),
-    [&]( _N i )
-    {
-      return( d( g ) );
-    }
+  std::shuffle(
+    p.indices( ).data( ), p.indices( ).data( ) + p.indices( ).size( )
     );
   if( columns )
     M = p * M;

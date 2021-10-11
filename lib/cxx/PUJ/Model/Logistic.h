@@ -15,31 +15,18 @@ namespace PUJ
      */
     template< class _TScalar, class _TTraits = PUJ::Traits< _TScalar > >
     class Logistic
+      : public Linear< _TScalar, _TTraits >
     {
     public:
       PUJ_TraitsMacro( Logistic );
-      using TLinear = PUJ::Model::Linear< _TScalar, _TTraits >;
+      using Superclass = PUJ::Model::Linear< _TScalar, _TTraits >;
 
     public:
       Logistic( const TRow& w, const TScalar& b );
-      virtual ~Logistic( );
+      virtual ~Logistic( ) = default;
 
-      unsigned long GetDimensions( ) const;
-      const TRow& GetWeights( ) const;
-      const TScalar& GetBias( ) const;
-
-      void SetWeights( const TRow& w );
-      void SetBias( const TScalar& b );
-
-      TScalar operator()( const TRow& x, bool threshold = true ) const;
-      TCol operator()( const TMatrix& x, bool threshold = true ) const;
-
-    protected:
-      void _StreamIn( std::istream& i );
-      void _StreamOut( std::ostream& o ) const;
-
-    protected:
-      TLinear* m_Linear;
+      virtual TScalar operator()( const TRow& x ) const override;
+      virtual TCol operator()( const TMatrix& x ) const override;
 
     public:
       /**
@@ -60,18 +47,6 @@ namespace PUJ
         std::vector< unsigned long long > m_Zeros;
         std::vector< unsigned long long > m_Ones;
       };
-
-    public:
-      friend std::istream& operator>>( std::istream& i, Self& m )
-        {
-          i >> *( m.m_Linear );
-          return( i );
-        }
-      friend std::ostream& operator<<( std::ostream& o, const Self& m )
-        {
-          o << *( m.m_Linear );
-          return( o );
-        }
     };
   } // end namespace
 } // end namespace

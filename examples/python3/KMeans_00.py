@@ -12,7 +12,7 @@ import PUJ.Optimizer.KMeans
 from matplotlib import pyplot as plt
 
 ## -- Generate data
-k = 3
+k = 8
 radii = [ [ 5, 5 ], [ 1, 1 ], [ 2, 2 ] ]
 centers = [ [ 0, 0 ], [ 10, 10 ], [ -10, 10 ] ]
 angles = [ 0, 0, 0 ]

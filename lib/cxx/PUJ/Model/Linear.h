@@ -19,27 +19,33 @@ namespace PUJ
       PUJ_TraitsMacro( Linear );
 
     public:
+      Linear( );
+      Linear( const TRow& t );
       Linear( const TRow& w, const TScalar& b );
-      Linear( const TMatrix& X, const TCol& y );
       virtual ~Linear( ) = default;
+
+      void AnalyticalFit( const TMatrix& X, const TCol& y );
 
       unsigned long GetDimensions( ) const;
       const TRow& GetWeights( ) const;
       const TScalar& GetBias( ) const;
+      const TRow& GetParameters( ) const;
+
+      virtual void Init( unsigned long n, const PUJ::EInitValues& e );
 
       void SetWeights( const TRow& w );
       void SetBias( const TScalar& b );
+      void SetParameters( const TRow& t );
 
-      TScalar operator()( const TRow& x ) const;
-      TCol operator()( const TMatrix& x ) const;
+      virtual TScalar operator()( const TRow& x ) const;
+      virtual TCol operator()( const TMatrix& x ) const;
 
     protected:
       void _StreamIn( std::istream& i );
       void _StreamOut( std::ostream& o ) const;
 
     protected:
-      TRow    m_Weights;
-      TScalar m_Bias;
+      TRow  m_Parameters;
 
     public:
       /**
@@ -47,12 +53,13 @@ namespace PUJ
       class Cost
       {
       public:
-        Cost( const TMatrix& X, const TCol& y );
+        Cost( Self* model, const TMatrix& X, const TCol& y );
         virtual ~Cost( ) = default;
 
         TScalar operator()( const TRow& t, TRow* g = nullptr ) const;
 
       protected:
+        Self*   m_Model;
         TMatrix m_XtX;
         TRow    m_uX;
         TRow    m_Xy;

@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 ## -- Generate data
 k = 3
 radii = [ [ 5, 3 ], [ 1, 6 ], [ 2, 2 ] ]
-centers = [ [ 0, 0 ], [ 10, 10 ], [ -10, 10 ] ]
+centers = [ [ 0, 0 ], [ 2, 2 ], [ -2, 2 ] ]
 angles = [ 0, 4.2, -3 ]
 sizes = [ 100, 150, 120 ]
 X = None

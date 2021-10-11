@@ -4,6 +4,10 @@
 #ifndef __PUJ__Traits__h__
 #define __PUJ__Traits__h__
 
+#ifdef _MSC_VER
+#  pragma warning( disable : 4661 )
+#endif // _MSC_VER
+
 #include <Eigen/Core>
 
 // -------------------------------------------------------------------------
@@ -17,6 +21,13 @@
 
 namespace PUJ
 {
+  enum EInitValues
+  {
+    Random = 0,
+    Zeros,
+    Ones
+  };
+
   /**
    */
   template< class _TScalar >
@@ -29,9 +40,11 @@ namespace PUJ
     using TCol    = Eigen::Matrix< TScalar, Eigen::Dynamic, 1 >;
   };
 
+  /**
+   */
   template< typename Func >
   struct lambda_as_visitor_wrapper
-    : Func
+    : public Func
   {
     lambda_as_visitor_wrapper( const Func& f )
       : Func( f )
@@ -45,6 +58,8 @@ namespace PUJ
       }
   };
 
+  /**
+   */
   template< typename Mat, typename Func >
   void visit_lambda( const Mat& m, const Func& f )
   {

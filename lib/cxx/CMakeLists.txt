@@ -9,14 +9,9 @@ include_directories(
 add_library(
   PUJ_ML
   SHARED
-  PUJ/Data/Algorithms.h
-  PUJ/Data/Shuffle.cxx
+  PUJ/Traits.h
   PUJ/Model/Linear.cxx
   PUJ/Model/Linear.h
-  PUJ/Model/Logistic.cxx
-  PUJ/Model/Logistic.h
-  PUJ/Optimizer/GradientDescent.cxx
-  PUJ/Optimizer/GradientDescent.h
   )
 generate_export_header(
   PUJ_ML
