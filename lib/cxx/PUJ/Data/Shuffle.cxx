@@ -2,11 +2,13 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+#include <iostream>
+
 #include <PUJ/Data/Algorithms.h>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <random>
-#include <iostream>
+
 // -------------------------------------------------------------------------
 template< class _TMatrix >
 void PUJ::Algorithms::
@@ -16,16 +18,15 @@ Shuffle( _TMatrix& M, bool columns )
   using _TP = Eigen::PermutationMatrix< Eigen::Dynamic, Eigen::Dynamic >;
 
   _N m = ( columns )? M.rows( ): M.cols( );
+  _TP p( m );
 
   std::random_device r;
-  std::mt19937 g( r( ) );
-  std::uniform_int_distribution< _N > d( 0, m - 1 );
-
-  _TP p( m );
+  std::mt19937 g( { r( ) } );
   p.setIdentity( );
   std::shuffle(
-    p.indices( ).data( ), p.indices( ).data( ) + p.indices( ).size( )
+    p.indices( ).data( ), p.indices( ).data( ) + p.indices( ).size( ), g
     );
+
   if( columns )
     M = p * M;
   else
@@ -52,6 +53,5 @@ Shuffle( _TMatrix& M, bool columns )
 
 PUJ_ML_Algorithms_Shuffle( float );
 PUJ_ML_Algorithms_Shuffle( double );
-PUJ_ML_Algorithms_Shuffle( long double );
 
 // eof - $RCSfile$

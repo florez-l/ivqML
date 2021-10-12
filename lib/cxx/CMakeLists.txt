@@ -10,8 +10,12 @@ add_library(
   PUJ_ML
   SHARED
   PUJ/Traits.h
+  PUJ/Data/Algorithms.h
+  PUJ/Data/Shuffle.cxx
   PUJ/Model/Linear.cxx
   PUJ/Model/Linear.h
+  PUJ/Optimizer/GradientDescent.h
+  PUJ/Optimizer/GradientDescent.hxx
   )
 generate_export_header(
   PUJ_ML

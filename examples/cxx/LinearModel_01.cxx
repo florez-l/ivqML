@@ -10,17 +10,16 @@
 #include <PUJ/Optimizer/GradientDescent.h>
 
 // -- Typedef
-using TScalar    = long double;
+using TScalar    = double;
 using TModel     = PUJ::Model::Linear< TScalar >;
-using TOptimizer = PUJ::Optimizer::GradientDescent< TScalar >;
+using TOptimizer = PUJ::Optimizer::GradientDescent< TModel >;
 
 // -------------------------------------------------------------------------
-void Debugger(
-  const TScalar& J, const TScalar& dJ, const TModel::TRow& t,
-  unsigned long long i
-  )
+bool debug( unsigned long long i, TScalar J, bool show )
 {
-  std::cout << i << " " << J << " " << dJ << " [" << t << "]" << std::endl;
+  if( show )
+    std::cout << i << " " << J << std::endl;
+  return( false );
 }
 
 // -------------------------------------------------------------------------
@@ -31,11 +30,8 @@ int main( int argc, char** argv )
   unsigned long long m = 10;
   TScalar dif_v = ( max_v - min_v ) / TScalar( m - 1 );
 
-  unsigned long long n = 5;
-  TModel::TRow w_real( n );
-  w_real << 10, 20, 30, 40, 50;
-  TScalar b_real = 2;
-  TModel real_model( w_real, b_real );
+  TModel real_model( 2, 10 );
+  unsigned long long n = real_model.GetDimensions( );
 
   TModel::TMatrix X_real =
     TModel::TMatrix::NullaryExpr(
@@ -50,21 +46,23 @@ int main( int argc, char** argv )
   PUJ::Algorithms::Shuffle( X_real );
   TModel::TCol y_real = real_model( X_real );
 
-  TModel::Cost J( X_real, y_real );
-  TOptimizer optimizer( J, n + 1 );
-  optimizer.SetAlpha( 1e-10 );
-  optimizer.SetMaximumNumberOfIterations( 100000000 );
-  optimizer.SetDebugIterations( 1000000 );
-  optimizer.SetDebug( Debugger );
-  optimizer.Fit( );
+  TModel opt_model;
+  opt_model.Init( n, PUJ::Random );
+  TModel::Cost J( &opt_model, X_real, y_real );
+  TOptimizer opt( &J );
+  opt.SetAlpha( 1e-4 );
+  opt.SetMaximumNumberOfIterations( 100000 );
+  opt.SetDebugIterations( 1000 );
+  opt.SetDebug( debug );
+  opt.Fit( );
 
-  TModel opt_model(
-    optimizer.GetTheta( ).block( 0, 1, 1, n ),
-    optimizer.GetTheta( )( 0, 0 )
-    );
+  TModel::TCol y_diff = y_real - opt_model( X_real );
+
   std::cout << "=======================================" << std::endl;
   std::cout << "Real model      : " << real_model << std::endl;
   std::cout << "Optimized model : " << opt_model << std::endl;
+  std::cout << "Iterations      : " << opt.GetRealIterations( ) << std::endl;
+  std::cout << "Difference      : " << y_diff.norm( ) << std::endl;
   std::cout << "=======================================" << std::endl;
 
   return( EXIT_SUCCESS );

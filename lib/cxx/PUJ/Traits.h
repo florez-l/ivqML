@@ -19,6 +19,20 @@
   using TRow    = typename TTraits::TRow;      \
   using TCol    = typename TTraits::TCol
 
+// -------------------------------------------------------------------------
+#define PUJ_ML_Attribute( _name, _type, _value )        \
+  protected:                                            \
+  _type m_##_name = { _value };                         \
+  public:                                               \
+  const _type& Get##_name( ) const                      \
+  {                                                     \
+    return( this->m_##_name );                          \
+  }                                                     \
+  void Set##_name( const _type& v )                     \
+  {                                                     \
+    this->m_##_name = v;                                \
+  }
+
 namespace PUJ
 {
   enum EInitValues

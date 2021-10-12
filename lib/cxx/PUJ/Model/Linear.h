@@ -4,7 +4,12 @@
 #ifndef __PUJ__Linear__h__
 #define __PUJ__Linear__h__
 
+
+#include <iostream>
+
+
 #include <PUJ/Traits.h>
+#include <vector>
 
 namespace PUJ
 {
@@ -18,17 +23,39 @@ namespace PUJ
     public:
       PUJ_TraitsMacro( Linear );
 
+    protected:
+      using _TCol = Eigen::Map< TCol >;
+
     public:
       Linear( );
       Linear( const TRow& t );
-      Linear( const TRow& w, const TScalar& b );
-      virtual ~Linear( ) = default;
+
+      template< class _TNumber, class ... _TArgs >
+      Linear( const _TNumber& v, _TArgs... args )
+        : m_W( nullptr )
+        {
+          if( sizeof...( args ) > 0 )
+          {
+            Self n( args... );
+            this->SetParameters( TRow::Zero( sizeof...( args ) + 1 ) );
+            this->SetWeights( n.GetParameters( ) );
+            this->SetBias( TScalar( v ) );
+          }
+          else
+          {
+            TRow p( 1 );
+            p( 0, 0 ) = TScalar( v );
+            this->SetParameters( p );
+          } // end if
+        }
+
+      virtual ~Linear( );
 
       void AnalyticalFit( const TMatrix& X, const TCol& y );
 
-      unsigned long GetDimensions( ) const;
-      const TRow& GetWeights( ) const;
-      const TScalar& GetBias( ) const;
+      const unsigned long& GetDimensions( ) const;
+      TRow GetWeights( ) const;
+      TScalar GetBias( ) const;
       const TRow& GetParameters( ) const;
 
       virtual void Init( unsigned long n, const PUJ::EInitValues& e );
@@ -45,7 +72,9 @@ namespace PUJ
       void _StreamOut( std::ostream& o ) const;
 
     protected:
-      TRow  m_Parameters;
+      unsigned long m_N;
+      TRow   m_Parameters;
+      _TCol* m_W;
 
     public:
       /**
@@ -56,7 +85,9 @@ namespace PUJ
         Cost( Self* model, const TMatrix& X, const TCol& y );
         virtual ~Cost( ) = default;
 
-        TScalar operator()( const TRow& t, TRow* g = nullptr ) const;
+        const TRow& GetParameters( ) const;
+        TScalar operator()( TRow* g = nullptr ) const;
+        void operator-=( const TRow& g );
 
       protected:
         Self*   m_Model;
