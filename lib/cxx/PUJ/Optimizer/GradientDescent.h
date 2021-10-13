@@ -24,9 +24,19 @@ namespace PUJ
       using TScalar = typename TModel::TScalar;
       using TCol    = typename TModel::TCol;
       using TRow    = typename TModel::TRow;
+      
+      enum RegularizationType
+      {
+        RidgeRegType = 0,
+        LassoRegType
+      };
 
       using TDebug =
         std::function< bool( unsigned long long, TScalar, bool ) >;
+
+    public:
+      GradientDescent( TCost* cost );
+      virtual ~GradientDescent( ) = default;
 
       PUJ_ML_Attribute( Cost, TCost*, nullptr );
       PUJ_ML_Attribute( Alpha, TScalar, 1e-2 );
@@ -35,9 +45,9 @@ namespace PUJ
       PUJ_ML_Attribute( MaximumNumberOfIterations, unsigned long long, 2000 );
       PUJ_ML_Attribute( DebugIterations, unsigned long long, 100 );
 
-    public:
-      GradientDescent( TCost* cost );
-      virtual ~GradientDescent( ) = default;
+      PUJ_ML_Attribute( RegularizationType, RegularizationType, RidgeRegType );
+      void SetRegularizationTypeToRidge( );
+      void SetRegularizationTypeToLasso( );
 
       const unsigned long long& GetRealIterations( ) const;
       void SetDebug( TDebug d );

@@ -35,28 +35,37 @@ template< class _TModel >
 void PUJ::Optimizer::GradientDescent< _TModel >::
 Fit( )
 {
+  static const TScalar maxJ = std::numeric_limits< TScalar >::max( );
+  TScalar J = maxJ;
   TRow g;
   bool stop = false;
-  TScalar J = ( *this->m_Cost )( &g );
-  this->_Regularize( J, g );
-
   this->m_RealIterations = 0;
-  while( !stop )
+  do
   {
-    *this->m_Cost -= g * this->m_Alpha;
+    // Next advance step
     TScalar Jn = ( *this->m_Cost )( &g );
     this->_Regularize( Jn, g );
+    *this->m_Cost -= g * this->m_Alpha;
+    
+    // Update cost difference
+    TScalar dJ = Jn;
+    if( J < maxJ )
+      dJ = Jn - J;
+    else
+      dJ = Jn;
 
-    stop = ( ( J - Jn ) <= this->m_Epsilon );
-    stop |=
+    // Update stop condition
+    stop  =
+      ( dJ <= this->m_Epsilon ) |
+      ( this->m_MaximumNumberOfIterations <= this->m_RealIterations ) |
       this->m_Debug(
         this->m_RealIterations, J,
         this->m_RealIterations % this->m_DebugIterations == 0
         );
-    J = Jn;
+
+    // Ok, finished an iteration
     this->m_RealIterations++;
-    stop |= ( this->m_MaximumNumberOfIterations <= this->m_RealIterations );
-  } // end if
+  } while( !stop );
 }
 
 // -------------------------------------------------------------------------
