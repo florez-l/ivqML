@@ -4,6 +4,8 @@
 #ifndef __PUJ__Optimizer__GradientDescent__hxx__
 #define __PUJ__Optimizer__GradientDescent__hxx__
 
+#include <boost/program_options.hpp>
+
 // -------------------------------------------------------------------------
 template< class _TModel >
 PUJ::Optimizer::GradientDescent< _TModel >::
@@ -13,6 +15,48 @@ GradientDescent( TCost* cost )
   this->m_Debug =
     []( unsigned long long, TScalar, TScalar, bool ) -> bool
     { return( false ); };
+}
+
+// -------------------------------------------------------------------------
+template< class _TModel >
+bool PUJ::Optimizer::GradientDescent< _TModel >::
+ParseArguments( int argc, char** argv )
+{
+  namespace _TPo = boost::program_options;
+
+  // Declare the supported options.
+  _TPo::options_description desc( "Optimizing options" );
+  desc.add_options( )
+    ( "help", "produce help message" )
+    ( "alpha", _TPo::value< TScalar >( &this->m_Alpha )->default_value( this->m_Alpha ), "learning rate" )
+    ( "lambda", _TPo::value< TScalar >( &this->m_Lambda )->default_value( this->m_Lambda ), "regularization" )
+    ( "max_iter", _TPo::value< unsigned long long >( &this->m_MaximumNumberOfIterations )->default_value( this->m_MaximumNumberOfIterations ), "maximum iterations" )
+    ( "deb_iter", _TPo::value< unsigned long long >( &this->m_DebugIterations )->default_value( this->m_DebugIterations ), "iterations for debug" )
+    ;
+
+  _TPo::variables_map vm;
+  _TPo::store( _TPo::parse_command_line( argc, argv, desc ), vm );
+  _TPo::notify( vm );
+
+  if( vm.count( "help" ) )
+  {
+    std::cout << desc << "\n";
+    return( false );
+  } // end if
+
+  /* TODO
+     if (vm.count("compression"))
+     {
+     std::cout << "Compression level was set to "
+     << vm["compression"].as<int>() << ".\n";
+     }
+     else
+     {
+     std::cout << "Compression level was not set.\n";
+     }
+  */
+
+  return( true );
 }
 
 // -------------------------------------------------------------------------

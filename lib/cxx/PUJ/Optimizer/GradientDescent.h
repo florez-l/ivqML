@@ -38,10 +38,14 @@ namespace PUJ
       GradientDescent( TCost* cost );
       virtual ~GradientDescent( ) = default;
 
+      bool ParseArguments( int argc, char** argv );
+
       PUJ_ML_Attribute( Cost, TCost*, nullptr );
       PUJ_ML_Attribute( Alpha, TScalar, 1e-2 );
       PUJ_ML_Attribute( Lambda, TScalar, 0 );
-      PUJ_ML_Attribute( Epsilon, TScalar, std::numeric_limits< TScalar >::epsilon( ) );
+      PUJ_ML_Attribute(
+        Epsilon, TScalar, std::numeric_limits< TScalar >::epsilon( )
+        );
       PUJ_ML_Attribute( MaximumNumberOfIterations, unsigned long long, 2000 );
       PUJ_ML_Attribute( DebugIterations, unsigned long long, 100 );
 

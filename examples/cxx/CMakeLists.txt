@@ -6,6 +6,7 @@ set(
   _examples
   LinearModel_00
   LinearModel_01
+  LinearModel_02
   LogisticModel_00
   LogisticModel_01
   )
