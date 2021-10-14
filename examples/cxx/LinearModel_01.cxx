@@ -15,10 +15,12 @@ using TModel     = PUJ::Model::Linear< TScalar >;
 using TOptimizer = PUJ::Optimizer::GradientDescent< TModel >;
 
 // -------------------------------------------------------------------------
-bool debug( unsigned long long i, TScalar J, bool show )
+bool debug( unsigned long long i, TScalar J, TScalar dJ, bool show )
 {
   if( show )
-    std::cout << i << " " << J << std::endl;
+    std::cout
+      << "Iteration: " << i
+      << ",  Cost = " << J << " (" << dJ << ")" << std::endl;
   return( false );
 }
 
@@ -27,10 +29,10 @@ int main( int argc, char** argv )
 {
   TScalar min_v = -10;
   TScalar max_v =  10;
-  unsigned long long m = 10;
+  unsigned long long m = 100;
   TScalar dif_v = ( max_v - min_v ) / TScalar( m - 1 );
 
-  TModel real_model( 2, 10 );
+  TModel real_model( 0.2, 4.3 );
   unsigned long long n = real_model.GetDimensions( );
 
   TModel::TMatrix X_real =
@@ -48,9 +50,9 @@ int main( int argc, char** argv )
 
   TModel opt_model;
   opt_model.Init( n, PUJ::Random );
-  TModel::Cost J( &opt_model, X_real, y_real );
+  TModel::Cost J( &opt_model, X_real, y_real, 1 );
   TOptimizer opt( &J );
-  opt.SetAlpha( 1e-4 );
+  opt.SetAlpha( 1e-2 );
   opt.SetMaximumNumberOfIterations( 100000 );
   opt.SetDebugIterations( 1000 );
   opt.SetDebug( debug );
@@ -61,7 +63,7 @@ int main( int argc, char** argv )
   std::cout << "=======================================" << std::endl;
   std::cout << "Real model      : " << real_model << std::endl;
   std::cout << "Optimized model : " << opt_model << std::endl;
-  std::cout << "Iterations      : " << opt.GetRealIterations( ) << std::endl;
+  std::cout << "Iterations      : " << opt.GetIterations( ) << std::endl;
   std::cout << "Difference      : " << y_diff.norm( ) << std::endl;
   std::cout << "=======================================" << std::endl;
 

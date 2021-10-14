@@ -11,15 +11,32 @@ GradientDescent( TCost* cost )
   : m_Cost( cost )
 {
   this->m_Debug =
-    []( unsigned long long, TScalar, bool ) -> bool { return( false ); };
+    []( unsigned long long, TScalar, TScalar, bool ) -> bool
+    { return( false ); };
+}
+
+// -------------------------------------------------------------------------
+template< class _TModel >
+void PUJ::Optimizer::GradientDescent< _TModel >::
+SetRegularizationTypeToRidge( )
+{
+  this->SetRegularizationType( Self::RidgeRegType );
+}
+
+// -------------------------------------------------------------------------
+template< class _TModel >
+void PUJ::Optimizer::GradientDescent< _TModel >::
+SetRegularizationTypeToLASSO( )
+{
+  this->SetRegularizationType( Self::LASSORegType );
 }
 
 // -------------------------------------------------------------------------
 template< class _TModel >
 const unsigned long long& PUJ::Optimizer::GradientDescent< _TModel >::
-GetRealIterations( ) const
+GetIterations( ) const
 {
-  return( this->m_RealIterations );
+  return( this->m_Iterations );
 }
 
 // -------------------------------------------------------------------------
@@ -36,36 +53,39 @@ void PUJ::Optimizer::GradientDescent< _TModel >::
 Fit( )
 {
   static const TScalar maxJ = std::numeric_limits< TScalar >::max( );
-  TScalar J = maxJ;
+  TScalar J = maxJ, Jn, dJ;
   TRow g;
   bool stop = false;
-  this->m_RealIterations = 0;
+  this->m_Iterations = 0;
   do
   {
-    // Next advance step
-    TScalar Jn = ( *this->m_Cost )( &g );
-    this->_Regularize( Jn, g );
-    *this->m_Cost -= g * this->m_Alpha;
-    
+    // Next iteration
+    for( unsigned int b = 0; b < this->m_Cost->GetNumberOfBatches( ); ++b )
+    {
+      Jn = this->m_Cost->operator()( b, &g );
+      this->_Regularize( Jn, g );
+      this->m_Cost->operator-=( g * this->m_Alpha );
+    } // end if
+
     // Update cost difference
-    TScalar dJ = Jn;
-    if( J < maxJ )
-      dJ = Jn - J;
-    else
-      dJ = Jn;
+    dJ = ( J != maxJ )? J - Jn: J;
 
     // Update stop condition
     stop  =
       ( dJ <= this->m_Epsilon ) |
-      ( this->m_MaximumNumberOfIterations <= this->m_RealIterations ) |
+      ( this->m_MaximumNumberOfIterations <= this->m_Iterations ) |
       this->m_Debug(
-        this->m_RealIterations, J,
-        this->m_RealIterations % this->m_DebugIterations == 0
+        this->m_Iterations, J, dJ,
+        this->m_Iterations % this->m_DebugIterations == 0
         );
 
     // Ok, finished an iteration
-    this->m_RealIterations++;
+    J = Jn;
+    this->m_Iterations++;
   } while( !stop );
+
+  // Finish iteration
+  this->m_Debug( this->m_Iterations, J, dJ, true );
 }
 
 // -------------------------------------------------------------------------
@@ -76,8 +96,16 @@ _Regularize( TScalar& J, TRow& g )
   if( this->m_Lambda != TScalar( 0 ) )
   {
     const TRow& t = this->m_Cost->GetParameters( );
-    J += t.squaredNorm( ) * this->m_Lambda;
-    g += t * TScalar( 2 ) * this->m_Lambda;
+    if( this->m_RegularizationType == Self::RidgeRegType )
+    {
+      J += t.squaredNorm( ) * this->m_Lambda;
+      g += t * TScalar( 2 ) * this->m_Lambda;
+    }
+    else if( this->m_RegularizationType == Self::LASSORegType )
+    {
+      J += t.array( ).abs( ).sum( ) * this->m_Lambda;
+      // TODO:
+    } // end if
   } // end if
 }
 

@@ -184,51 +184,54 @@ _StreamOut( std::ostream& o ) const
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
 PUJ::Model::Linear< _TScalar, _TTraits >::Cost::
-Cost( Self* model, const TMatrix& X, const TCol& y )
+Cost( Self* model, const TMatrix& X, const TCol& y, unsigned int batch_size )
+  : _TBaseCost( model, X, y, batch_size )
 {
-  this->m_Model = model;
-  this->m_XtX = ( X.transpose( ) * X ) / TScalar( X.rows( ) );
-  this->m_uX = X.colwise( ).mean( );
-  this->m_Xy = ( X.array( ).colwise( ) * y.array( ) ).colwise( ).mean( );
-  this->m_uy = y.mean( );
-  this->m_yty = ( y.transpose( ) * y )( 0, 0 ) / TScalar( X.rows( ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar, class _TTraits >
-const typename PUJ::Model::Linear< _TScalar, _TTraits >::
-TRow& PUJ::Model::Linear< _TScalar, _TTraits >::Cost::
-GetParameters( ) const
-{
-  return( this->m_Model->GetParameters( ) );
+  for( unsigned int i = 0; i < this->m_X.size( ); ++i )
+  {
+    this->m_XtX.push_back(
+      ( this->m_X[ i ].transpose( ) * this->m_X[ i ] ) /
+      TScalar( this->m_X[ i ].rows( ) )
+      );
+    this->m_uX.push_back( this->m_X[ i ].colwise( ).mean( ) );
+    this->m_Xy.push_back(
+      (
+        this->m_X[ i ].array( ).colwise( ) * this->m_Y[ i ].col( 0 ).array( )
+        ).colwise( ).mean( )
+      );
+    this->m_uy.push_back( this->m_Y[ i ].mean( ) );
+    this->m_yty.push_back(
+      this->m_Y[ i ].squaredNorm( ) / TScalar( this->m_X[ i ].rows( ) )
+      );
+  } // end for
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
 typename PUJ::Model::Linear< _TScalar, _TTraits >::
 TScalar PUJ::Model::Linear< _TScalar, _TTraits >::Cost::
-operator()( TRow* g ) const
+operator()( unsigned int i, TRow* g ) const
 {
   TScalar b = this->m_Model->GetBias( );
   TRow w = this->m_Model->GetWeights( );
-  TRow wXtX = w * this->m_XtX;
+  TRow wXtX = w * this->m_XtX[ i ];
   TCol wt = w.transpose( );
-  TScalar uXw = this->m_uX * wt;
+  TScalar uXw = ( this->m_uX[ i ] * wt )( 0, 0 );
   TScalar J =
     ( wXtX * wt )( 0, 0 ) +
     ( 2.0 * b * uXw ) +
     ( b * b ) -
-    ( 2.0 * this->m_Xy * wt )( 0, 0 ) -
-    ( 2.0 * b * this->m_uy ) +
-    this->m_yty;
+    ( 2.0 * this->m_Xy[ i ] * wt )( 0, 0 ) -
+    ( 2.0 * b * this->m_uy[ i ] ) +
+    this->m_yty[ i ];
 
   if( g != nullptr )
   {
     unsigned long n = this->m_Model->GetDimensions( );
     if( g->cols( ) != n + 1 )
       *g = TRow::Zero( n + 1 );
-    g->operator()( 0, 0 ) = uXw + b - this->m_uy;
-    g->block( 0, 1, 1, n ) = wXtX + ( b * this->m_uX ) - this->m_Xy;
+    g->operator()( 0, 0 ) = uXw + b - this->m_uy[ i ];
+    g->block( 0, 1, 1, n ) = wXtX + ( b * this->m_uX[ i ] ) - this->m_Xy[ i ];
     *g *= 2.0;
   } // end if
 

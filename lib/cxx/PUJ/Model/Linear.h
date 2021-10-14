@@ -9,7 +9,7 @@
 
 
 #include <PUJ/Traits.h>
-#include <vector>
+#include <PUJ/Model/BaseCost.h>
 
 namespace PUJ
 {
@@ -24,6 +24,7 @@ namespace PUJ
       PUJ_TraitsMacro( Linear );
 
     protected:
+      using _TBaseCost = PUJ::Model::BaseCost< Self >;
       using _TCol = Eigen::Map< TCol >;
 
     public:
@@ -77,25 +78,30 @@ namespace PUJ
       _TCol* m_W;
 
     public:
+
       /**
        */
       class Cost
+        : public _TBaseCost
       {
       public:
-        Cost( Self* model, const TMatrix& X, const TCol& y );
+        Cost(
+          Self* model, const TMatrix& X, const TCol& y,
+          unsigned int batch_size = 0
+          );
         virtual ~Cost( ) = default;
 
-        const TRow& GetParameters( ) const;
-        TScalar operator()( TRow* g = nullptr ) const;
-        void operator-=( const TRow& g );
+        virtual TScalar operator()(
+          unsigned int i, TRow* g = nullptr
+          ) const override;
+        virtual void operator-=( const TRow& g ) override;
 
       protected:
-        Self*   m_Model;
-        TMatrix m_XtX;
-        TRow    m_uX;
-        TRow    m_Xy;
-        TScalar m_uy;
-        TScalar m_yty;
+        std::vector< TMatrix > m_XtX;
+        std::vector< TMatrix > m_uX;
+        std::vector< TMatrix > m_Xy;
+        std::vector< TScalar > m_uy;
+        std::vector< TScalar > m_yty;
       };
 
     public:

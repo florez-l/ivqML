@@ -12,8 +12,11 @@ add_library(
   PUJ/Traits.h
   PUJ/Data/Algorithms.h
   PUJ/Data/Shuffle.cxx
+  PUJ/Model/BaseCost.h
   PUJ/Model/Linear.cxx
   PUJ/Model/Linear.h
+  PUJ/Model/Logistic.cxx
+  PUJ/Model/Logistic.h
   PUJ/Optimizer/GradientDescent.h
   PUJ/Optimizer/GradientDescent.hxx
   )

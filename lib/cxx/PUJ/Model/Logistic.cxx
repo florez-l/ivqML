@@ -7,8 +7,16 @@
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
 PUJ::Model::Logistic< _TScalar, _TTraits >::
-Logistic( const TRow& w, const TScalar& b )
-  : Superclass( w, b )
+Logistic( )
+  : Superclass( )
+{
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar, class _TTraits >
+PUJ::Model::Logistic< _TScalar, _TTraits >::
+Logistic( const TRow& t )
+  : Superclass( t )
 {
 }
 
@@ -30,7 +38,7 @@ operator()( const TRow& x ) const
 
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
-typename PUJ::Model::Logistic< _TScalar, _TTraits >::
+ typename PUJ::Model::Logistic< _TScalar, _TTraits >::
 TCol PUJ::Model::Logistic< _TScalar, _TTraits >::
 operator()( const TMatrix& x ) const
 {
@@ -51,69 +59,60 @@ operator()( const TMatrix& x ) const
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
 PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
-Cost( const TMatrix& X, const TCol& y )
+Cost( Self* model, const TMatrix& X, const TCol& y, unsigned int batch_size )
+  : _TBaseCost( model, X, y, batch_size )
 {
-  this->m_Zeros.clear( );
-  this->m_Ones.clear( );
-  PUJ::visit_lambda(
-    y,
-    [&]( TScalar v, int i, int j ) -> void
-    {
-      if( v == 0 ) this->m_Zeros.push_back( i );
-      else         this->m_Ones.push_back( i );
-    }
-    );
+  this->m_Zeros.resize( this->m_X.size( ) );
+  this->m_Ones.resize( this->m_X.size( ) );
 
-  this->m_Xy = ( X.array( ).colwise( ) * y.array( ) ).colwise( ).mean( );
-  this->m_uy = y.mean( );
-  this->m_X = X;
+  for( unsigned int b = 0; b < this->m_X.size( ); ++b )
+  {
+    this->m_Zeros[ b ].clear( );
+    this->m_Ones[ b ].clear( );
+    PUJ::visit_lambda(
+      y,
+      [&]( TScalar v, int i, int j ) -> void
+      {
+        if( v == 0 ) this->m_Zeros[ b ].push_back( i );
+        else         this->m_Ones[ b ].push_back( i );
+      }
+      );
+  } // end for
 }
 
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
 typename PUJ::Model::Logistic< _TScalar, _TTraits >::
 TScalar PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
-operator()( const TRow& t, TRow* g ) const
+operator()( unsigned int i, TRow* g ) const
 {
-  unsigned long long n = this->m_X.cols( );
-  unsigned long long m = this->m_X.rows( );
+  static const TScalar _E = 1e-8; // std::numeric_limits< TScalar >::epsilon( );
+  static const TScalar _1 = TScalar( 1 );
+  unsigned long long n = this->m_X[ i ].cols( );
+  unsigned long long m = this->m_X[ i ].rows( );
 
-  return( TScalar( 0 ) );
-    /* TODO
-  static const TScalar eps = 1e-8; // std::numeric_limits< TScalar >::epsilon( );
-
-  TCol a = Self( t.block( 0, 1, 1, n ), t( 0, 0 ) )( this->m_X );
-  TScalar o = Eigen::log( a( this->m_Ones ).array( ) + eps ).sum( );
-  TScalar z = Eigen::log( 1.0 - a( this->m_Zeros ).array( ) + eps ).sum( );
+  TCol a = this->m_Model->operator()( this->m_X[ i ] );
+  TScalar o = Eigen::log( a( this->m_Ones[ i ] ).array( ) + _E ).sum( );
+  TScalar z = Eigen::log( _1 - a( this->m_Zeros[ i ] ).array( ) + _E ).sum( );
 
   if( g != nullptr )
   {
     if( g->cols( ) != n + 1 )
       *g = TRow::Zero( n + 1 );
 
-    g->operator()( 0, 0 ) = a.mean( ) - this->m_uy;
+    g->operator()( 0, 0 ) = a.mean( ) - this->m_uy[ i ];
     g->block( 0, 1, 1, n ) =
-      ( this->m_X.array( ).colwise( ) * a.array( ) ).colwise( ).mean( ) -
-      this->m_Xy.array( );
-*/
-    /* TODO
-       TMatrix lll( this->m_Ones.size( ), 2 );
-       lll.block( 0, 0, this->m_Ones.size( ), 1 ) = a( this->m_Ones );
-       lll.block( 0, 1, this->m_Ones.size( ), 1 ) = Eigen::log( a( this->m_Ones ).array( ) + eps );
+      ( this->m_X[ i ].array( ).colwise( ) * a.array( ) ).colwise( ).mean( ) -
+      this->m_Xy[ i ].array( );
+  } // end if
 
-       std::cout << lll << std::endl;
-       std::cout << t << std::endl;
-       std::cout << o << " " << z << " " << m << " : " << *g << std::endl;
-       std::exit( 1 );
-    */
-
-  // } // end if
-  // TODO: return( -( o + z ) / TScalar( m ) );
+  return( -( o + z ) / TScalar( m ) );
 }
 
 // -------------------------------------------------------------------------
 #include <PUJ_ML_export.h>
+
 template class PUJ_ML_EXPORT PUJ::Model::Logistic< float >;
-// template class PUJ_ML_EXPORT PUJ::Model::Logistic< double >;
+template class PUJ_ML_EXPORT PUJ::Model::Logistic< double >;
 
 // eof - $RCSfile$
