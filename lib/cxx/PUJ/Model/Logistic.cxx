@@ -59,6 +59,11 @@ operator()( const TMatrix& x ) const
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
 PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
+Cost( )
+  : _TBaseCost( )
+  {
+  }
+  /* TODO
 Cost( Self* model, const TMatrix& X, const TCol& y, unsigned int batch_size )
   : _TBaseCost( model, X, y, batch_size )
 {
@@ -79,6 +84,7 @@ Cost( Self* model, const TMatrix& X, const TCol& y, unsigned int batch_size )
       );
   } // end for
 }
+*/
 
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
@@ -110,8 +116,6 @@ operator()( unsigned int i, TRow* g ) const
 }
 
 // -------------------------------------------------------------------------
-#include <PUJ_ML_export.h>
-
 template class PUJ_ML_EXPORT PUJ::Model::Logistic< float >;
 template class PUJ_ML_EXPORT PUJ::Model::Logistic< double >;
 

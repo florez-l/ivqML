@@ -9,11 +9,14 @@
 #include <PUJ/Data/CSV.h>
 #include <PUJ/Model/Linear.h>
 #include <PUJ/Optimizer/GradientDescent.h>
+#include <PUJ/Optimizer/Trainer.h>
 
 // -- Typedef
 using TScalar    = double;
 using TModel     = PUJ::Model::Linear< TScalar >;
 using TOptimizer = PUJ::Optimizer::GradientDescent< TModel >;
+using TTrainer   = PUJ::Optimizer::Trainer< TOptimizer >;
+using TMatrix    = TModel::TMatrix;
 
 // -------------------------------------------------------------------------
 bool debug( unsigned long long i, TScalar J, TScalar dJ, bool show )
@@ -28,29 +31,39 @@ bool debug( unsigned long long i, TScalar J, TScalar dJ, bool show )
 // -------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
+  // Prepare experiment
+  TTrainer trainer( "input_csv_data", std::string( "" ) );
+  if( !trainer.ParseArguments( argc, argv ) )
+    return( EXIT_FAILURE );
+  std::string input_csv_data =
+    trainer.GetParameter< std::string >( "input_csv_data" );
+
   // Read data
-  TModel::TMatrix data = PUJ::CSV::Read< TModel::TMatrix >( argv[ 1 ] );
+  TMatrix data = PUJ::CSV::Read< TMatrix >( input_csv_data );
   PUJ::Algorithms::Shuffle( data );
-  TModel::TMatrix X_real = data.block( 0, 0, data.rows( ), data.cols( ) - 1 );
-  TModel::TMatrix y_real = data.block( 0, data.cols( ) - 1, data.rows( ), 1 );
+  TMatrix X_real = data.block( 0, 0, data.rows( ), data.cols( ) - 1 );
+  TMatrix y_real = data.block( 0, data.cols( ) - 1, data.rows( ), 1 );
+
+  // Configure trainer
+  trainer.SetTrainData( X_real, y_real );
+  trainer.SetDebug( debug );
+  trainer.Fit( );
 
   // Analytical model
-  TModel analytical_model;
-  analytical_model.AnalyticalFit( X_real, y_real );
+  /* TODO
+  TModel a_model;
+  a_model.AnalyticalFit( X_real, y_real );
+*/
 
   // Optimized model
+  /*
   TModel opt_model;
   opt_model.Init( X_real.cols( ), PUJ::Random );
-  TModel::Cost J( &opt_model, X_real, y_real, 1 );
+  TModel::Cost J( &opt_model, X_real, y_real, bsize );
   TOptimizer opt( &J );
 
   if( opt.ParseArguments( argc, argv ) )
   {
-    /* TODO
-       opt.SetAlpha( 1e-4 );
-       opt.SetMaximumNumberOfIterations( 100000 );
-       opt.SetDebugIterations( 10 );
-    */
     opt.SetDebug( debug );
     opt.Fit( );
 
@@ -64,6 +77,8 @@ int main( int argc, char** argv )
   }
   else
     return( EXIT_FAILURE );
+  */
+  return( EXIT_SUCCESS );
 }
 
 // eof - $RCSfile$

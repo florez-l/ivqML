@@ -9,8 +9,8 @@
 // -------------------------------------------------------------------------
 template< class _TModel >
 PUJ::Optimizer::GradientDescent< _TModel >::
-GradientDescent( TCost* cost )
-  : m_Cost( cost )
+GradientDescent( )
+  : m_Cost( nullptr )
 {
   this->m_Debug =
     []( unsigned long long, TScalar, TScalar, bool ) -> bool
@@ -19,44 +19,48 @@ GradientDescent( TCost* cost )
 
 // -------------------------------------------------------------------------
 template< class _TModel >
-bool PUJ::Optimizer::GradientDescent< _TModel >::
-ParseArguments( int argc, char** argv )
+void PUJ::Optimizer::GradientDescent< _TModel >::
+SetCost( TCost* cost )
 {
-  namespace _TPo = boost::program_options;
+    std::cout << "Set " << cost << std::endl;
+    this->m_Cost = cost;
+}
 
-  // Declare the supported options.
-  _TPo::options_description desc( "Optimizing options" );
-  desc.add_options( )
-    ( "help", "produce help message" )
-    ( "alpha", _TPo::value< TScalar >( &this->m_Alpha )->default_value( this->m_Alpha ), "learning rate" )
-    ( "lambda", _TPo::value< TScalar >( &this->m_Lambda )->default_value( this->m_Lambda ), "regularization" )
-    ( "max_iter", _TPo::value< unsigned long long >( &this->m_MaximumNumberOfIterations )->default_value( this->m_MaximumNumberOfIterations ), "maximum iterations" )
-    ( "deb_iter", _TPo::value< unsigned long long >( &this->m_DebugIterations )->default_value( this->m_DebugIterations ), "iterations for debug" )
+// -------------------------------------------------------------------------
+template< class _TModel >
+void PUJ::Optimizer::GradientDescent< _TModel >::
+AddArguments( boost::program_options::options_description* o )
+{
+  o->add_options( )
+    (
+      "alpha",
+      boost::program_options::value< TScalar >( &this->m_Alpha )->
+      default_value( this->m_Alpha ),
+      "learning rate"
+    )
+    (
+      "lambda",
+      boost::program_options::value< TScalar >( &this->m_Lambda )->
+      default_value( this->m_Lambda ),
+      "regularization"
+    )
+    (
+      "max_iter",
+      boost::program_options::value< unsigned long long >(
+        &this->m_MaximumNumberOfIterations
+        )->
+      default_value( this->m_MaximumNumberOfIterations ),
+      "maximum iterations"
+    )
+    (
+      "deb_iter",
+      boost::program_options::value< unsigned long long >(
+        &this->m_DebugIterations
+        )->
+      default_value( this->m_DebugIterations ),
+      "iterations for debug"
+    )
     ;
-
-  _TPo::variables_map vm;
-  _TPo::store( _TPo::parse_command_line( argc, argv, desc ), vm );
-  _TPo::notify( vm );
-
-  if( vm.count( "help" ) )
-  {
-    std::cout << desc << "\n";
-    return( false );
-  } // end if
-
-  /* TODO
-     if (vm.count("compression"))
-     {
-     std::cout << "Compression level was set to "
-     << vm["compression"].as<int>() << ".\n";
-     }
-     else
-     {
-     std::cout << "Compression level was not set.\n";
-     }
-  */
-
-  return( true );
 }
 
 // -------------------------------------------------------------------------
@@ -96,6 +100,7 @@ template< class _TModel >
 void PUJ::Optimizer::GradientDescent< _TModel >::
 Fit( )
 {
+    std::cout << "Start " << this->m_Cost << std::endl;
   static const TScalar maxJ = std::numeric_limits< TScalar >::max( );
   TScalar J = maxJ, Jn, dJ;
   TRow g;

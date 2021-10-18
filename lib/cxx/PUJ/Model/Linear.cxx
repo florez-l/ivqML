@@ -184,9 +184,18 @@ _StreamOut( std::ostream& o ) const
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
 PUJ::Model::Linear< _TScalar, _TTraits >::Cost::
-Cost( Self* model, const TMatrix& X, const TCol& y, unsigned int batch_size )
-  : _TBaseCost( model, X, y, batch_size )
+Cost( )
+  : _TBaseCost( )
 {
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar, class _TTraits >
+void PUJ::Model::Linear< _TScalar, _TTraits >::Cost::
+SetTrainData( const TMatrix& X, const TMatrix& Y )
+{
+  this->_TBaseCost::SetTrainData( X, Y );
+
   for( unsigned int i = 0; i < this->m_X.size( ); ++i )
   {
     this->m_XtX.push_back(
@@ -247,8 +256,6 @@ operator-=( const TRow& g )
 }
 
 // -------------------------------------------------------------------------
-#include <PUJ_ML_export.h>
-
 template class PUJ_ML_EXPORT PUJ::Model::Linear< float >;
 template class PUJ_ML_EXPORT PUJ::Model::Linear< double >;
 

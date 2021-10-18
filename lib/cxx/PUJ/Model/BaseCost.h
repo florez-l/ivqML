@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <vector>
+#include <boost/program_options.hpp>
 
 namespace PUJ
 {
@@ -24,25 +25,26 @@ namespace PUJ
       using TScalar = typename _TModel::TScalar;
 
     public:
-      BaseCost(
-        TModel* model, const TMatrix& X, const TMatrix& Y,
-        unsigned int batch_size = 0
-        )
+      BaseCost( )
+        : m_Model( nullptr )
+      {
+      }
+      
+      virtual void SetTrainData( const TMatrix& X, const TMatrix& Y )
+      {
+        if( this->m_BatchSize > 0 )
         {
-          this->m_Model = model;
-          if( batch_size > 0 )
-          {
-            unsigned int n =
+          unsigned int n =
               ( unsigned int )(
-                std::ceil( double( X.rows( ) ) / double( batch_size ) )
+                std::ceil( double( X.rows( ) ) / double( this->m_BatchSize ) )
                 );
             for( unsigned int i = 0; i < n; ++i )
             {
-              unsigned int bs = batch_size;
-              if( ( i + 1 ) * batch_size > X.rows( ) )
-                bs = X.rows( ) - ( i * batch_size );
-              this->m_X.push_back( X.block( i * batch_size, 0, bs, X.cols( ) ) );
-              this->m_Y.push_back( Y.block( i * batch_size, 0, bs, Y.cols( ) ) );
+              unsigned int bs = this->m_BatchSize;
+              if( ( i + 1 ) * this->m_BatchSize > X.rows( ) )
+                bs = X.rows( ) - ( i * this->m_BatchSize );
+              this->m_X.push_back( X.block( i * this->m_BatchSize, 0, bs, X.cols( ) ) );
+              this->m_Y.push_back( Y.block( i * this->m_BatchSize, 0, bs, Y.cols( ) ) );
             } // end for
           }
           else
@@ -53,6 +55,11 @@ namespace PUJ
         }
 
       virtual ~BaseCost( ) = default;
+      
+      void SetModel( TModel* m )
+      {
+        this->m_Model = m;
+      }
 
       unsigned int GetNumberOfBatches( ) const
         {
@@ -67,9 +74,22 @@ namespace PUJ
         unsigned int i, TRow* g = nullptr
         ) const = 0;
       virtual void operator-=( const TRow& g ) = 0;
+      virtual void AddArguments(
+        boost::program_options::options_description* o
+        )
+      {
+        o->add_options( )
+        (
+          "batch_size",
+          boost::program_options::value< unsigned int >( &this->m_BatchSize )->
+          default_value( this->m_BatchSize ),
+          "Batch size"
+        );
+      }
 
     protected:
       TModel* m_Model;
+      unsigned int m_BatchSize { 0 };
       std::vector< TMatrix > m_X;
       std::vector< TMatrix > m_Y;
     };

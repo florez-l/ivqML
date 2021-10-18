@@ -13,7 +13,7 @@ namespace PUJ
     /**
      */
     template< class _TScalar, class _TTraits = PUJ::Traits< _TScalar > >
-    class Logistic
+    class PUJ_ML_EXPORT Logistic
       : public PUJ::Model::Linear< _TScalar, _TTraits >
     {
     public:
@@ -60,14 +60,16 @@ namespace PUJ
 
       /**
        */
-      class Cost
+      class PUJ_ML_EXPORT Cost
         : public _TBaseCost
       {
       public:
-        Cost(
+        Cost( );
+        /*
           Self* model, const TMatrix& X, const TCol& y,
           unsigned int batch_size = 0
           );
+          */
         virtual ~Cost( ) = default;
 
         virtual TScalar operator()(

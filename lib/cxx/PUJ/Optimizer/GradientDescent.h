@@ -5,6 +5,7 @@
 #define __PUJ__Optimizer__GradientDescent__h__
 
 #include <functional>
+#include <boost/program_options.hpp>
 
 namespace PUJ
 {
@@ -35,10 +36,11 @@ namespace PUJ
         std::function< bool( unsigned long long, TScalar, TScalar, bool ) >;
 
     public:
-      GradientDescent( TCost* cost );
+      GradientDescent( );
       virtual ~GradientDescent( ) = default;
 
-      bool ParseArguments( int argc, char** argv );
+      void SetCost( TCost* cost );
+      void AddArguments( boost::program_options::options_description* o );
 
       PUJ_ML_Attribute( Cost, TCost*, nullptr );
       PUJ_ML_Attribute( Alpha, TScalar, 1e-2 );
@@ -46,7 +48,7 @@ namespace PUJ
       PUJ_ML_Attribute(
         Epsilon, TScalar, std::numeric_limits< TScalar >::epsilon( )
         );
-      PUJ_ML_Attribute( MaximumNumberOfIterations, unsigned long long, 2000 );
+      PUJ_ML_Attribute( MaximumNumberOfIterations, unsigned long long, 1000 );
       PUJ_ML_Attribute( DebugIterations, unsigned long long, 100 );
 
       PUJ_ML_Attribute( RegularizationType, RegularizationType, RidgeRegType );

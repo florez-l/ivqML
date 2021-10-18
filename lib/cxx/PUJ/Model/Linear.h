@@ -4,10 +4,6 @@
 #ifndef __PUJ__Linear__h__
 #define __PUJ__Linear__h__
 
-
-#include <iostream>
-
-
 #include <PUJ/Traits.h>
 #include <PUJ/Model/BaseCost.h>
 
@@ -18,7 +14,7 @@ namespace PUJ
     /**
      */
     template< class _TScalar, class _TTraits = PUJ::Traits< _TScalar > >
-    class Linear
+    class PUJ_ML_EXPORT Linear
     {
     public:
       PUJ_TraitsMacro( Linear );
@@ -81,20 +77,18 @@ namespace PUJ
 
       /**
        */
-      class Cost
+      class PUJ_ML_EXPORT Cost
         : public _TBaseCost
       {
       public:
-        Cost(
-          Self* model, const TMatrix& X, const TCol& y,
-          unsigned int batch_size = 0
-          );
+        Cost( );
         virtual ~Cost( ) = default;
 
         virtual TScalar operator()(
           unsigned int i, TRow* g = nullptr
           ) const override;
         virtual void operator-=( const TRow& g ) override;
+        virtual void SetTrainData( const TMatrix& X, const TMatrix& Y ) override;
 
       protected:
         std::vector< TMatrix > m_XtX;

@@ -19,6 +19,7 @@ add_library(
   PUJ/Model/Logistic.h
   PUJ/Optimizer/GradientDescent.h
   PUJ/Optimizer/GradientDescent.hxx
+  PUJ/Optimizer/Trainer.h
   )
 generate_export_header(
   PUJ_ML

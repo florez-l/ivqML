@@ -18,28 +18,40 @@ _TMatrix PUJ::CSV::Read(
   )
 {
   // Load buffer
-  std::FILE* ifs = std::fopen( fname.c_str( ), "r" );
-  std::fseek( ifs, 0, SEEK_END );
-  std::size_t size = std::ftell( ifs );
-
-  char* buffer = new char[ size ];
-  std::rewind( ifs );
-  std::fread( buffer, sizeof( char ), size, ifs );
+  std::ifstream ifs( fname.c_str( ) );
+  ifs.seekg( 0, std::ios::end );
+  std::size_t size = ifs.tellg( );
+  ifs.seekg( 0, std::ios::beg );
+  std::string buffer( size, 0 );
+  ifs.read( &buffer[ 0 ], size );
+  ifs.close( );
   std::istringstream input( buffer );
-
+  
   // Read line by line
   std::vector< std::stringstream > lines;
   std::string line;
   unsigned long long n = 0;
   while( std::getline( input, line ) )
   {
-    std::vector< std::string > tokens;
-    boost::split( tokens, line, boost::is_any_of( separator ) );
-    n = ( n < tokens.size( ) )? tokens.size( ): n;
-
-    lines.push_back( std::stringstream( ) );
-    for( const std::string& t: tokens )
-      *lines.rbegin( ) << t << " ";
+    if( line != "" )
+    {
+      std::vector< std::string > tokens;
+      boost::split( tokens, line, boost::is_any_of( separator ) );
+      unsigned int i = 0;
+      lines.push_back( std::stringstream( ) );
+      for( const std::string& t: tokens )
+      {
+        if( t != "" )
+        {
+          *lines.rbegin( ) << t << " ";
+          i++;
+        } // end if
+      } // end for
+      if( i > 0 )
+        n = ( n < i )? i: n;
+      else
+        lines.pop_back( );
+    } // end if
   } // end while
 
   // Pass to Eigen::Matrix
@@ -52,7 +64,6 @@ _TMatrix PUJ::CSV::Read(
       lines[ r ] >> data( r, c );
 
   // Finish
-  delete [] buffer;
   return( data );
 }
 

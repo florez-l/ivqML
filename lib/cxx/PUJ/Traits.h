@@ -8,6 +8,13 @@
 #  pragma warning( disable : 4661 )
 #endif // _MSC_VER
 
+
+
+#include <iostream>
+
+
+
+#include <PUJ_ML_export.h>
 #include <Eigen/Core>
 
 // -------------------------------------------------------------------------
