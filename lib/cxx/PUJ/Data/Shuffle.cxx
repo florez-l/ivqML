@@ -37,18 +37,18 @@ Shuffle( _TMatrix& M, bool columns )
 #include <PUJ_ML_export.h>
 #include <PUJ/Traits.h>
 
-#define PUJ_ML_Algorithms_Shuffle( t )                                  \
-  template void PUJ_ML_EXPORT                                           \
-  PUJ::Algorithms::Shuffle< PUJ::Traits< t >::TMatrix >(                \
-    PUJ::Traits< t >::TMatrix&, bool                                    \
-    );                                                                  \
-  template void PUJ_ML_EXPORT                                           \
-  PUJ::Algorithms::Shuffle< PUJ::Traits< t >::TCol >(                   \
-    PUJ::Traits< t >::TCol&, bool                                       \
-    );                                                                  \
-  template void PUJ_ML_EXPORT                                           \
-  PUJ::Algorithms::Shuffle< PUJ::Traits< t >::TRow >(                   \
-    PUJ::Traits< t >::TRow&, bool                                       \
+#define PUJ_ML_Algorithms_Shuffle( t )                          \
+  template void PUJ_ML_EXPORT                                   \
+  PUJ::Algorithms::Shuffle< PUJ::Traits< t >::TMatrix >(        \
+    PUJ::Traits< t >::TMatrix&, bool                            \
+    );                                                          \
+  template void PUJ_ML_EXPORT                                   \
+  PUJ::Algorithms::Shuffle< PUJ::Traits< t >::TCol >(           \
+    PUJ::Traits< t >::TCol&, bool                               \
+    );                                                          \
+  template void PUJ_ML_EXPORT                                   \
+  PUJ::Algorithms::Shuffle< PUJ::Traits< t >::TRow >(           \
+    PUJ::Traits< t >::TRow&, bool                               \
     )
 
 PUJ_ML_Algorithms_Shuffle( float );

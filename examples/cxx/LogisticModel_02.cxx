@@ -8,13 +8,13 @@
 #include <PUJ/Data/Algorithms.h>
 #include <PUJ/Data/CSV.h>
 #include <PUJ/Model/Logistic.h>
-#include <PUJ/Optimizer/GradientDescent.h>
+#include <PUJ/Optimizer/Adam.h>
 #include <PUJ/Optimizer/Trainer.h>
 
 // -- Typedef
 using TScalar    = double;
 using TModel     = PUJ::Model::Logistic< TScalar >;
-using TOptimizer = PUJ::Optimizer::GradientDescent< TModel >;
+using TOptimizer = PUJ::Optimizer::Adam< TModel >;
 using TTrainer   = PUJ::Optimizer::Trainer< TOptimizer >;
 using TMatrix    = TModel::TMatrix;
 

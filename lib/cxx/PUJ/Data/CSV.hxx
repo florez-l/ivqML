@@ -26,7 +26,7 @@ _TMatrix PUJ::CSV::Read(
   ifs.read( &buffer[ 0 ], size );
   ifs.close( );
   std::istringstream input( buffer );
-  
+
   // Read line by line
   std::vector< std::stringstream > lines;
   std::string line;

@@ -192,9 +192,10 @@ Cost( )
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
 void PUJ::Model::Linear< _TScalar, _TTraits >::Cost::
-SetTrainData( const TMatrix& X, const TMatrix& Y )
+SetTrainData( const TMatrix& X, const TMatrix& Y, const PUJ::EInitValues& e )
 {
-  this->_TBaseCost::SetTrainData( X, Y );
+  this->m_Model->Init( X.cols( ), e );
+  this->_TBaseCost::SetTrainData( X, Y, e );
 
   for( unsigned int i = 0; i < this->m_X.size( ); ++i )
   {

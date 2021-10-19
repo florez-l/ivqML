@@ -88,7 +88,10 @@ namespace PUJ
           unsigned int i, TRow* g = nullptr
           ) const override;
         virtual void operator-=( const TRow& g ) override;
-        virtual void SetTrainData( const TMatrix& X, const TMatrix& Y ) override;
+        virtual void SetTrainData(
+          const TMatrix& X, const TMatrix& Y,
+          const PUJ::EInitValues& e = PUJ::Random
+          ) override;
 
       protected:
         std::vector< TMatrix > m_XtX;

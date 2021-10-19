@@ -45,39 +45,21 @@ int main( int argc, char** argv )
   TMatrix y_real = data.block( 0, data.cols( ) - 1, data.rows( ), 1 );
 
   // Configure trainer
-  trainer.SetTrainData( X_real, y_real );
+  trainer.SetTrainData( X_real, y_real, PUJ::Zeros );
   trainer.SetDebug( debug );
   trainer.Fit( );
 
   // Analytical model
-  /* TODO
   TModel a_model;
   a_model.AnalyticalFit( X_real, y_real );
-*/
 
-  // Optimized model
-  /*
-  TModel opt_model;
-  opt_model.Init( X_real.cols( ), PUJ::Random );
-  TModel::Cost J( &opt_model, X_real, y_real, bsize );
-  TOptimizer opt( &J );
-
-  if( opt.ParseArguments( argc, argv ) )
-  {
-    opt.SetDebug( debug );
-    opt.Fit( );
-
-    std::cout << "=======================================" << std::endl;
-    std::cout << "Analytical model : " << analytical_model << std::endl;
-    std::cout << "Optimized model  : " << opt_model << std::endl;
-    std::cout << "Iterations       : " << opt.GetIterations( ) << std::endl;
-    std::cout << "=======================================" << std::endl;
-
-    return( EXIT_SUCCESS );
-  }
-  else
-    return( EXIT_FAILURE );
-  */
+  // Show data
+  std::cout << "=======================================" << std::endl;
+  std::cout << "Analytical model : " << a_model << std::endl;
+  std::cout << "Optimized model  : " << trainer.GetModel( ) << std::endl;
+  std::cout << "Iterations       : "
+            << trainer.GetOptimizer( ).GetIterations( ) << std::endl;
+  std::cout << "=======================================" << std::endl;
   return( EXIT_SUCCESS );
 }
 

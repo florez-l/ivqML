@@ -27,14 +27,17 @@ namespace PUJ
     public:
       BaseCost( )
         : m_Model( nullptr )
-      {
-      }
-      
-      virtual void SetTrainData( const TMatrix& X, const TMatrix& Y )
-      {
-        if( this->m_BatchSize > 0 )
         {
-          unsigned int n =
+        }
+
+      virtual void SetTrainData(
+        const TMatrix& X, const TMatrix& Y,
+        const PUJ::EInitValues& e = PUJ::Random
+        )
+        {
+          if( this->m_BatchSize > 0 )
+          {
+            unsigned int n =
               ( unsigned int )(
                 std::ceil( double( X.rows( ) ) / double( this->m_BatchSize ) )
                 );
@@ -43,8 +46,12 @@ namespace PUJ
               unsigned int bs = this->m_BatchSize;
               if( ( i + 1 ) * this->m_BatchSize > X.rows( ) )
                 bs = X.rows( ) - ( i * this->m_BatchSize );
-              this->m_X.push_back( X.block( i * this->m_BatchSize, 0, bs, X.cols( ) ) );
-              this->m_Y.push_back( Y.block( i * this->m_BatchSize, 0, bs, Y.cols( ) ) );
+              this->m_X.push_back(
+                X.block( i * this->m_BatchSize, 0, bs, X.cols( ) )
+                );
+              this->m_Y.push_back(
+                Y.block( i * this->m_BatchSize, 0, bs, Y.cols( ) )
+                );
             } // end for
           }
           else
@@ -55,15 +62,25 @@ namespace PUJ
         }
 
       virtual ~BaseCost( ) = default;
-      
-      void SetModel( TModel* m )
-      {
-        this->m_Model = m;
-      }
+
+      unsigned int GetBatchSize( ) const
+        {
+          return( this->m_BatchSize );
+        }
 
       unsigned int GetNumberOfBatches( ) const
         {
           return( this->m_X.size( ) );
+        }
+
+      void SetBatchSize( unsigned int bs )
+        {
+          this->m_BatchSize = bs;
+        }
+
+      void SetModel( TModel* m )
+        {
+          this->m_Model = m;
         }
 
       virtual const TRow& GetParameters( ) const
@@ -77,15 +94,15 @@ namespace PUJ
       virtual void AddArguments(
         boost::program_options::options_description* o
         )
-      {
-        o->add_options( )
-        (
-          "batch_size",
-          boost::program_options::value< unsigned int >( &this->m_BatchSize )->
-          default_value( this->m_BatchSize ),
-          "Batch size"
-        );
-      }
+        {
+          o->add_options( )
+            (
+              "batch_size",
+              boost::program_options::value< unsigned int >( &this->m_BatchSize )->
+              default_value( this->m_BatchSize ),
+              "Batch size"
+              );
+        }
 
     protected:
       TModel* m_Model;

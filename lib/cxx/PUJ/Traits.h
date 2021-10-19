@@ -18,12 +18,12 @@
 #include <Eigen/Core>
 
 // -------------------------------------------------------------------------
-#define PUJ_TraitsMacro( _s )                  \
-  using Self    = _s;                          \
-  using TTraits = _TTraits;                    \
-  using TScalar = typename TTraits::TScalar;   \
-  using TMatrix = typename TTraits::TMatrix;   \
-  using TRow    = typename TTraits::TRow;      \
+#define PUJ_TraitsMacro( _s )                   \
+  using Self    = _s;                           \
+  using TTraits = _TTraits;                     \
+  using TScalar = typename TTraits::TScalar;    \
+  using TMatrix = typename TTraits::TMatrix;    \
+  using TRow    = typename TTraits::TRow;       \
   using TCol    = typename TTraits::TCol
 
 // -------------------------------------------------------------------------

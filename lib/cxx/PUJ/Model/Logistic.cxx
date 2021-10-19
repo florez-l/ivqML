@@ -38,7 +38,7 @@ operator()( const TRow& x ) const
 
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
- typename PUJ::Model::Logistic< _TScalar, _TTraits >::
+typename PUJ::Model::Logistic< _TScalar, _TTraits >::
 TCol PUJ::Model::Logistic< _TScalar, _TTraits >::
 operator()( const TMatrix& x ) const
 {
@@ -61,30 +61,8 @@ template< class _TScalar, class _TTraits >
 PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
 Cost( )
   : _TBaseCost( )
-  {
-  }
-  /* TODO
-Cost( Self* model, const TMatrix& X, const TCol& y, unsigned int batch_size )
-  : _TBaseCost( model, X, y, batch_size )
 {
-  this->m_Zeros.resize( this->m_X.size( ) );
-  this->m_Ones.resize( this->m_X.size( ) );
-
-  for( unsigned int b = 0; b < this->m_X.size( ); ++b )
-  {
-    this->m_Zeros[ b ].clear( );
-    this->m_Ones[ b ].clear( );
-    PUJ::visit_lambda(
-      y,
-      [&]( TScalar v, int i, int j ) -> void
-      {
-        if( v == 0 ) this->m_Zeros[ b ].push_back( i );
-        else         this->m_Ones[ b ].push_back( i );
-      }
-      );
-  } // end for
 }
-*/
 
 // -------------------------------------------------------------------------
 template< class _TScalar, class _TTraits >
@@ -113,6 +91,32 @@ operator()( unsigned int i, TRow* g ) const
   } // end if
 
   return( -( o + z ) / TScalar( m ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar, class _TTraits >
+void PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
+SetTrainData( const TMatrix& X, const TMatrix& Y, const PUJ::EInitValues& e )
+{
+  this->m_Model->Init( X.cols( ), e );
+  this->_TBaseCost::SetTrainData( X, Y, e );
+
+  this->m_Zeros.resize( this->m_X.size( ) );
+  this->m_Ones.resize( this->m_X.size( ) );
+
+  for( unsigned int b = 0; b < this->m_X.size( ); ++b )
+  {
+    this->m_Zeros[ b ].clear( );
+    this->m_Ones[ b ].clear( );
+    PUJ::visit_lambda(
+      this->m_Y[ b ],
+      [&]( TScalar v, int i, int j ) -> void
+      {
+        if( v == 0 ) this->m_Zeros[ b ].push_back( i );
+        else         this->m_Ones[ b ].push_back( i );
+      }
+      );
+  } // end for
 }
 
 // -------------------------------------------------------------------------

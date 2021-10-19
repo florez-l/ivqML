@@ -32,24 +32,24 @@ namespace PUJ
         : Superclass( v, args... )
         {
         }
-        /* TODO
-           : m_W( nullptr )
-           {
-           if( sizeof...( args ) > 0 )
-           {
-           Self n( args... );
-           this->SetParameters( TRow::Zero( sizeof...( args ) + 1 ) );
-           this->SetWeights( n.GetParameters( ) );
-           this->SetBias( TScalar( v ) );
-           }
-           else
-           {
-           TRow p( 1 );
-           p( 0, 0 ) = TScalar( v );
-           this->SetParameters( p );
-           } // end if
-           }
-        */
+      /* TODO
+         : m_W( nullptr )
+         {
+         if( sizeof...( args ) > 0 )
+         {
+         Self n( args... );
+         this->SetParameters( TRow::Zero( sizeof...( args ) + 1 ) );
+         this->SetWeights( n.GetParameters( ) );
+         this->SetBias( TScalar( v ) );
+         }
+         else
+         {
+         TRow p( 1 );
+         p( 0, 0 ) = TScalar( v );
+         this->SetParameters( p );
+         } // end if
+         }
+      */
 
       virtual ~Logistic( ) = default;
 
@@ -65,16 +65,15 @@ namespace PUJ
       {
       public:
         Cost( );
-        /*
-          Self* model, const TMatrix& X, const TCol& y,
-          unsigned int batch_size = 0
-          );
-          */
         virtual ~Cost( ) = default;
 
         virtual TScalar operator()(
           unsigned int i, TRow* g = nullptr
           ) const override;
+        virtual void SetTrainData(
+          const TMatrix& X, const TMatrix& Y,
+          const PUJ::EInitValues& e = PUJ::Random
+          ) override;
 
       protected:
         std::vector< std::vector< unsigned long long > > m_Zeros;

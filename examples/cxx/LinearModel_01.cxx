@@ -50,8 +50,14 @@ int main( int argc, char** argv )
 
   TModel opt_model;
   opt_model.Init( n, PUJ::Random );
-  TModel::Cost J( &opt_model, X_real, y_real, 1 );
-  TOptimizer opt( &J );
+
+  TModel::Cost J;
+  J.SetBatchSize( 1 );
+  J.SetModel( &opt_model );
+  J.SetTrainData( X_real, y_real );
+
+  TOptimizer opt;
+  opt.SetCost( &J );
   opt.SetAlpha( 1e-2 );
   opt.SetMaximumNumberOfIterations( 100000 );
   opt.SetDebugIterations( 1000 );
