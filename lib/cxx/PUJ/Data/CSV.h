@@ -19,6 +19,15 @@ namespace PUJ
       const std::string& separator = ", ;\t"
       );
 
+    /**
+     */
+    template< class _TMatrix >
+    bool Write(
+      const _TMatrix& data,
+      const std::string& fname,
+      const char& separator = ','
+      );
+
   } // end namespace
 } // end namespace
 

@@ -4,6 +4,8 @@
 
 set(
   _examples
+  NormalizeData
+  StandardizeData
   LinearModel_00
   LinearModel_01
   LinearModel_02

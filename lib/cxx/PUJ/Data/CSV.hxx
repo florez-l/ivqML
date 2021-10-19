@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <Eigen/Core>
 
 // -------------------------------------------------------------------------
 template< class _TMatrix >
@@ -65,6 +66,23 @@ _TMatrix PUJ::CSV::Read(
 
   // Finish
   return( data );
+}
+
+// -------------------------------------------------------------------------
+template< class _TMatrix >
+bool PUJ::CSV::Write(
+  const _TMatrix& data, const std::string& fname, const char& separator
+  )
+{
+  Eigen::IOFormat f(
+    Eigen::StreamPrecision, Eigen::DontAlignCols,
+    ",", "\n", "", "", "", "\n"
+    );
+  std::ofstream ofs( fname.c_str( ) );
+  ofs << data.format( f );
+  ofs.close( );
+
+  return( true );
 }
 
 #endif // __PUJ__Data__CSV__hxx__
