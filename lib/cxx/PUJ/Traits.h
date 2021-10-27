@@ -13,7 +13,7 @@
 #include <iostream>
 
 
-
+#include <cmath>
 #include <PUJ_ML_export.h>
 #include <Eigen/Core>
 
