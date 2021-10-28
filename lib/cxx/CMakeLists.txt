@@ -17,6 +17,8 @@ add_library(
   PUJ/Model/Linear.h
   PUJ/Model/Logistic.cxx
   PUJ/Model/Logistic.h
+  PUJ/Model/NeuralNetwork/ActivationFunction.cxx
+  PUJ/Model/NeuralNetwork/ActivationFunction.h
   PUJ/Optimizer/GradientDescent.h
   PUJ/Optimizer/GradientDescent.hxx
   PUJ/Optimizer/Trainer.h
