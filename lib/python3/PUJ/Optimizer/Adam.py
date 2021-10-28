@@ -6,8 +6,10 @@ import math, numpy
 
 '''
 '''
-def GradientDescent( cost, **kwargs ):
-  a = 1e-1
+def Adam( cost, **kwargs ):
+  a = 1e-2
+  b1 = 0.9
+  b2 = 0.999
   l = 0.0
   lt = 'ridge'
   I = 1e10
@@ -17,6 +19,8 @@ def GradientDescent( cost, **kwargs ):
   T = cost.GetInitialParameters( )
 
   if 'alpha' in kwargs: a = float( kwargs[ 'alpha' ] )
+  if 'beta1' in kwargs: b1 = float( kwargs[ 'beta1' ] )
+  if 'beta2' in kwargs: b2 = float( kwargs[ 'beta2' ] )
   if 'regularization' in kwargs: l = float( kwargs[ 'regularization' ] )
   if 'reg_type' in kwargs: lt = kwargs[ 'reg_type' ]
   if 'max_iter' in kwargs: I = int( kwargs[ 'max_iter' ] )
@@ -24,42 +28,44 @@ def GradientDescent( cost, **kwargs ):
   if 'debug_step' in kwargs: ds = int( kwargs[ 'debug_step' ] )
   if 'debug_function' in kwargs: df = kwargs[ 'debug_function' ]
 
-  # Init loop
   J = math.inf
+  Jn = math.inf
   dJ = math.inf
-  i = 0
+  b1t = b1
+  b2t = b2
+  m = numpy.zeros( T.shape )
+  v = numpy.zeros( T.shape )
   stop = False
+  i = 0
 
-  # Main loop
-  while dJ > e and i < I and not stop:
+  while not stop:
+
+    # Advance iterations
+    i += 1
 
     # Batch loop
     for b in range( cost.GetNumberOfBatches( ) ):
 
-      # Compute gradients
+      # Compute cost and its gradient
       J, G = cost.CostAndGradient( T, b )
-      if l > 0:
-        if lt == 'ridge':
-          J += l * T @ T.T
-          G += 2.0 * l * T
-        elif lt == 'lasso':
-          J += l * numpy.abs( T ).sum( )
-          G += l * ( T > 0 ).astype( G.dtype ).sum( )
-          G -= l * ( T < 0 ).astype( G.dtype ).sum( )
-        # end if
-      # end if
+
+      # Update gradient
+      m = ( m * b1 ) + ( G * ( 1 - b1 ) )
+      v = ( v * b2 ) + ( numpy.power( G, 2 ) * ( 1 - b2 ) )
+      nG = numpy.divide( m / ( 1 - b1t ), numpy.power( v / ( 1 - b2t ), 0.5 ) + e )
 
       # Step forward
-      T -= G * a
-
+      T -= nG * a
     # end for
+
+    b1t *= b1
+    b2t *= b2
 
     if not df is None:
       stop = df( cost.GetModel( ), J, dJ, i, i % ds == 0 )
     # end if
 
-    # TODO: Stop criterion and debug
-    i += 1
+    stop = ( i >= I )
 
   # end while
 

@@ -383,6 +383,7 @@ class FeedForward:
           ).sum( )
         J = -( p + n ) / float( self.m_Batches[ batch ][ 1 ].shape[ 0 ] )
       elif self.m_Propagation == 'cce':
+        ## print( '******* IMPLEMENT THIS *************' )
         pass
       # end if
 

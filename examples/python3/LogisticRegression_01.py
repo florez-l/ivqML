@@ -63,7 +63,7 @@ debug = PUJ.Debug.Cost( cost_tst )
 # -- Iterative solution
 tI, nI = PUJ.Optimizer.GradientDescent(
   cost_tra,
-  learning_rate = lr,
+  alpha = lr,
   init_theta = init_theta,
   max_iter = I,
   epsilon = e,

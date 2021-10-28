@@ -67,7 +67,7 @@ debug = PUJ.Debug.Polynomial( X, y )
 ## -- Iterative solution
 PUJ.Optimizer.GradientDescent(
   cost,
-  learning_rate = args.learning_rate,
+  alpha = args.alpha,
   max_iter = args.max_iterations,
   epsilon = args.epsilon,
   debug_step = args.debug_step,
