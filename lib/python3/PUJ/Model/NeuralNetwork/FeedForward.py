@@ -219,7 +219,7 @@ class FeedForward:
         a = data[ i + is_os + out_size ]
 
         self.AddLayer( out_size, a, ( w, b ) )
-        i += is_os + out_size + 3
+        i += is_os + out_size + 1
 
       else:
 
