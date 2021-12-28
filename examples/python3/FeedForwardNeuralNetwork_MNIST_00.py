@@ -43,6 +43,18 @@ p = fwd_nn.GetLayerOutputSize( 1 )
 eP = numpy.eye( p )
 y_test_cat = eP[ y_test , ].reshape( m, p )
 
+# 0 : 1 0 0 0 0 0 0 0 0 0
+# 1 : 0 1 0 0 0 0 0 0 0 0
+# 2 : 0 0 1 0 0 0 0 0 0 0
+# 3 : 0 0 0 1 0 0 0 0 0 0
+# 4 : 0 0 0 0 1 0 0 0 0 0
+# 5 : 0 0 0 0 0 1 0 0 0 0
+# 6 : 0
+# 7 : 0
+# 8 : 0
+# 9 : 0
+
+
 # -- Estimate all examples
 y_estim = fwd_nn( X_test )
 y_estim_cat = eP[ numpy.argmax( y_estim, axis = 1 ) , ].reshape( m, p )
