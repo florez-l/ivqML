@@ -2,36 +2,125 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
-#include <PUJ/Model.h>
+#include <PUJ/Model/Logistic.h>
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-PUJ::Model::Logistic< _TScalar >::
-Logistic( const TRowVector& w, const TScalar& b )
-  : Superclass( w, b )
+template< class _TScalar, class _TTraits >
+PUJ::Model::Logistic< _TScalar, _TTraits >::
+Logistic( )
+  : Superclass( )
 {
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-typename PUJ::Model::Logistic< _TScalar >::
-TMatrix PUJ::Model::Logistic< _TScalar >::
-operator()( const TMatrix& x, bool threshold ) const
+template< class _TScalar, class _TTraits >
+PUJ::Model::Logistic< _TScalar, _TTraits >::
+Logistic( const TRow& t )
+  : Superclass( t )
 {
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar, class _TTraits >
+typename PUJ::Model::Logistic< _TScalar, _TTraits >::
+TScalar PUJ::Model::Logistic< _TScalar, _TTraits >::
+operator()( const TRow& x ) const
+{
+  static const TScalar _0 = TScalar( 0 );
   static const TScalar _1 = TScalar( 1 );
-  static const TScalar _t = TScalar( 0.5 );
+  static const TScalar _bnd = TScalar( 40 );
 
-  auto z = _1 / ( _1 + Eigen::exp( -this->Superclass::operator()( x ).array( ) ) );
-  if( threshold )
-    return( ( z.array( ) >= _t ).template cast< TScalar >( ) );
-  else
-    return( z );
+  TScalar z = this->Superclass::operator()( x );
+  if     ( z >  _bnd ) return( _1 );
+  else if( z < -_bnd ) return( _0 );
+  else                 return( _1 / ( _1 + std::exp( -z ) ) );
 }
 
 // -------------------------------------------------------------------------
-#include <PUJ_ML_export.h>
+template< class _TScalar, class _TTraits >
+typename PUJ::Model::Logistic< _TScalar, _TTraits >::
+TCol PUJ::Model::Logistic< _TScalar, _TTraits >::
+operator()( const TMatrix& x ) const
+{
+  static const auto f = []( TScalar z ) -> TScalar
+    {
+      static const TScalar _0 = TScalar( 0 );
+      static const TScalar _1 = TScalar( 1 );
+      static const TScalar _bnd = TScalar( 40 );
+
+      if     ( z >  _bnd ) return( _1 );
+      else if( z < -_bnd ) return( _0 );
+      else                 return( _1 / ( _1 + std::exp( -z ) ) );
+    };
+
+  return( this->Superclass::operator()( x ).unaryExpr( f ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar, class _TTraits >
+PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
+Cost( )
+  : _TBaseCost( )
+{
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar, class _TTraits >
+typename PUJ::Model::Logistic< _TScalar, _TTraits >::
+TScalar PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
+operator()( unsigned int i, TRow* g ) const
+{
+  static const TScalar _E = 1e-8; // std::numeric_limits< TScalar >::epsilon( );
+  static const TScalar _1 = TScalar( 1 );
+  unsigned long long n = this->m_X[ i ].cols( );
+  unsigned long long m = this->m_X[ i ].rows( );
+
+  TCol a = this->m_Model->operator()( this->m_X[ i ] );
+  TScalar o = Eigen::log( a( this->m_Ones[ i ] ).array( ) + _E ).sum( );
+  TScalar z = Eigen::log( _1 - a( this->m_Zeros[ i ] ).array( ) + _E ).sum( );
+
+  if( g != nullptr )
+  {
+    if( g->cols( ) != n + 1 )
+      *g = TRow::Zero( n + 1 );
+
+    g->operator()( 0, 0 ) = a.mean( ) - this->m_uy[ i ];
+    g->block( 0, 1, 1, n ) =
+      ( this->m_X[ i ].array( ).colwise( ) * a.array( ) ).colwise( ).mean( ) -
+      this->m_Xy[ i ].array( );
+  } // end if
+
+  return( -( o + z ) / TScalar( m ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar, class _TTraits >
+void PUJ::Model::Logistic< _TScalar, _TTraits >::Cost::
+SetTrainData( const TMatrix& X, const TMatrix& Y, const PUJ::EInitValues& e )
+{
+  this->m_Model->Init( X.cols( ), e );
+  this->_TBaseCost::SetTrainData( X, Y, e );
+
+  this->m_Zeros.resize( this->m_X.size( ) );
+  this->m_Ones.resize( this->m_X.size( ) );
+
+  for( unsigned int b = 0; b < this->m_X.size( ); ++b )
+  {
+    this->m_Zeros[ b ].clear( );
+    this->m_Ones[ b ].clear( );
+    PUJ::visit_lambda(
+      this->m_Y[ b ],
+      [&]( TScalar v, int i, int j ) -> void
+      {
+        if( v == 0 ) this->m_Zeros[ b ].push_back( i );
+        else         this->m_Ones[ b ].push_back( i );
+      }
+      );
+  } // end for
+}
+
+// -------------------------------------------------------------------------
 template class PUJ_ML_EXPORT PUJ::Model::Logistic< float >;
 template class PUJ_ML_EXPORT PUJ::Model::Logistic< double >;
-template class PUJ_ML_EXPORT PUJ::Model::Logistic< long double >;
 
 // eof - $RCSfile$

@@ -117,14 +117,6 @@ Linear regression
 
 \begin_inset Formula 
 \[
-\mathbf{x}_{i}\in\mathbb{R}^{1\times n}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
 \mathbf{y}\in\mathbb{R}^{m\times1}
 \]
 
@@ -150,6 +142,14 @@ b\in\mathbb{R}
 \end_inset
 
 
+\begin_inset Formula 
+\[
+h\left(\mathbf{x}\right)=\mathbf{x}\mathbf{w}^{\top}+b
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -159,7 +159,18 @@ Cost function
 \begin_layout Standard
 \begin_inset Formula 
 \[
-J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)^{2}
+J\left(\mathbf{w},b,\mathbf{X},\mathbf{y}\right)=\frac{1}{m}\sum_{i=1}^{m}\left(h\left(\mathbf{x}_{i}\right)-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]-y_{i}\right)^{2}
 \]
 
 \end_inset
@@ -167,7 +178,7 @@ J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(
 
 \begin_inset Formula 
 \[
-J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\mathbf{w}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}\mathbf{w}^{\top}+2b\mathbf{w}\mathbf{x}_{i}^{\top}+b^{2}-2\mathbf{w}\mathbf{x}_{i}^{\top}y_{i}-2by_{i}+y_{i}^{2}\right)
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]^{2}-2\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]y_{i}+y_{i}^{2}\right)
 \]
 
 \end_inset
@@ -175,7 +186,7 @@ J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(
 
 \begin_inset Formula 
 \[
-J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\left[\frac{1}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+2b\mathbf{w}\frac{1}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}+\frac{1}{m}\sum_{i=1}^{m}b^{2}-2\mathbf{w}\frac{1}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}y_{i}-2b\frac{1}{m}\sum_{i=1}^{m}y_{i}+\frac{1}{m}\sum_{i=1}^{m}y_{i}^{2}
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\left(\mathbf{x}_{i}\mathbf{w}^{\top}\right)\left(\mathbf{x}_{i}\mathbf{w}^{\top}\right)+2b\mathbf{x}_{i}\mathbf{w}^{\top}+b^{2}-2y_{i}\mathbf{x}_{i}\mathbf{w}^{\top}-2by_{i}+y_{i}^{2}\right)
 \]
 
 \end_inset
@@ -183,7 +194,31 @@ J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\left[\frac{1}{m}\sum
 
 \begin_inset Formula 
 \[
-\boxed{J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]\mathbf{w}^{\top}+2b\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b^{2}-2\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\bowtie\mathbf{y}\right)-2b\mu\left(\mathbf{y}\right)+\frac{1}{m}\mathbf{y}^{\top}\mathbf{y}}
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\mathbf{w}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}\mathbf{w}^{\top}+2b\mathbf{x}_{i}\mathbf{w}^{\top}+b^{2}-2y_{i}\mathbf{x}_{i}\mathbf{w}^{\top}-2by_{i}+y_{i}^{2}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\frac{1}{m}\left[\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+\frac{2b}{m}\left[\sum_{i=1}^{m}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+b^{2}-\frac{2}{m}\left[\sum_{i=1}^{m}y_{i}\mathbf{x}_{i}\right]\mathbf{w}^{\top}-\frac{2b}{m}\left[\sum_{i=1}^{m}y_{i}\right]+\frac{1}{m}\left[\sum_{i=1}^{m}y_{i}^{2}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]\mathbf{w}^{\top}+b\left[\frac{2}{m}\sum_{i=1}^{m}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+b^{2}-\left[\frac{2}{m}\sum_{i=1}^{m}y_{i}\mathbf{x}_{i}\right]\mathbf{w}^{\top}-b\left[\frac{2}{m}\sum_{i=1}^{m}y_{i}\right]+\left[\frac{1}{m}\mathbf{y}^{\top}\mathbf{y}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boxed{J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]\mathbf{w}^{\top}+2b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\mathbf{w}^{\top}+b^{2}-2\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)\mathbf{w}^{\top}-2b\mu\left(\mathbf{y}\right)+\frac{1}{m}\mathbf{y}^{\top}\mathbf{y}}
 \]
 
 \end_inset
@@ -198,7 +233,7 @@ Gradient (weights)
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\frac{\partial}{\partial w^{(j)}}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)^{2}
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\frac{\partial}{\partial w^{(j)}}\left(\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]-y_{i}\right)^{2}
 \]
 
 \end_inset
@@ -206,18 +241,7 @@ Gradient (weights)
 
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\frac{\partial}{\partial w^{(j)}}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\left(\frac{\partial}{\partial w^{(j)}}\mathbf{w}\mathbf{x}_{i}^{\top}+\frac{\partial}{\partial w^{(j)}}b-\frac{\partial}{\partial w^{(j)}}y_{i}\right)
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]-y_{i}\right)\left(\frac{\partial}{\partial w^{(j)}}\mathbf{x}_{i}\mathbf{w}^{\top}\right)
 \]
 
 \end_inset
@@ -225,7 +249,7 @@ Gradient (weights)
 
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\left(\frac{\partial}{\partial w^{(j)}}\mathbf{w}\mathbf{x}_{i}^{\top}\right)
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]-y_{i}\right)x_{i}^{\left(j\right)}
 \]
 
 \end_inset
@@ -233,18 +257,7 @@ Gradient (weights)
 
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b-y_{i}\right)x_{i}^{(j)}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\frac{2}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}x_{i}^{(j)}+b\frac{2}{m}\sum_{i=1}^{m}x_{i}^{(j)}-\frac{2}{m}\sum_{i=1}^{m}y_{i}x_{i}^{(j)}
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(x_{i}^{\left(j\right)}\mathbf{x}_{i}\mathbf{w}^{\top}+bx_{i}^{\left(j\right)}-x_{i}^{\left(j\right)}y_{i}\right)
 \]
 
 \end_inset
@@ -252,22 +265,7 @@ Gradient (weights)
 
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\left[\begin{array}{c}
-\mathbf{w}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}x_{i}^{(1)}\\
-\mathbf{w}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}x_{i}^{(2)}\\
-\vdots\\
-\mathbf{w}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}x_{i}^{(n)}
-\end{array}\right]+\frac{2b}{m}\left[\begin{array}{c}
-\sum_{i=1}^{m}x_{i}^{(1)}\\
-\sum_{i=1}^{m}x_{i}^{(2)}\\
-\vdots\\
-\sum_{i=1}^{m}x_{i}^{(n)}
-\end{array}\right]-\frac{2}{m}\left[\begin{array}{c}
-\sum_{i=1}^{m}y_{i}x_{i}^{(1)}\\
-\sum_{i=1}^{m}y_{i}x_{i}^{(2)}\\
-\vdots\\
-\sum_{i=1}^{m}y_{i}x_{i}^{(n)}
-\end{array}\right]
+\frac{\partial}{\partial w^{(j)}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\left(\sum_{i=1}^{m}x_{i}^{\left(j\right)}\mathbf{x}_{i}\mathbf{w}^{\top}+b\sum_{i=1}^{m}x_{i}^{\left(j\right)}-\sum_{i=1}^{m}x_{i}^{\left(j\right)}y_{i}\right)
 \]
 
 \end_inset
@@ -275,7 +273,7 @@ Gradient (weights)
 
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\mathbf{w}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}+\frac{2b}{m}\sum_{i=1}^{m}\mathbf{x}_{i}-\frac{2}{m}\sum_{i=1}^{m}y_{i}\mathbf{x}_{i}
+\nabla_{\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)\in\mathbb{R}^{1\times n}=\frac{2}{m}\left(\sum_{i=1}^{m}\mathbf{x}_{i}\left(\mathbf{x}_{i}\mathbf{w}^{\top}\right)+b\sum_{i=1}^{m}\mathbf{x}_{i}-\sum_{i=1}^{m}\mathbf{x}_{i}y_{i}\right)
 \]
 
 \end_inset
@@ -283,7 +281,23 @@ Gradient (weights)
 
 \begin_inset Formula 
 \[
-\boxed{\frac{\partial}{\partial\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=2\left(\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)\right)}
+\nabla_{\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)\in\mathbb{R}^{1\times n}=\frac{2}{m}\left(\sum_{i=1}^{m}\left(\mathbf{w}\mathbf{x}_{i}^{\top}\right)\mathbf{x}_{i}+b\sum_{i=1}^{m}\mathbf{x}_{i}-\sum_{i=1}^{m}\mathbf{x}_{i}y_{i}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)\in\mathbb{R}^{1\times n}=\frac{2}{m}\left(\mathbf{w}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}+b\sum_{i=1}^{m}\mathbf{x}_{i}-\sum_{i=1}^{m}\mathbf{x}_{i}y_{i}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boxed{\nabla_{\mathbf{w}}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=2\left(\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)\right)}
 \]
 
 \end_inset
@@ -298,15 +312,7 @@ Gradient (bias)
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\frac{\partial}{\partial b}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)^{2}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\frac{\partial}{\partial b}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\frac{\partial}{\partial b}\left(\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]-y_{i}\right)^{2}
 \]
 
 \end_inset
@@ -317,18 +323,7 @@ Gradient (bias)
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\left(\frac{\partial}{\partial b}\mathbf{w}\mathbf{x}_{i}^{\top}+\frac{\partial}{\partial b}b-\frac{\partial}{\partial b}y_{i}\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)\left(\frac{\partial}{\partial b}b\right)
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\mathbf{x}_{i}\mathbf{w}^{\top}+b-y_{i}\right)
 \]
 
 \end_inset
@@ -336,7 +331,7 @@ Gradient (bias)
 
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{2}{m}\sum_{i=1}^{m}\left(\mathbf{w}\mathbf{x}_{i}^{\top}+b-y_{i}\right)
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\left(\frac{2}{m}\sum_{i=1}^{m}\mathbf{x}_{i}\mathbf{w}^{\top}+\frac{2}{m}\sum_{i=1}^{m}b-\frac{2}{m}\sum_{i=1}^{m}y_{i}\right)
 \]
 
 \end_inset
@@ -344,7 +339,7 @@ Gradient (bias)
 
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\mathbf{w}\frac{2}{m}\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}+\frac{2}{m}\sum_{i=1}^{m}b-\frac{2}{m}\sum_{i=1}^{m}y_{i}
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\left(\frac{2}{m}\left[\sum_{i=1}^{m}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+2b-\frac{2}{m}\sum_{i=1}^{m}y_{i}\right)
 \]
 
 \end_inset
@@ -352,7 +347,7 @@ Gradient (bias)
 
 \begin_inset Formula 
 \[
-\boxed{\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=2\left(\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b-\mu\left(\mathbf{y}\right)\right)}
+\boxed{\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=2\left(\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\mathbf{w}^{\top}+b-\mu\left(\mathbf{y}\right)\right)}
 \]
 
 \end_inset
@@ -367,7 +362,7 @@ Analitic solution
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=0=2\left(\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b-\mu\left(\mathbf{y}\right)\right)
+\frac{\partial}{\partial b}J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=0=2\left(\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\mathbf{w}^{\top}+b-\mu\left(\mathbf{y}\right)\right)
 \]
 
 \end_inset
@@ -386,13 +381,19 @@ Analitic solution
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\left[\begin{array}{c}
-\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b-\mu\left(\mathbf{y}\right)\\
-\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
-\end{array}\right]=\left[\begin{array}{c}
-0\\
-\mathbf{0}
-\end{array}\right]
+\left[\begin{array}{ccc}
+\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\mathbf{w}^{\top}+b-\mu\left(\mathbf{y}\right) &  & \mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)\end{array}\right]=\left[\begin{array}{ccc}
+0 &  & \mathbf{0}\end{array}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left[\begin{array}{ccc}
+\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\mathbf{w}^{\top}+b &  & \mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\end{array}\right]=\left[\begin{array}{ccc}
+\mu\left(\mathbf{y}\right) &  & \boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)\end{array}\right]
 \]
 
 \end_inset
@@ -401,11 +402,12 @@ Analitic solution
 \begin_inset Formula 
 \[
 \left[\begin{array}{c}
-\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+b\\
-\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]+b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)
+b+\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\mathbf{w}^{\top}\\
+b\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)+\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]\mathbf{w}^{\top}
 \end{array}\right]=\left[\begin{array}{c}
 \mu\left(\mathbf{y}\right)\\
-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
+\\
+\boldsymbol{\mu}_{2}^{\top\text{¸}}\left(\mathbf{X}\bowtie\mathbf{y}\right)
 \end{array}\right]
 \]
 
@@ -414,12 +416,18 @@ Analitic solution
 
 \begin_inset Formula 
 \[
-\left[\begin{array}{c}
-b+\mathbf{w}\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)\\
-b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)+\mathbf{w}\left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]
+\left[\begin{array}{ccc}
+1 &  & \boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\\
+\\
+\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right) &  & \frac{1}{m}\mathbf{X}^{\top}\mathbf{X}
+\end{array}\right]\left[\begin{array}{c}
+b\\
+\\
+\mathbf{w}^{\top}
 \end{array}\right]=\left[\begin{array}{c}
 \mu\left(\mathbf{y}\right)\\
-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
+\\
+\boldsymbol{\mu}_{2}^{\top\text{¸}}\left(\mathbf{X}\bowtie\mathbf{y}\right)
 \end{array}\right]
 \]
 
@@ -428,14 +436,13 @@ b\boldsymbol{\mu}_{2}\left(\mathbf{X}\right)+\mathbf{w}\left[\frac{1}{m}\mathbf{
 
 \begin_inset Formula 
 \[
-\left[\begin{array}{cc}
-b & \mathbf{w}\end{array}\right]\left[\begin{array}{cc}
-1 & \boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)\\
-\boldsymbol{\mu}_{2}\left(\mathbf{X}\right) & \left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]
-\end{array}\right]=\left[\begin{array}{c}
-\mu\left(\mathbf{y}\right)\\
-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
-\end{array}\right]
+\left[\begin{array}{ccc}
+b &  & \mathbf{w}\end{array}\right]\left[\begin{array}{ccc}
+1 &  & \boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\\
+\\
+\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right) &  & \frac{1}{m}\mathbf{X}^{\top}\mathbf{X}
+\end{array}\right]=\left[\begin{array}{ccc}
+\mu\left(\mathbf{y}\right) &  & \boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)\end{array}\right]
 \]
 
 \end_inset
@@ -443,13 +450,12 @@ b & \mathbf{w}\end{array}\right]\left[\begin{array}{cc}
 
 \begin_inset Formula 
 \[
-\boxed{\left[\begin{array}{cc}
-b & \mathbf{w}\end{array}\right]=\left[\begin{array}{c}
-\mu\left(\mathbf{y}\right)\\
-\boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)
-\end{array}\right]\left[\begin{array}{cc}
-1 & \boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right)\\
-\boldsymbol{\mu}_{2}\left(\mathbf{X}\right) & \left[\frac{1}{m}\mathbf{X}^{\top}\mathbf{X}\right]
+\boxed{\left[\begin{array}{ccc}
+b &  & \mathbf{w}\end{array}\right]=\left[\begin{array}{ccc}
+\mu\left(\mathbf{y}\right) &  & \boldsymbol{\mu}_{2}\left(\mathbf{X}\bowtie\mathbf{y}\right)\end{array}\right]\left[\begin{array}{ccc}
+1 &  & \boldsymbol{\mu}_{2}\left(\mathbf{X}\right)\\
+\\
+\boldsymbol{\mu}_{2}^{\top}\left(\mathbf{X}\right) &  & \frac{1}{m}\mathbf{X}^{\top}\mathbf{X}
 \end{array}\right]^{-1}}
 \]
 

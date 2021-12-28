@@ -2,31 +2,52 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+#include <cmath>
 #include <iostream>
-#include <random>
-#include <PUJ/Model.h>
 
-// -- Typedefs
-using TModel = PUJ::Model::Linear< double >;
+#include <PUJ/Data/Algorithms.h>
+#include <PUJ/Model/Linear.h>
+
+// -- Typedef
+using TScalar = double;
+using TModel = PUJ::Model::Linear< TScalar >;
 
 int main( int argc, char** argv )
 {
-  TModel::TRowVector w( 1 );
-  w << 2;
-  TModel::TScalar b = 1;
+  unsigned long long n = 1;
+  if( argc > 1 )
+    n = std::atoi( argv[ 1 ] );
 
-  TModel m( w, b );
+  TScalar min_v = -10;
+  TScalar max_v =  10;
+  unsigned long long m = 1000;
+  TScalar dif_v = ( max_v - min_v ) / TScalar( m - 1 );
 
-  TModel::TRowVector s( 1 );
-  s << 3;
-  std::cout << m( s ) << std::endl;
+  TModel real_model;
+  real_model.Init( n, PUJ::Random );
 
-  std::random_device rd;
-  std::mt19937 gen( rd( ) );
-  std::uniform_real_distribution< TModel::TScalar > dis( -10.0, 10.0 );
-  TModel::TMatrix X =
-    TModel::TMatrix::NullaryExpr( 30, 1, [&](){ return( dis( gen ) ); } );
-  std::cout << m( X ) << std::endl;
+  TModel::TMatrix X_real =
+    TModel::TMatrix::NullaryExpr(
+      m, n,
+      [=]( TModel::TMatrix::Index i ) -> TScalar
+      {
+        return(
+          std::pow( ( dif_v * TScalar( i % m ) ) + min_v, 1 + ( i / m ) )
+          );
+      }
+      );
+  PUJ::Algorithms::Shuffle( X_real );
+  TModel::TCol y_real = real_model( X_real );
+
+  TModel analytical_model;
+  analytical_model.AnalyticalFit( X_real, y_real );
+  TModel::TCol y_diff = y_real - analytical_model( X_real );
+
+  std::cout << "=======================================" << std::endl;
+  std::cout << "Real model       : " << real_model << std::endl;
+  std::cout << "Analytical model : " << analytical_model << std::endl;
+  std::cout << "Difference      : " << y_diff.norm( ) << std::endl;
+  std::cout << "=======================================" << std::endl;
 
   return( EXIT_SUCCESS );
 }

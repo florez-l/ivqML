@@ -8,7 +8,7 @@ sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 import numpy
 import PUJ.Model.Logistic
 
-m = PUJ.Model.Logistic( [ -1, 2 ] )
+m = PUJ.Model.Logistic( parameters = [ 1, 2 ] )
 x = numpy.random.uniform( -10, 10, ( 10, 1 ) )
 
 print( m( 0.3 ) )

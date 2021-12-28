@@ -8,7 +8,6 @@ sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 import PUJ.Helpers.ArgParse
 import PUJ.Data.Algorithms
 import PUJ.Model.Linear
-import PUJ.Regression.MSE
 import PUJ.Optimizer.GradientDescent
 import PUJ.Debug.Polynomial
 
@@ -35,12 +34,12 @@ for i in range( 0, len( args.coefficients ), 2 ):
   w_true[ int( args.coefficients[ i ][ 1 : ] ) ] = \
           float( args.coefficients[ i + 1 ] )
 # end for
-model = PUJ.Model.Linear( w_true )
+model = PUJ.Model.Linear( parameters = w_true )
 
 ## -- Synthetic data
 vOff = ( args.v1 - args.v0 ) / args.number_of_samples
 X = numpy.matrix( numpy.arange( args.v0, args.v1 + 1, vOff ) ).T
-for i in range( 1, model.Dimensions( ) ):
+for i in range( 1, model.GetInputSize( ) ):
   X = numpy.append(
     X,
     numpy.array( X[ : , 0 ] ) * numpy.array( X[ : , i - 1 ] ),
@@ -51,29 +50,24 @@ D = numpy.append( X, model( X ), axis = 1 )
 numpy.random.shuffle( D )
 X, y, *_ = PUJ.Data.Algorithms.SplitData( D, 1 )
 
-## -- Prepare regression
-cost = PUJ.Regression.MSE( X, y )
-
 ## -- Analitical solution
-tA = cost.AnalyticSolve( )
+analitical_model = PUJ.Model.Linear( )
+analitical_model.Fit( X, y )
 
-## -- Init parameters
-if args.init == 'zeros':
-  t0 = numpy.zeros( len( w_true ) )
-elif args.init == 'ones':
-  t0 = numpy.ones( len( w_true ) )
-else:
-  t0 = numpy.random.uniform( low = 0, high = 1, size = len( w_true ) )
-# end if
+## -- Prepare regression
+iterative_model = PUJ.Model.Linear(
+  parameters = args.init,
+  size = model.GetInputSize( )
+  )
+cost = PUJ.Model.Linear.Cost( X, y, iterative_model )
 
 ## -- Prepare debug
 debug = PUJ.Debug.Polynomial( X, y )
 
 ## -- Iterative solution
-tI, nI = PUJ.Optimizer.GradientDescent(
+PUJ.Optimizer.GradientDescent(
   cost,
-  learning_rate = args.learning_rate,
-  init_theta = t0,
+  alpha = args.alpha,
   max_iter = args.max_iterations,
   epsilon = args.epsilon,
   debug_step = args.debug_step,
@@ -81,15 +75,11 @@ tI, nI = PUJ.Optimizer.GradientDescent(
   )
 
 ## -- Show results
-tD = tI - tA
 print( '=================================================================' )
-print( '* Analitical solution  :', tA )
-print( '* Iterative solution   :', tI )
-print( '* Difference           :', ( tD @ tD.T )[ 0 , 0 ] ** 0.5 )
-print( '* Final cost           :', cost.Cost( tI ) )
-print( '* Number of iterations :', nI )
+print( '* Analitical solution :', analitical_model )
+print( '* Iterative solution  :', iterative_model )
+print( '* Number of iterations :', debug.GetNumberOfIterations( ) )
 print( '=================================================================' )
-
 debug.KeepFigures( )
 
 ## eof - $RCSfile$

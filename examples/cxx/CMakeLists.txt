@@ -4,8 +4,14 @@
 
 set(
   _examples
+  NormalizeData
+  StandardizeData
   LinearModel_00
+  LinearModel_01
+  LinearModel_02
   LogisticModel_00
+  LogisticModel_01
+  LogisticModel_02
   )
 
 include_directories(

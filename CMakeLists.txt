@@ -10,6 +10,9 @@ project(PUJ_ML VERSION 1.0.0.1)
 set(CMAKE_CXX_STANDARD 17)
 include(GenerateExportHeader)
 
+## -- Find Boost
+find_package(Boost REQUIRED program_options)
+
 ## -- Find Eigen3
 find_package(Eigen3 REQUIRED)
 

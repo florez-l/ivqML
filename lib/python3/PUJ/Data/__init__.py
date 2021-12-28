@@ -3,6 +3,7 @@
 ## =========================================================================
 
 from .Algorithms import *
+from .Generator import *
 from .Normalize import *
 
 ## eof - $RCSfile$

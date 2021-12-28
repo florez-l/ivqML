@@ -1,0 +1,6 @@
+draft
+2 8 ReLU
+8 4 ReLU
+4 2 ReLU
+2 1 Logistic
+0 0
