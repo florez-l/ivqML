@@ -4,7 +4,9 @@
 #ifndef __PUJ_ML__Model__Base__h__
 #define __PUJ_ML__Model__Base__h__
 
+#include <cassert>
 #include <Eigen/Core>
+#include <PUJ_ML/Export.h>
 
 namespace PUJ_ML
 {
@@ -20,7 +22,7 @@ namespace PUJ_ML
       using TScalar = _T;
       using TMatrix = Eigen::Matrix< _T, Eigen::Dynamic, Eigen::Dynamic >;
       using TRow    = Eigen::Matrix< _T, 1, Eigen::Dynamic >;
-      using TColumn = Eigen::Matrix< _T, Eigen::Dynamic, 1 >;
+      using TCol    = Eigen::Matrix< _T, Eigen::Dynamic, 1 >;
 
     public:
       /**
@@ -38,46 +40,46 @@ namespace PUJ_ML
         Cost( Self* model, const TMatrix& X, const TMatrix& Y );
         virtual ~Cost( ) = default;
 
-        const ERegularization& regularization( ) const;
-        void set_ridge_regularization( );
-        void set_LASSO_regularization( );
+        const ERegularization& GetRegularization( ) const;
+        void SetRegularizationToRidge( );
+        void SetRegularizationToLASSO( );
 
-        const _T& lambda( ) const;
-        void set_lambda( const _T& l );
+        const _T& GetLambda( ) const;
+        void SetLambda( const _T& l );
 
         virtual _T operator()( _T* g = nullptr ) const;
 
       protected:
-        Self* m_Model;
+        Self* m_Model { nullptr };
 
-        const TMatrix* m_X;
-        const TMatrix* m_Y;
+        const TMatrix* m_X { nullptr };
+        const TMatrix* m_Y { nullptr };
 
         ERegularization m_Regularization;
-        _T m_Lambda;
+        _T m_Lambda { 0 };
       };
 
     public:
       Base( );
       virtual ~Base( ) = default;
 
-      TRow& parameters( );
-      const TRow& parameters( ) const;
-      unsigned long number_of_parameters( ) const;
+      TCol& GetParameters( );
+      const TCol& GetParameters( ) const;
+      unsigned long GetNumberOfParameters( ) const;
 
       template< class _I >
-      void set_parameters( _I b, _I e );
-      void set_parameters( const TRow& p );
+      void SetParameters( _I b, _I e );
+      void SetParameters( const TCol& p );
 
-      virtual TColumn operator()( const TMatrix& x ) = 0;
-      virtual TColumn operator[]( const TMatrix& x );
+      virtual TMatrix operator()( const TMatrix& x ) = 0;
+      virtual TMatrix operator[]( const TMatrix& x );
 
     protected:
       void _Out( std::ostream& o ) const;
       void _In( std::istream& i );
 
     protected:
-      TRow m_P;
+      TCol m_P;
 
     public:
       friend std::ostream& operator<<( std::ostream& o, const Self& m )
@@ -98,12 +100,12 @@ namespace PUJ_ML
 template< class _T >
 template< class _I >
 void PUJ_ML::Model::Base< _T >::
-set_parameters( _I b, _I e )
+SetParameters( _I b, _I e )
 {
   this->m_P.resize( std::distance( b, e ) );
   unsigned long long k = 0;
   for( auto i = b; i != e; ++i )
-    this->m_P( k++ ) = *i;
+    this->m_P( k++ ) = _T( *i );
 }
 
 #endif // __PUJ_ML__Model__Base__h__

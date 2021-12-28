@@ -15,7 +15,7 @@ Perceptron( )
 // -------------------------------------------------------------------------
 template< class _T >
 PUJ_ML::Model::Perceptron< _T >::
-Perceptron( const TMatrix& X, const TColumn& Y )
+Perceptron( const TMatrix& X, const TCol& Y )
   : Superclass( )
 {
 }
@@ -23,7 +23,7 @@ Perceptron( const TMatrix& X, const TColumn& Y )
 // -------------------------------------------------------------------------
 template< class _T >
 typename PUJ_ML::Model::Perceptron< _T >::
-TColumn PUJ_ML::Model::Perceptron< _T >::
+TMatrix PUJ_ML::Model::Perceptron< _T >::
 operator[]( const TMatrix& x )
 {
   return(
@@ -32,8 +32,8 @@ operator[]( const TMatrix& x )
 }
 
 // -------------------------------------------------------------------------
-template class PUJ_ML::Model::Perceptron< float >;
-template class PUJ_ML::Model::Perceptron< double >;
-template class PUJ_ML::Model::Perceptron< long double >;
+template class PUJ_ML_EXPORT PUJ_ML::Model::Perceptron< float >;
+template class PUJ_ML_EXPORT PUJ_ML::Model::Perceptron< double >;
+template class PUJ_ML_EXPORT PUJ_ML::Model::Perceptron< long double >;
 
 // eof - $RCSfile$

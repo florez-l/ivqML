@@ -9,7 +9,7 @@ int main( int argc, char** argv )
   TScalar p[] = { 0, 1 };
 
   TModel m;
-  m.set_parameters( p, p + 2 );
+  m.SetParameters( p, p + 2 );
 
   TModel::TMatrix x( 3, 1 );
   x << 3, -4, 5;

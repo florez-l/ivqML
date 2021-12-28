@@ -31,7 +31,7 @@ Linear( )
 // -------------------------------------------------------------------------
 template< class _T >
 PUJ_ML::Model::Linear< _T >::
-Linear( const TMatrix& X, const TColumn& Y )
+Linear( const TMatrix& X, const TCol& Y )
   : Superclass( )
 {
 }
@@ -39,18 +39,18 @@ Linear( const TMatrix& X, const TColumn& Y )
 // -------------------------------------------------------------------------
 template< class _T >
 typename PUJ_ML::Model::Linear< _T >::
-TColumn PUJ_ML::Model::Linear< _T >::
+TMatrix PUJ_ML::Model::Linear< _T >::
 operator()( const TMatrix& x )
 {
+  assert( x.cols( ) + 1 == this->m_P.rows( ) );
   return(
-    ( x * this->m_P.block( 0, 1, 1, this->m_P.cols( ) - 1 ).transpose( ) ).
-    array( ) + this->m_P( 0 )
+    ( x * this->m_P.block( 1, 0, x.cols( ), 1 ) ).array( ) + this->m_P( 0 )
     );
 }
 
 // -------------------------------------------------------------------------
-template class PUJ_ML::Model::Linear< float >;
-template class PUJ_ML::Model::Linear< double >;
-template class PUJ_ML::Model::Linear< long double >;
+template class PUJ_ML_EXPORT PUJ_ML::Model::Linear< float >;
+template class PUJ_ML_EXPORT PUJ_ML::Model::Linear< double >;
+template class PUJ_ML_EXPORT PUJ_ML::Model::Linear< long double >;
 
 // eof - $RCSfile$

@@ -32,7 +32,7 @@ Logistic( )
 // -------------------------------------------------------------------------
 template< class _T >
 PUJ_ML::Model::Logistic< _T >::
-Logistic( const TMatrix& X, const TColumn& Y )
+Logistic( const TMatrix& X, const TCol& Y )
   : Superclass( )
 {
 }
@@ -40,7 +40,7 @@ Logistic( const TMatrix& X, const TColumn& Y )
 // -------------------------------------------------------------------------
 template< class _T >
 typename PUJ_ML::Model::Logistic< _T >::
-TColumn PUJ_ML::Model::Logistic< _T >::
+TMatrix PUJ_ML::Model::Logistic< _T >::
 operator()( const TMatrix& x )
 {
   static const auto f = []( _T z ) -> _T
@@ -59,7 +59,7 @@ operator()( const TMatrix& x )
 // -------------------------------------------------------------------------
 template< class _T >
 typename PUJ_ML::Model::Logistic< _T >::
-TColumn PUJ_ML::Model::Logistic< _T >::
+TMatrix PUJ_ML::Model::Logistic< _T >::
 operator[]( const TMatrix& x )
 {
   return(
@@ -68,8 +68,8 @@ operator[]( const TMatrix& x )
 }
 
 // -------------------------------------------------------------------------
-template class PUJ_ML::Model::Logistic< float >;
-template class PUJ_ML::Model::Logistic< double >;
-template class PUJ_ML::Model::Logistic< long double >;
+template class PUJ_ML_EXPORT PUJ_ML::Model::Logistic< float >;
+template class PUJ_ML_EXPORT PUJ_ML::Model::Logistic< double >;
+template class PUJ_ML_EXPORT PUJ_ML::Model::Logistic< long double >;
 
 // eof - $RCSfile$

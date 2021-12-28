@@ -22,7 +22,7 @@ namespace PUJ_ML
       using TScalar    = typename Superclass::TScalar;
       using TMatrix    = typename Superclass::TMatrix;
       using TRow       = typename Superclass::TRow;
-      using TColumn    = typename Superclass::TColumn;
+      using TCol       = typename Superclass::TCol;
 
     public:
       /**
@@ -39,10 +39,10 @@ namespace PUJ_ML
 
     public:
       Linear( );
-      Linear( const TMatrix& X, const TColumn& Y );
+      Linear( const TMatrix& X, const TCol& Y );
       virtual ~Linear( ) = default;
 
-      virtual TColumn operator()( const TMatrix& x ) override;
+      virtual TMatrix operator()( const TMatrix& x ) override;
     };
   } // end namespace
 } // end namespace

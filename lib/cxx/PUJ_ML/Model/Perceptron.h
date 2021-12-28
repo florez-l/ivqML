@@ -22,14 +22,14 @@ namespace PUJ_ML
       using TScalar    = typename Superclass::TScalar;
       using TMatrix    = typename Superclass::TMatrix;
       using TRow       = typename Superclass::TRow;
-      using TColumn    = typename Superclass::TColumn;
+      using TCol       = typename Superclass::TCol;
 
     public:
       Perceptron( );
-      Perceptron( const TMatrix& X, const TColumn& Y );
+      Perceptron( const TMatrix& X, const TCol& Y );
       virtual ~Perceptron( ) = default;
 
-      virtual TColumn operator[]( const TMatrix& x ) override;
+      virtual TMatrix operator[]( const TMatrix& x ) override;
     };
   } // end namespace
 } // end namespace
