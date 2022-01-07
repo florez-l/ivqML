@@ -6,14 +6,18 @@ include_directories(
   ${PROJECT_BINARY_DIR}/lib/cxx
   ${PROJECT_SOURCE_DIR}/lib/cxx
   )
+  
+set(
+  _examples
+  LinearModel_00
+  LinearModel_FitGradientDescent_00
+  LogisticModel_00
+  PerceptronModel_00
+  )
 
-add_executable(example_LinearModel_00 LinearModel_00.cxx)
-target_link_libraries(example_LinearModel_00 PUJ_ML)
-
-add_executable(example_LogisticModel_00 LogisticModel_00.cxx)
-target_link_libraries(example_LogisticModel_00 PUJ_ML)
-
-add_executable(example_PerceptronModel_00 PerceptronModel_00.cxx)
-target_link_libraries(example_PerceptronModel_00 PUJ_ML)
+foreach(_e ${_examples})
+  add_executable(example_${_e} ${_e}.cxx)
+  target_link_libraries(example_${_e} PUJ_ML)
+endforeach(_e)
 
 ## eof - $RCSfile$
