@@ -4,6 +4,7 @@
 
 set(
   _h
+  PUJ_ML/Helpers/CSV.h
   PUJ_ML/Model/Base.h
   PUJ_ML/Model/Linear.h
   PUJ_ML/Model/Logistic.h
@@ -11,6 +12,7 @@ set(
   )
 set(
   _cxx
+  PUJ_ML/Helpers/CSV.cxx
   PUJ_ML/Model/Base.cxx
   PUJ_ML/Model/Linear.cxx
   PUJ_ML/Model/Logistic.cxx
@@ -27,6 +29,6 @@ generate_export_header(
   EXPORT_MACRO_NAME PUJ_ML_EXPORT
   EXPORT_FILE_NAME PUJ_ML/Export.h
   )
-target_link_libraries(PUJ_ML Eigen3::Eigen)
+target_link_libraries(PUJ_ML ${Boost_LIBRARIES} Eigen3::Eigen)
 
 ## eof - $RCSfile$
