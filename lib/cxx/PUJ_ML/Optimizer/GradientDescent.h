@@ -27,6 +27,7 @@ namespace PUJ_ML
     public:
       GradientDescent( )
         {
+          this->m_E = std::numeric_limits< TScalar >::epsilon( );
         }
 
       virtual ~GradientDescent( ) = default;
@@ -101,9 +102,10 @@ namespace PUJ_ML
       
       TScalar m_A { 0.01 };
       TScalar m_L { 0 };
-      TScalar m_E { std::numeric_limits< TScalar >::epsilon };
       unsigned long long m_N { 1000 };
       unsigned long long m_D { 100 };
+
+      TScalar m_E;
     };
   } // end namespace
 } // end namespace
