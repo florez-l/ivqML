@@ -16,7 +16,7 @@ Cost( Superclass* model, const TMatrix& X, const TMatrix& Y )
 // -------------------------------------------------------------------------
 template< class _T >
 _T PUJ_ML::Model::Logistic< _T >::Cost::
-operator()( _T* g ) const
+Compute( TCol* g ) const
 {
   return( _T( 0 ) );
 }

@@ -15,9 +15,25 @@ Cost( Superclass* model, const TMatrix& X, const TMatrix& Y )
 // -------------------------------------------------------------------------
 template< class _T >
 _T PUJ_ML::Model::Linear< _T >::Cost::
-operator()( _T* g ) const
+Compute( TCol* g ) const
 {
-  return( _T( 0 ) );
+  if( this->m_Model == nullptr )
+    return( _T( 0 ) );
+  
+  TCol z = ( this->m_Model->operator()( *this->m_X ) - *this->m_Y );
+  _T J = z.array( ).pow( 2 ).mean( );
+
+  if( g != nullptr )
+  {
+    unsigned long long n = this->m_Model->GetNumberOfParameters( );
+    if( g->cols( ) != n )
+      *g = TCol::Zero( n );
+    g->block( 1, 0, n - 1, 1 ) =
+      ( this->m_X->array( ).colwise( ) * z.array( ) ).colwise( ).mean( );
+    ( *g )( 0 ) = z.mean( );
+    *g *= _T( 2 );
+  } // end if
+  return( J );
 }
 
 // -------------------------------------------------------------------------

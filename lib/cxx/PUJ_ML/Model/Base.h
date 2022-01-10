@@ -30,33 +30,19 @@ namespace PUJ_ML
       class Cost
       {
       public:
-        enum ERegularization
-        {
-          RidgeReg = 0,
-          LASSOReg
-        };
-
-      public:
         Cost( Self* model, const TMatrix& X, const TMatrix& Y );
         virtual ~Cost( ) = default;
+        
+        const TCol& GetParameters( ) const;
 
-        const ERegularization& GetRegularization( ) const;
-        void SetRegularizationToRidge( );
-        void SetRegularizationToLASSO( );
-
-        const _T& GetLambda( ) const;
-        void SetLambda( const _T& l );
-
-        virtual _T operator()( _T* g = nullptr ) const;
+        virtual _T Compute( TCol* g = nullptr ) const = 0;
+        virtual void Update( const TCol& g ) const;
 
       protected:
         Self* m_Model { nullptr };
 
         const TMatrix* m_X { nullptr };
         const TMatrix* m_Y { nullptr };
-
-        ERegularization m_Regularization;
-        _T m_Lambda { 0 };
       };
 
     public:

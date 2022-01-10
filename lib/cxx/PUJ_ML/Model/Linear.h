@@ -34,7 +34,7 @@ namespace PUJ_ML
         Cost( Superclass* model, const TMatrix& X, const TMatrix& Y );
         virtual ~Cost( ) = default;
 
-        virtual _T operator()( _T* g = nullptr ) const override;
+        virtual _T Compute( TCol* g = nullptr ) const override;
       };
 
     public:

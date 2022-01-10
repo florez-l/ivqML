@@ -19,7 +19,7 @@ namespace PUJ_ML
       _TMatrix Read(
         const std::string& fname,
         bool ignore_first_row = false,
-        const std::string& separator = ", ;\t"
+        const std::string& separator = ","
         );
 
       /**

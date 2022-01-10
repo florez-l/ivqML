@@ -16,8 +16,8 @@ include(GenerateExportHeader)
 ## -- Find Boost
 find_package(Boost REQUIRED program_options)
 
-## -- Find Eigen (3.4)
-find_package(Eigen3 3.4 REQUIRED)
+## -- Find Eigen
+find_package(Eigen3 REQUIRED)
 
 ## -- Source code
 subdirs(lib/cxx examples)

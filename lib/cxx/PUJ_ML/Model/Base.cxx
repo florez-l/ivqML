@@ -12,60 +12,24 @@ Cost( Self* model, const TMatrix& X, const TMatrix& Y )
   this->m_Model = model;
   this->m_X = &X;
   this->m_Y = &Y;
-  this->SetRegularizationToRidge( );
 }
 
 // -------------------------------------------------------------------------
 template< class _T >
-const typename PUJ_ML::Model::Base< _T >::Cost::
-ERegularization& PUJ_ML::Model::Base< _T >::Cost::
-GetRegularization( ) const
+const typename PUJ_ML::Model::Base< _T >::
+TCol& PUJ_ML::Model::Base< _T >::Cost::
+GetParameters( ) const
 {
-  return( this->m_Regularization );
-}
-
-// -------------------------------------------------------------------------
-template< class _T >
-void PUJ_ML::Model::Base< _T >::Cost::
-SetRegularizationToRidge( )
-{
-  this->m_Regularization = Self::Cost::RidgeReg;
+  return( this->m_Model->GetParameters( ) );
 }
 
 // -------------------------------------------------------------------------
 template< class _T >
 void PUJ_ML::Model::Base< _T >::Cost::
-SetRegularizationToLASSO( )
+Update( const TCol& g ) const
 {
-  this->m_Regularization = Self::Cost::LASSOReg;
-}
-
-// -------------------------------------------------------------------------
-template< class _T >
-const _T& PUJ_ML::Model::Base< _T >::Cost::
-GetLambda( ) const
-{
-  return( this->m_Lambda );
-}
-
-// -------------------------------------------------------------------------
-template< class _T >
-void PUJ_ML::Model::Base< _T >::Cost::
-SetLambda( const _T& l )
-{
-  this->m_Lambda = l;
-
-}
-
-// -------------------------------------------------------------------------
-template< class _T >
-_T PUJ_ML::Model::Base< _T >::Cost::
-operator()( _T* g ) const
-{
-  /*
-   * TODO: take regularization into account
-   */
-  return( _T( 0 ) );
+  if( this->m_Model != nullptr )
+    this->m_Model->SetParameters( this->m_Model->GetParameters( ) - g );
 }
 
 // -------------------------------------------------------------------------
