@@ -4,19 +4,19 @@
 
 set(
   _h
-  PUJ_ML/Helpers/CSV.h
-  PUJ_ML/Model/Base.h
-  PUJ_ML/Model/Linear.h
-  PUJ_ML/Model/Logistic.h
-  PUJ_ML/Model/Perceptron.h
+  PUJ/Helpers/CSV.h
+  PUJ/Model/Base.h
+  PUJ/Model/Linear.h
+  PUJ/Model/Logistic.h
+  PUJ/Model/Perceptron.h
   )
 set(
   _cxx
-  PUJ_ML/Helpers/CSV.cxx
-  PUJ_ML/Model/Base.cxx
-  PUJ_ML/Model/Linear.cxx
-  PUJ_ML/Model/Logistic.cxx
-  PUJ_ML/Model/Perceptron.cxx
+  PUJ/Helpers/CSV.cxx
+  PUJ/Model/Base.cxx
+  PUJ/Model/Linear.cxx
+  PUJ/Model/Logistic.cxx
+  PUJ/Model/Perceptron.cxx
   )
 
 include_directories(
@@ -26,8 +26,8 @@ include_directories(
 add_library(PUJ_ML SHARED ${_cxx} ${_h})
 generate_export_header(
   PUJ_ML
-  EXPORT_MACRO_NAME PUJ_ML_EXPORT
-  EXPORT_FILE_NAME PUJ_ML/Export.h
+  EXPORT_MACRO_NAME PUJ_EXPORT
+  EXPORT_FILE_NAME PUJ/Export.h
   )
 target_link_libraries(PUJ_ML ${Boost_LIBRARIES} Eigen3::Eigen)
 
