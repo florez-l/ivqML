@@ -14,7 +14,9 @@ class Linear( Base ):
   def __init__( self, data = None ):
     if not data is None:
       if not isinstance( data, numpy.matrix ):
-        raise ValueError( 'Input data is not a numpy.matrix' )
+        raise ValueError(
+          'Input data is not a numpy.matrix (' + str( type( data ) ) + ')'
+          )
       # end if
 
       # Get input matrices
@@ -58,6 +60,10 @@ class Linear( Base ):
     ## ---------------------------------------------------------------------
     def __init__( self, model, X, y ):
       super( ).__init__( model, X, y )
+      self.m_XtX = ( X.T @ X ) / float( X.shape[ 0 ] )
+      self.m_mX = X.mean( axis = 0 )
+      self.m_mY = y.mean( )
+      self.m_XhY = numpy.multiply( X, y ).mean( axis = 0 )
     # end def
 
     ## ---------------------------------------------------------------------
@@ -68,15 +74,14 @@ class Linear( Base ):
         numpy.power( self.m_Model.evaluate( self.m_X ) - self.m_Y, 2 ).\
         mean( )
       if need_gradient:
-        g = self.m_Model.parameters( )
+        g = numpy.zeros( self.m_Model.parameters( ).shape )
         w = g[ 1 : , : ]
         b = g[ 0 , 0 ]
-        m = float( self.m_X.shape[ 0 ] )
 
-        g[ 0 , 0 ] = ( self.m_X.mean( axis = 0 ) @ w ) + b - self.m_Y.mean( )
-        g[ 1 : , : ]  = ( w @ ( self.m_X.T @ self.m_X ) ) / m
-        g[ 1 : , : ] += b * self.m_X.mean( axis = 0 )
-        g[ 1 : , : ] -= numpy.multiply( self.m_X, self.m_Y ).mean( axis = 0 )
+        g[ 0 , 0 ] = ( self.m_mX @ w ) + b - self.m_mY
+        g[ 1 : , : ]  = w @ self.m_XtX
+        g[ 1 : , : ] += b * self.m_mX
+        g[ 1 : , : ] -= self.m_XhY
         
         return [ J, 2.0 * g ]
       else:
