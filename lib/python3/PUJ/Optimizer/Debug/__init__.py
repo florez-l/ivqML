@@ -4,5 +4,6 @@
 
 from .Simple import *
 from .PlotCost import *
+from .PlotPolynomialCost import *
 
 ## eof - $RCSfile$

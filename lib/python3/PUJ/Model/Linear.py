@@ -61,9 +61,9 @@ class Linear( Base ):
     def __init__( self, model, X, y ):
       super( ).__init__( model, X, y )
       self.m_XtX = ( X.T @ X ) / float( X.shape[ 0 ] )
-      self.m_mX = X.mean( axis = 0 )
+      self.m_mX = numpy.matrix( X.mean( axis = 0 ) )
       self.m_mY = y.mean( )
-      self.m_XhY = numpy.multiply( X, y ).mean( axis = 0 )
+      self.m_XhY = numpy.matrix( numpy.multiply( X, y ).mean( axis = 0 ) ).T
     # end def
 
     ## ---------------------------------------------------------------------
@@ -79,8 +79,8 @@ class Linear( Base ):
         b = g[ 0 , 0 ]
 
         g[ 0 , 0 ] = ( self.m_mX @ w ) + b - self.m_mY
-        g[ 1 : , : ]  = w @ self.m_XtX
-        g[ 1 : , : ] += b * self.m_mX
+        g[ 1 : , : ]  = self.m_XtX @ w
+        g[ 1 : , : ] += b * self.m_mX.T
         g[ 1 : , : ] -= self.m_XhY
         
         return [ J, 2.0 * g ]
