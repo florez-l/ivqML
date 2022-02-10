@@ -26,8 +26,7 @@ J = PUJ.Model.Linear.Cost( m, data[ : , 0 : -1 ], data[ : , -1 : ] )
 a = PUJ.Model.Linear( numpy.matrix( data ) )
 
 # Debugger
-# debugger = PUJ.Optimizer.Debug.Simple
-debugger = PUJ.Optimizer.Debug.PlotCost( )
+debugger = PUJ.Optimizer.Debug.Simple
 
 # Fit using an optimization algorithm
 opt = PUJ.Optimizer.GradientDescent( J )
