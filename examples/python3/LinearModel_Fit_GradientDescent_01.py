@@ -7,13 +7,6 @@ sys.path.insert( 0, '../../lib/python3' )
 
 import PUJ
 
-## -------------------------------------------------------------------------
-def simple_debug( model, i, J, dJ, show ):
-  if show:
-    print( i, J, dJ )
-  # end if
-# end def
-
 ## ----------
 ## -- Main --
 ## ----------
@@ -32,9 +25,13 @@ J = PUJ.Model.Linear.Cost( m, data[ : , 0 : -1 ], data[ : , -1 : ] )
 # Analytical model
 a = PUJ.Model.Linear( numpy.matrix( data ) )
 
+# Debugger
+# debugger = PUJ.Optimizer.Debug.Simple
+debugger = PUJ.Optimizer.Debug.PlotCost( )
+
 # Fit using an optimization algorithm
 opt = PUJ.Optimizer.GradientDescent( J )
-opt.setDebugFunction( simple_debug )
+opt.setDebugFunction( debugger )
 opt.setLearningRate( 1e-6 )
 opt.setNumberOfIterations( 100000 )
 opt.setNumberOfDebugIterations( 10 )
@@ -46,5 +43,8 @@ print( '= Iterations       :', opt.realIterations( ) )
 print( '= Fitted model     :', m )
 print( '= Analytical model :', a )
 print( '===========================================' )
+
+# Keep showing figures
+debugger.KeepFigures( )
 
 ## eof - $RCSfile$
