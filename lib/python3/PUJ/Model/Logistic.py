@@ -48,9 +48,9 @@ class Logistic( Linear ):
     ## ---------------------------------------------------------------------
     def evaluate( self, need_gradient = False ):
       z = self.m_Model.evaluate( self.m_X )
-      J  = numpy.log( z[ self.m_Y == 1 ] ).sum( )
-      J += numpy.log( 1 - z[ self.m_Y == 0 ] ).sum( )
-      J /= float( self.m_X.shape[ 0 ] )
+      J  = numpy.log( z[ self.m_Y == 1 ] + 1e-12 ).sum( )
+      J += numpy.log( 1 - z[ self.m_Y == 0 ] + 1e-12 ).sum( )
+      J /= -float( self.m_X.shape[ 0 ] )
       if need_gradient:
 
         g = numpy.zeros( self.m_Model.parameters( ).shape )
