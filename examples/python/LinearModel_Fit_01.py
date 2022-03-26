@@ -1,8 +1,10 @@
 ## =========================================================================
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
+## This example shows a naive implementation of a 1D linear regression.
+## =========================================================================
 
-import csv, pprint, sys
+import csv, sys
 
 # Read file
 csv_file = open( sys.argv[ 1 ] )
@@ -52,11 +54,28 @@ iA[ 1 ][ 0 ] = -A[ 0 ][ 1 ] / dA
 w = ( iA[ 0 ][ 0 ] * B[ 0 ] ) + ( iA[ 0 ][ 1 ] * B[ 1 ] )
 b = ( iA[ 1 ][ 0 ] * B[ 0 ] ) + ( iA[ 1 ][ 1 ] * B[ 1 ] )
 
-# Compute cosst
+# Compute cost
+J = float( 0 )
+for i in range( len( X ) ):
+  J += ( ( w * X[ i ] ) + b - Y[ i ] ) ** 2
+# end for
+J /= float( len( X ) )
 
+# Compute cost derivative
+g = [ float( 0 ), float( 0 ) ]
+for i in range( len( X ) ):
+  g[ 0 ] += 2 * ( ( w * X[ i ] ) + b - Y[ i ] ) * X[ i ]
+  g[ 1 ] += 2 * ( ( w * X[ i ] ) + b - Y[ i ] )
+# end for
+g[ 0 ] /= float( len( X ) )
+g[ 1 ] /= float( len( X ) )
+
+# Show results
 print( '***********************' )
-print( '* Weight = ' + str( w ) )
-print( '* Bias   = ' + str( b ) )
+print( '* Weight     = ' + str( w ) )
+print( '* Bias       = ' + str( b ) )
+print( '* Cost       = ' + str( J ) )
+print( '* Derivative = ' + str( g ) )
 print( '***********************' )
 
 ## eof - $RCSfile$
