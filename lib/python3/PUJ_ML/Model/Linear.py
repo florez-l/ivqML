@@ -64,10 +64,6 @@ class Linear( BaseModel ):
   Assign parameters
   '''
   def setParameters( self, p ):
-    if self.numberOfParameters( ) == 0:
-      raise ValueError( 'Parameters should be defined first!' )
-    # end if
-
     rP = None
     if not isinstance( p, numpy.matrix ):
       rP = numpy.matrix( p ).T
@@ -75,15 +71,7 @@ class Linear( BaseModel ):
       rP = p
     # end if
 
-    if rP.shape[ 0 ] != self.numberOfParameters( ):
-      raise ValueError(
-        'Number of parameters (=' + str( rP.shape[ 0 ] ) +
-        ') differs from parameters (=' + str( self.numberOfParameters( ) )
-        + ')'
-        )
-    # end if
-
-    self.m_P = rP
+    self.m_P = rP.astype( numpy.float64 )
   # end def
 
   '''

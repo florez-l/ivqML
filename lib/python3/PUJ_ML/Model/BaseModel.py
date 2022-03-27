@@ -146,6 +146,25 @@ class BaseModel( ABC ):
     # end def
 
     '''
+    Get a particular batch
+    '''
+    def batch( self, bId ):
+      i = bId * self.m_BatchSize
+      j = ( bId + 1 ) * self.m_BatchSize
+      if j > self.m_X.shape[ 0 ]:
+        j = self.m_X.shape[ 0 ]
+      # end if
+      return [ self.m_X, self.m_Y ]
+    # end def
+
+    '''
+    Shuffle input data
+    '''
+    def shuffle( self ):
+      pass
+    # end def
+
+    '''
     Compute the cost with current parameters
     '''
     def evaluate( self, batch_id = -1, need_gradient = False ):
@@ -154,6 +173,13 @@ class BaseModel( ABC ):
       else:
         return self._evaluate( [ self.m_X, self.m_Y ], need_gradient )
       # end if
+    # end def
+
+    '''
+    Move model parameters along d
+    '''
+    def move( self, d ):
+      self.m_Model.moveParameters( d )
     # end def
 
     '''
