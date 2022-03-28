@@ -4,5 +4,6 @@
 
 from .BaseModel import *
 from .Linear import *
+from .Logistic import *
 
 ## eof - $RCSfile$

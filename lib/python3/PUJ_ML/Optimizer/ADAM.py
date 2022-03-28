@@ -46,8 +46,7 @@ class ADAM( GradientDescent ):
     b2 = self.m_Beta2
     b2t = self.m_Beta2
     cb2 = float( 1 ) - self.m_Beta2
-    [ J0, g ] = self.evaluate( 0 )
-    start_batch = 1
+    [ J0, g ] = self.m_Cost.evaluate( batch_id = -1, need_gradient = False )
 
     # Prepare loop
     stop = False
@@ -56,7 +55,10 @@ class ADAM( GradientDescent ):
     # Main loop
     while not stop:
 
-      for b in range( start_batch, self.m_Cost.numberOfBatches( ) ):
+      # Perform one batch loop
+      for b in range( self.m_Cost.numberOfBatches( ) ):
+        [ J, g ] = self.evaluate( b )
+
         # Update moments estimate
         m = ( b1 * m ) + ( cb1 * g )
         v = ( b2 * v ) + ( cb2 * numpy.power( g, 2 ) )
@@ -68,34 +70,38 @@ class ADAM( GradientDescent ):
           ( numpy.power( v / ( float( 1 ) - b2t ), 0.5 ) + self.m_Epsilon )
           )
 
-        # Update gradient
-        [ J1, g ] = self.evaluate( b )
+        # Update dampings
+        b1t *= b1
+        b2t *= b2
       # end for
-      start_batch = 0
 
-      # Update iterations
+      # Update stop criteria
+      [ J1, g ] = self.m_Cost.evaluate( batch_id = -1, need_gradient = False )
       if not self.m_Debug is None:
-        stop = self.m_Debug(
-          self.m_Cost.model( ), self.m_Iteration, J0, J0 - J1,
+        stop = stop or self.m_Debug(
+          self.m_Cost.model( ),
+          self.m_Iteration,
+          J0, J0 - J1,
           self.m_Iteration % self.m_NumberOfDebugIterations == 0
           )
       # end if
       self.m_Iteration += 1
       stop = stop or self.m_Iteration >= self.m_MaximumNumberOfIterations
-      stop = stop or ( abs( J0 - J1 ) < self.m_Epsilon )
+      stop = stop or math.isnan( J1 ) or math.isinf( J1 )
 
-      # Final debug call
-      if not self.m_Debug is None and stop:
-        self.m_Debug(
-          self.m_Cost.model( ), self.m_Iteration - 1, J0, J0 - J1, True
-          )
+      if not stop:
+        # Prepare next step
+        stop = stop or abs( J0 - J1 ) <= self.m_Epsilon
+        J0 = J1
+        self.m_Cost.shuffle( )
+      else:
+        # Debug last iteration
+        if not self.m_Debug is None:
+          self.m_Debug(
+            self.m_Cost.model( ), self.m_Iteration, J0, J0 - J1, True
+            )
+        # end if
       # end if
-      J0 = J1
-
-      # Update dampings
-      b1t *= b1
-      b2t *= b2
-
     # end while
   # end def
 # end class
