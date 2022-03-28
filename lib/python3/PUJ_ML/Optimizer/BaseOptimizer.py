@@ -5,7 +5,7 @@
 from abc import ABC, abstractmethod
 import numpy
 
-class BaseOptimizer:
+class BaseOptimizer( ABC ):
 
   '''
   '''
@@ -29,38 +29,56 @@ class BaseOptimizer:
     self.m_Epsilon *= 2
   # end def
 
+  '''
+  '''
   def setLambda( self, l ):
     self.m_Lambda = l
   # end def
 
+  '''
+  '''
   def setRegularizationToRidge( self ):
     self.m_RegularizationType = 'ridge'
   # end def
 
+  '''
+  '''
   def setRegularizationToLASSO( self ):
     self.m_RegularizationType = 'LASSO'
   # end def
 
+  '''
+  '''
   def setEpsilon( self, e ):
     self.m_Epsilon = e
   # end def
 
+  '''
+  '''
   def setMaximumNumberOfIterations( self, i ):
     self.m_MaximumNumberOfIterations = i
   # end def
 
+  '''
+  '''
   def setNumberOfDebugIterations( self, i ):
     self.m_NumberOfDebugIterations = i
   # end def
 
+  '''
+  '''
   def setDebug( self, f ):
     self.m_Debug = f
   # end def
 
+  '''
+  '''
   def iterations( self ):
     return self.m_Iteration
   # end def
 
+  '''
+  '''
   def evaluate( self, bId ):
     [ J, g ] = self.m_Cost.evaluate( batch_id = bId, need_gradient = True )
     if self.m_Lambda != 0:

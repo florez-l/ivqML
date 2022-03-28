@@ -165,6 +165,12 @@ class BaseModel( ABC ):
     # end def
 
     '''
+    '''
+    def accuracy( self ):
+      return 0.0
+    # end def
+
+    '''
     Compute the cost with current parameters
     '''
     def evaluate( self, batch_id = -1, need_gradient = False ):

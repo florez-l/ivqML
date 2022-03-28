@@ -2,38 +2,31 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-import getopt, numpy, os, random, sys
+import numpy, os, random, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 import PUJ_ML.Model.Logistic
 import PUJ_ML.Optimizer.ADAM
+import PUJ_ML.Optimizer.Debug
 import ReadData
 
 # Options
-opts, args = getopt.getopt(
-  sys.argv[ 1 : ],
-  'a:b1:b2:l:r:m:d:s:',
-  [ 'alpha=', 'lambda=', 'regularization=', 'max_iter=', 'debug_iter=', 'samples=' ]
-  )
-fname = args[ 0 ]
+if len( sys.argv ) < 2 or len( sys.argv ) % 2 == 1:
+  print( 'Usage:', sys.argv[ 0 ], 'input_data [hyperparameters]' )
+  sys.exit( 1 )
+# end if
+fname = sys.argv[ 1 ]
 params = {
   'alpha': 1e-2,
   'beta1': 0.9,
   'beta2': 0.999,
   'lambda': 0.0,
   'regularization': 'ridge',
-  'max_iter': 100000,
+  'max_iter': 10000,
   'debug_iter': 1000,
   'samples': 100
   }
-for k, v in opts:
-  if k == '-a' or k == '--alpha': params[ 'alpha' ] = float( v )
-  if k == '-b1' or k == '--beta1': params[ 'beta1' ] = float( v )
-  if k == '-b2' or k == '--beta2': params[ 'beta2' ] = float( v )
-  if k == '-l' or k == '--lambda': params[ 'lambda' ] = float( v )
-  if k == '-r' or k == '--regularization': params[ 'reg' ] = v
-  if k == '-m' or k == '--max_iter': params[ 'max_iter' ] = int( v )
-  if k == '-d' or k == '--debug_iter': params[ 'debug_iter' ] = int( v )
-  if k == '-s' or k == '--samples': params[ 'samples' ] = int( v )
+for a in range( 2, len( sys.argv ), 2 ):
+  params[ sys.argv[ a ] ] = sys.argv[ a + 1 ]
 # end for
 
 # Read data
@@ -71,32 +64,39 @@ model.setParameters(
 cost = model.cost( X, Y )
 
 # Debugger
-def debugger( model, i, J, dJ, show ):
-  if show:
-    print(
-      'Iteration: {: 8d} , Cost: {:.4e} , Cost diff.: {:.4e}'.
-      format( i, J, dJ )
-      )
-  # end if
-# end def
+debugger = PUJ_ML.Optimizer.Debug.Labeling( X, Y )
 
 # Prepare optimizer
 opt = PUJ_ML.Optimizer.ADAM( cost )
-opt.setLearningRate( params[ 'alpha' ] )
-opt.setFirstDamping( params[ 'beta1' ] )
-opt.setSecondDamping( params[ 'beta2' ] )
-opt.setLambda( params[ 'lambda' ] )
-opt.setRegularizationToRidge( )
-opt.setMaximumNumberOfIterations( params[ 'max_iter' ] )
-opt.setNumberOfDebugIterations( params[ 'debug_iter' ] )
+opt.setLearningRate( float( params[ 'alpha' ] ) )
+opt.setFirstDamping( float( params[ 'beta1' ] ) )
+opt.setSecondDamping( float( params[ 'beta2' ] ) )
+opt.setLambda( float( params[ 'lambda' ] ) )
+if params[ 'regularization' ].lower( ) == 'ridge':
+  opt.setRegularizationToRidge( )
+elif params[ 'regularization' ].lower( ) == 'lasso':
+  opt.setRegularizationToRidge( )
+# end if
+opt.setMaximumNumberOfIterations( int( params[ 'max_iter' ] ) )
+opt.setNumberOfDebugIterations( int( params[ 'debug_iter' ] ) )
 opt.setDebug( debugger )
 opt.fit( )
+
+# Compute accuracy
+Z = model.threshold( X )
+K = \
+  numpy.concatenate( ( Z, 1 - Z ), axis = 1 ).T @ \
+  numpy.concatenate( ( Y, 1 - Y ), axis = 1 )
+acc = K.diagonal( ).sum( ) / K.sum( )
 
 # Show results
 print( '***********************' )
 print( '* Model      = ' + str( model ) )
 print( '* Iterations = ' + str( opt.iterations( ) ) )
 print( '* Final cost = {:.4e}'.format( cost.evaluate( )[ 0 ] ) )
+print( '* Accuracy   = {:.2%}'.format( acc ) )
 print( '***********************' )
+
+debugger.keep( )
 
 ## eof - $RCSfile$

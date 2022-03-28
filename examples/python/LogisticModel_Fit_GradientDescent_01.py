@@ -6,6 +6,7 @@ import getopt, numpy, os, random, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 import PUJ_ML.Model.Logistic
 import PUJ_ML.Optimizer.GradientDescent
+import PUJ_ML.Optimizer.Debug
 import ReadData
 
 # Options
@@ -67,14 +68,7 @@ model.setParameters(
 cost = model.cost( X, Y )
 
 # Debugger
-def debugger( model, i, J, dJ, show ):
-  if show:
-    print(
-      'Iteration: {: 8d} , Cost: {:.4e} , Cost diff.: {:.4e}'.
-      format( i, J, dJ )
-      )
-  # end if
-# end def
+debugger = PUJ_ML.Optimizer.Debug.Simple( )
 
 # Prepare optimizer
 opt = PUJ_ML.Optimizer.GradientDescent( cost )
