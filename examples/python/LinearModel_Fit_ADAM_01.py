@@ -12,22 +12,29 @@ import PUJ_ML.Optimizer.ADAM
 # Options
 opts, args = getopt.getopt(
   sys.argv[ 1 : ],
-  'a:l:r:m:d:',
-  [ 'alpha=', 'lambda=', 'regularization=', 'max_iter=', 'debug_iter=' ]
+  'a:b1:b2:l:r:m:d:s:',
+  [ 'alpha=', 'lambda=', 'regularization=', 'max_iter=', 'debug_iter=', 'samples=' ]
   )
+fname = args[ 0 ]
 params = {
   'alpha': 1e-2,
+  'beta1': 0.9,
+  'beta2': 0.999,
   'lambda': 0.0,
   'regularization': 'ridge',
   'max_iter': 100000,
-  'debug_iter': 1000
+  'debug_iter': 1000,
+  'samples': 100
   }
 for k, v in opts:
   if k == '-a' or k == '--alpha': params[ 'alpha' ] = float( v )
+  if k == '-b1' or k == '--beta1': params[ 'beta1' ] = float( v )
+  if k == '-b2' or k == '--beta2': params[ 'beta2' ] = float( v )
   if k == '-l' or k == '--lambda': params[ 'lambda' ] = float( v )
   if k == '-r' or k == '--regularization': params[ 'reg' ] = v
   if k == '-m' or k == '--max_iter': params[ 'max_iter' ] = int( v )
   if k == '-d' or k == '--debug_iter': params[ 'debug_iter' ] = int( v )
+  if k == '-s' or k == '--samples': params[ 'samples' ] = int( v )
 # end for
 
 # Read file

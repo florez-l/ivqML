@@ -54,12 +54,15 @@ class Logistic( Linear ):
       z = self.m_Model.evaluate( X )
       J  = numpy.log( z[ Y == 1 ] + 1e-12 ).sum( )
       J += numpy.log( 1 - z[ Y == 0 ] + 1e-12 ).sum( )
+      J /= -float( X.shape[ 0 ] )
       if need_gradient:
         g = numpy.zeros( ( self.m_Model.numberOfParameters( ), 1 ) )
         g[ 0 , 0 ] = z.mean( ) - Y.mean( )
         g[ 1 : , : ] = \
-          numpy.matrix( numpy.multiply( X, z ) ).mean( axis = 0 ).T - \
-          numpy.multiply( X, Y )
+           (
+          numpy.matrix( numpy.multiply( X, z ) ).mean( axis = 0 ) - \
+          numpy.multiply( X, Y ).mean( axis = 0 )
+          ).T
         return [ J, g ]
       else:
         return [ J, None ]

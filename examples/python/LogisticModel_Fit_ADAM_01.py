@@ -5,18 +5,20 @@
 import getopt, numpy, os, random, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 import PUJ_ML.Model.Logistic
-import PUJ_ML.Optimizer.GradientDescent
+import PUJ_ML.Optimizer.ADAM
 import ReadData
 
 # Options
 opts, args = getopt.getopt(
   sys.argv[ 1 : ],
-  'a:l:r:m:d:s:',
+  'a:b1:b2:l:r:m:d:s:',
   [ 'alpha=', 'lambda=', 'regularization=', 'max_iter=', 'debug_iter=', 'samples=' ]
   )
 fname = args[ 0 ]
 params = {
-  'alpha': 1e-4,
+  'alpha': 1e-2,
+  'beta1': 0.9,
+  'beta2': 0.999,
   'lambda': 0.0,
   'regularization': 'ridge',
   'max_iter': 100000,
@@ -25,6 +27,8 @@ params = {
   }
 for k, v in opts:
   if k == '-a' or k == '--alpha': params[ 'alpha' ] = float( v )
+  if k == '-b1' or k == '--beta1': params[ 'beta1' ] = float( v )
+  if k == '-b2' or k == '--beta2': params[ 'beta2' ] = float( v )
   if k == '-l' or k == '--lambda': params[ 'lambda' ] = float( v )
   if k == '-r' or k == '--regularization': params[ 'reg' ] = v
   if k == '-m' or k == '--max_iter': params[ 'max_iter' ] = int( v )
@@ -77,8 +81,10 @@ def debugger( model, i, J, dJ, show ):
 # end def
 
 # Prepare optimizer
-opt = PUJ_ML.Optimizer.GradientDescent( cost )
+opt = PUJ_ML.Optimizer.ADAM( cost )
 opt.setLearningRate( params[ 'alpha' ] )
+opt.setFirstDamping( params[ 'beta1' ] )
+opt.setSecondDamping( params[ 'beta2' ] )
 opt.setLambda( params[ 'lambda' ] )
 opt.setRegularizationToRidge( )
 opt.setMaximumNumberOfIterations( params[ 'max_iter' ] )
