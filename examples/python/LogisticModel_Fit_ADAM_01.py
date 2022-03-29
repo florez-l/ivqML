@@ -2,99 +2,81 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-import numpy, os, random, sys
+import argparse, numpy, os, random, sys
 sys.path.append( os.path.join( os.getcwd( ), '../../lib/python3' ) )
 import PUJ_ML.Model.Logistic
 import PUJ_ML.Optimizer.ADAM
 import PUJ_ML.Optimizer.Debug
-import ReadData
 
-# Options
-if len( sys.argv ) < 2 or len( sys.argv ) % 2 == 1:
-  print( 'Usage:', sys.argv[ 0 ], 'input_data [hyperparameters]' )
-  sys.exit( 1 )
-# end if
-fname = sys.argv[ 1 ]
-params = {
-  'alpha': 1e-2,
-  'beta1': 0.9,
-  'beta2': 0.999,
-  'lambda': 0.0,
-  'regularization': 'ridge',
-  'max_iter': 10000,
-  'debug_iter': 1000,
-  'samples': 100
-  }
-for a in range( 2, len( sys.argv ), 2 ):
-  params[ sys.argv[ a ] ] = sys.argv[ a + 1 ]
-# end for
+# Command line options
+parser = argparse.ArgumentParser( )
+parser.add_argument( 'input_data', help = 'File where data can be found.' )
+parser.add_argument( '-a', type = float, default = 1e-2 )
+parser.add_argument( '-b1', type = float, default = 0.9 )
+parser.add_argument( '-b2', type = float, default = 0.999 )
+parser.add_argument( '-l', type = float, default = 0 )
+parser.add_argument( '-m', type = int, default = 10000 )
+parser.add_argument( '-d', type = int, default = 1000 )
+parser.add_argument( '-t', type = float, default = 0.7 )
+parser.add_argument(
+  '-r', type = str, default = 'ridge', help = '[ridge/LASSO]'
+  )
+args = parser.parse_args( )
 
 # Read data
-[ X, Y ] = ReadData.ReadData( fname )
-Y = Y.mean( axis = 1 ).reshape( Y.shape[ 0 ], 1 )
-Y /= Y.max( )
-
-# Keep just some samples
-if X.shape[ 0 ] > params[ 'samples' ]:
-
-  # Extract some samples
-  Z = X[ Y[ : , 0 ] == 0 ]
-  O = X[ Y[ : , 0 ] == 1 ]
-  numpy.random.shuffle( Z )
-  numpy.random.shuffle( O )
-  Z = Z[ : params[ 'samples' ] , : ]
-  O = O[ : params[ 'samples' ] , : ]
-  Y = numpy.concatenate(
-    ( numpy.zeros( ( Z.shape[ 0 ], 1 ) ), numpy.ones( ( O.shape[ 0 ], 1 ) ) )
-    )
-  X = numpy.concatenate( ( Z, O ) )
-# end if
-
-# Shuffle such samples
-P = numpy.arange( X.shape[ 0 ] )
-numpy.random.shuffle( P )
-X = X[ P , : ]
-Y = Y[ P , : ]
+D = numpy.loadtxt( args.input_data, delimiter = ',' )
+train = int( float( D.shape[ 0 ] ) * args.t )
+X_train = D[ : train , : -1 ]
+Y_train = D[ : train , -1 : ]
+X_test = D[ train : , : -1 ]
+Y_test = D[ train : , -1 : ]
 
 # Create a model to keep result and its associated cost function
 model = PUJ_ML.Model.Logistic( )
 model.setParameters(
-  [ random.uniform( -1, 1 ) for i in range( X.shape[ 1 ] + 1 ) ]
+  [ random.uniform( -1, 1 ) for i in range( X_train.shape[ 1 ] + 1 ) ]
   )
-cost = model.cost( X, Y )
+cost = model.cost( X_train, Y_train )
 
 # Debugger
-debugger = PUJ_ML.Optimizer.Debug.Labeling( X, Y )
+debugger = PUJ_ML.Optimizer.Debug.Labeling( X_train, Y_train )
 
 # Prepare optimizer
 opt = PUJ_ML.Optimizer.ADAM( cost )
-opt.setLearningRate( float( params[ 'alpha' ] ) )
-opt.setFirstDamping( float( params[ 'beta1' ] ) )
-opt.setSecondDamping( float( params[ 'beta2' ] ) )
-opt.setLambda( float( params[ 'lambda' ] ) )
-if params[ 'regularization' ].lower( ) == 'ridge':
+opt.setLearningRate( args.a )
+opt.setFirstDamping( args.b1 )
+opt.setSecondDamping( args.b2 )
+opt.setLambda( args.l )
+if args.r.lower( ) == 'ridge':
   opt.setRegularizationToRidge( )
-elif params[ 'regularization' ].lower( ) == 'lasso':
-  opt.setRegularizationToRidge( )
+elif args.r.lower( ) == 'lasso':
+  opt.setRegularizationToLASSO( )
 # end if
-opt.setMaximumNumberOfIterations( int( params[ 'max_iter' ] ) )
-opt.setNumberOfDebugIterations( int( params[ 'debug_iter' ] ) )
+opt.setMaximumNumberOfIterations( args.m )
+opt.setNumberOfDebugIterations( args.d )
 opt.setDebug( debugger )
 opt.fit( )
 
-# Compute accuracy
-Z = model.threshold( X )
-K = \
-  numpy.concatenate( ( Z, 1 - Z ), axis = 1 ).T @ \
-  numpy.concatenate( ( Y, 1 - Y ), axis = 1 )
-acc = K.diagonal( ).sum( ) / K.sum( )
+# Compute accuracies
+Z_train = model.threshold( X_train )
+K_train = \
+  numpy.concatenate( ( Z_train, 1 - Z_train ), axis = 1 ).T @ \
+  numpy.concatenate( ( Y_train, 1 - Y_train ), axis = 1 )
+acc_train = K_train.diagonal( ).sum( ) / K_train.sum( )
+
+Z_test = model.threshold( X_test )
+K_test = \
+  numpy.concatenate( ( Z_test, 1 - Z_test ), axis = 1 ).T @ \
+  numpy.concatenate( ( Y_test, 1 - Y_test ), axis = 1 )
+acc_test = K_test.diagonal( ).sum( ) / K_test.sum( )
 
 # Show results
 print( '***********************' )
-print( '* Model      = ' + str( model ) )
-print( '* Iterations = ' + str( opt.iterations( ) ) )
-print( '* Final cost = {:.4e}'.format( cost.evaluate( )[ 0 ] ) )
-print( '* Accuracy   = {:.2%}'.format( acc ) )
+print( '* Model          = ' + str( model ) )
+print( '* Iterations     = ' + str( opt.iterations( ) ) )
+print( '* Final cost     = {:.4e}'.format( cost.evaluate( )[ 0 ] ) )
+print( '* Train accuracy = {:.2%}'.format( acc_train ) )
+print( '* Test accuracy  = {:.2%}'.format( acc_test ) )
 print( '***********************' )
 
 debugger.keep( )
