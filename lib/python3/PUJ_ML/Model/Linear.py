@@ -61,6 +61,13 @@ class Linear( BaseModel ):
   # end def
 
   '''
+  Return the required number of inputs
+  '''
+  def numberOfOutputs( self ):
+    return 1
+  # end def
+
+  '''
   Assign parameters
   '''
   def setParameters( self, p ):

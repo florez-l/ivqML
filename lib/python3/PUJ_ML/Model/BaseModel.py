@@ -39,6 +39,14 @@ class BaseModel( ABC ):
   # end def
 
   '''
+  Return the required number of inputs
+  '''
+  @abstractmethod
+  def numberOfOutputs( self ):
+    return 0
+  # end def
+
+  '''
   Assign parameters
   '''
   @abstractmethod

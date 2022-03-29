@@ -2,9 +2,7 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-from .BaseModel import *
-from .Linear import *
-from .Logistic import *
-from .NeuralNetwork import *
+from .Activation import *
+from .FeedForward import *
 
 ## eof - $RCSfile$
