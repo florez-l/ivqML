@@ -240,8 +240,8 @@ class FeedForward( BaseModel ):
       Z = []
       L = self.m_Model.numberOfLayers( )
       for i in range( L ):
-        Z += [ ( self.m_Model.m_W[ i ] @ A[ -1 ] ) + self.m_Model.m_B[ i ] ]
-        A += [ self.m_Model.m_S[ i ]( Z[ -1 ] ) ]
+        Z += [ ( self.m_Model.m_W[ i ] @ A[ i ] ) + self.m_Model.m_B[ i ] ]
+        A += [ self.m_Model.m_S[ i ]( Z[ i ] ) ]
       # end for
 
       # 2. Cost
