@@ -7,7 +7,7 @@ import numpy
 
 '''
 '''
-class Logistic( Linear ):
+class SVM( Linear ):
 
   '''
   '''
@@ -20,14 +20,14 @@ class Logistic( Linear ):
   '''
   def threshold( self, X ):
     z = self.evaluate( X )
-    return ( z >= 0.5 ).astype( z.dtype )
+    return ( z >= 1 ).astype( z.dtype ) - ( z <= -1 ).astype( z.dtype )
   # end def
 
   '''
   Add a displacement to parameters
   '''
   def _evaluate( self, X ):
-    return 1.0 / ( 1.0 + numpy.exp( -super( )._evaluate( X ) ) )
+    return ( X @ self.m_P[ 1 : , : ] ) - self.m_P[ 0 , 0 ]
   # end def
 
   '''
@@ -47,18 +47,17 @@ class Logistic( Linear ):
     def _evaluate( self, samples, need_gradient = False ):
       X = samples[ 0 ]
       Y = samples[ 1 ]
-      z = self.m_Model.evaluate( X )
-      J  = numpy.log( z[ Y == 1 ] + 1e-12 ).sum( )
-      J += numpy.log( 1 - z[ Y == 0 ] + 1e-12 ).sum( )
-      J /= -float( X.shape[ 0 ] )
+      n = self.m_Model.numberOfParameters( )
+      m = float( X.shape[ 0 ] )
+      Z = numpy.multiply( self.m_Model.evaluate( X ), Y )
+      I = numpy.asarray( Z < 1 ).reshape( -1 )
+      J = ( 1 - Z[ I ] ).sum( ) / m
       if need_gradient:
         g = numpy.zeros( ( self.m_Model.numberOfParameters( ), 1 ) )
-        g[ 0 , 0 ] = z.mean( ) - Y.mean( )
+        g[ 0 , 0 ] = Y[ I ].sum( ) / m
         g[ 1 : , : ] = \
-           (
-          numpy.matrix( numpy.multiply( X, z ) ).mean( axis = 0 ) - \
-          numpy.multiply( X, Y ).mean( axis = 0 )
-          ).T
+          numpy.multiply( X, Y )[ I , : ].sum( axis = 0 ).\
+          reshape( n - 1, 1 ) / m
         return [ J, g ]
       else:
         return [ J, None ]

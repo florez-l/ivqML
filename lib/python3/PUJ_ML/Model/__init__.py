@@ -5,6 +5,7 @@
 from .BaseModel import *
 from .Linear import *
 from .Logistic import *
+from .SVM import *
 from .NeuralNetwork import *
 
 ## eof - $RCSfile$
