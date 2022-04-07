@@ -23,7 +23,7 @@ class FeedForward( BaseModel ):
 
   '''
   '''
-  def addLayer( self, a, size, init = 'random' ):
+  def addLayer( self, a, size, init = [ -1e-1, 1e-1 ] ):
 
     # Input values
     o_size = size
@@ -33,18 +33,12 @@ class FeedForward( BaseModel ):
     if len( self.m_W ) > 0:
       i_size = self.m_W[ -1 ].shape[ 0 ]
     # end if
-    if init == 'zero':
-      self.m_W += [ numpy.zeros( ( o_size, i_size ) ) ]
-    elif init == 'random':
-      self.m_W += [ numpy.random.uniform( 1e-2, 1, ( o_size, i_size ) ) ]
-    # end if
+    self.m_W += \
+      [ numpy.random.uniform( init[ 0 ], init[ 1 ], ( o_size, i_size ) ) ]
 
     # Biases
-    if init == 'zero':
-      self.m_B += [ numpy.zeros( ( o_size, 1 ) ) ]
-    elif init == 'random':
-      self.m_B += [ numpy.random.uniform( 1e-2, 1, ( o_size, 1 ) ) ]
-    # end if
+    self.m_B += \
+      [ numpy.random.uniform( init[ 0 ], init[ 1 ], ( o_size, 1 ) ) ]
 
     # Activation function
     if isinstance( a, ( str ) ):
@@ -210,8 +204,8 @@ class FeedForward( BaseModel ):
   '''
   def _evaluate( self, X ):
     assert len( self.m_W ) > 0, 'Parameters should be defined.'
-    z = self.m_S[ 0 ]( ( self.m_W[ 0 ] @ X.T ) + self.m_B[ 0 ] )
-    for l in range( 1, len( self.m_W ) ):
+    z = X.T
+    for l in range( len( self.m_W ) ):
       z = self.m_S[ l ]( ( self.m_W[ l ] @ z ) + self.m_B[ l ] )
     # end for
     return z.T
@@ -248,12 +242,16 @@ class FeedForward( BaseModel ):
       J = float( 0 )
       last_activation = str( self.m_Model.m_S[ -1 ] )
       if last_activation == 'SoftMax':
-        pass
+        for k in range( Y.shape[ 1 ] ):
+          J -= numpy.log( A[ -1 ][ : , Y[ : , k ] == 1 ] + 1e-12 ).sum( )
+          J -= numpy.log( 1.0 - A[ -1 ][ : , Y[ : , k ] == 0 ] + 1e-12 ).sum( )
+        # end for
+        J /= float( X.shape[ 0 ] )
       elif last_activation == 'Sigmoid':
         a = A[ -1 ].T
-        J  = numpy.log( a[ Y == 1 ] + 1e-12 ).sum( )
-        J += numpy.log( 1 - a[ Y == 0 ] + 1e-12 ).sum( )
-        J /= -float( X.shape[ 0 ] )
+        J -= numpy.log( a[ Y == 1 ] + 1e-12 ).sum( )
+        J -= numpy.log( 1 - a[ Y == 0 ] + 1e-12 ).sum( )
+        J /= float( X.shape[ 0 ] )
       else:
         pass
       # end if

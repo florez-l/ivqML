@@ -23,8 +23,7 @@ class SoftMax( Base ):
       return None
     else:
       e = numpy.exp( z )
-      s = e.sum( )
-      return e / s
+      return e / e.sum( axis = 0 )
     # end if
   # end def
 

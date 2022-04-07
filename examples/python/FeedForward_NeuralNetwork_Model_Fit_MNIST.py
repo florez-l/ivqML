@@ -39,7 +39,7 @@ except Exception as err:
   x_test = data[ 'x_test' ]
   y_test = data[ 'y_test' ]
   numpy.savez(
-    'mnist.npz',
+    args.input_data,
     x_train = x_train, y_train = y_train,
     x_test = x_test, y_test = y_test
     )
@@ -56,17 +56,11 @@ I = numpy.eye( len( L ) )
 y_train = I[ y_train , : ]
 y_test  = I[ y_test , : ]
 
-# Standardize samples
-#mean = X_train.mean( axis = 0 )
-#C = X_train - mean
-#cov = numpy.sqrt( ( C.T @ C / float( X_train.shape[ 0 ] ) ).diagonal( ) )
-#X_train = C / cov
-
 # Create a model to keep result and its associated cost function
 model = PUJ_ML.Model.NeuralNetwork.FeedForward( input_size = n )
 model.addLayer( 'ReLU', 32 )
 model.addLayer( 'SoftMax', len( L ) )
-cost = model.cost( x_train, y_train )
+cost = model.cost( x_train[ : 100 , : ], y_train[ : 100 , : ] )
 
 # Debugger
 debugger = PUJ_ML.Optimizer.Debug.Simple( )
