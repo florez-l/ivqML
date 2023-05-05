@@ -54,21 +54,49 @@ iA[ 1 ][ 0 ] = -A[ 0 ][ 1 ] / dA
 w = ( iA[ 0 ][ 0 ] * B[ 0 ] ) + ( iA[ 0 ][ 1 ] * B[ 1 ] )
 b = ( iA[ 1 ][ 0 ] * B[ 0 ] ) + ( iA[ 1 ][ 1 ] * B[ 1 ] )
 
-# Compute cost
-J = float( 0 )
-for i in range( len( X ) ):
-  J += ( ( w * X[ i ] ) + b - Y[ i ] ) ** 2
-# end for
-J /= float( len( X ) )
+w = 3.14
+b = 2.7
+a = 1e-4
 
-# Compute cost derivative
-g = [ float( 0 ), float( 0 ) ]
-for i in range( len( X ) ):
-  g[ 0 ] += 2 * ( ( w * X[ i ] ) + b - Y[ i ] ) * X[ i ]
-  g[ 1 ] += 2 * ( ( w * X[ i ] ) + b - Y[ i ] )
-# end for
-g[ 0 ] /= float( len( X ) )
-g[ 1 ] /= float( len( X ) )
+iterations = 0
+stop = False
+while not stop:
+  iterations = iterations + 1
+
+  # Compute cost
+  J = float( 0 )
+  for i in range( len( X ) ):
+    J += ( ( w * X[ i ] ) + b - Y[ i ] ) ** 2
+  # end for
+  J /= float( len( X ) )
+
+  # Compute cost derivative
+  g = [ float( 0 ), float( 0 ) ]
+  for i in range( len( X ) ):
+    g[ 0 ] += 2 * ( ( w * X[ i ] ) + b - Y[ i ] ) * X[ i ]
+    g[ 1 ] += 2 * ( ( w * X[ i ] ) + b - Y[ i ] )
+  # end for
+  g[ 0 ] /= float( len( X ) )
+  g[ 1 ] /= float( len( X ) )
+  m = ( ( g[ 0 ] ** 2 ) + ( g[ 1 ] ** 2 ) ) ** 0.5
+
+  w = w - a * g[ 0 ]
+  b = b - a * g[ 1 ]
+
+  #if iterations >= 25000:
+  #  stop = True
+  # end if
+
+  if m < 1e-8:
+    stop = True
+  # end if
+
+  print( iterations, w, b, J, g )
+
+# end while
+
+
+print( g )
 
 # Show results
 print( '***********************' )

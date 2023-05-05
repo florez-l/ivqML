@@ -99,13 +99,6 @@ Linear regression
 , example size.
 \end_layout
 
-\begin_layout Itemize
-\begin_inset Formula $A\bowtie B$
-\end_inset
-
-, element-wise using broadcasting (python like).
-\end_layout
-
 \begin_layout Standard
 \begin_inset Formula 
 \[
@@ -150,6 +143,22 @@ b\in\mathbb{R}
 \end_inset
 
 
+\begin_inset Formula 
+\[
+h\left(\mathbf{x}\right):\mathbb{R}^{1\times n}\rightarrow\mathbb{R}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+h\left(\mathbf{x}\right)=\mathbf{x}\mathbf{w}^{\top}+b
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -159,7 +168,66 @@ Cost function
 \begin_layout Standard
 \begin_inset Formula 
 \[
-J\left(\mathbf{X},\mathbf{y},\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\left[\mathbf{w}\mathbf{x}_{i}^{\top}+b\right]-y_{i}\right)^{2}
+l\left(\mathbf{x}_{i},y_{i}|\mathbf{w},b\right)=\left(h\left(\mathbf{x}_{i}\right)-y_{i}\right)^{2}=\left(\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y}|\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y}|\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\left[\mathbf{x}_{i}\mathbf{w}^{\top}+b\right]^{2}-2\mathbf{x}_{i}\mathbf{w}^{\top}y_{i}-2by_{i}+y_{i}^{2}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y}|\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\left(\mathbf{x}_{i}\mathbf{w}^{\top}\right)^{2}+2b\mathbf{x}_{i}\mathbf{w}^{\top}+b^{2}-2\mathbf{x}_{i}\mathbf{w}^{\top}y_{i}-2by_{i}+y_{i}^{2}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y}|\mathbf{w},b\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\mathbf{x}_{i}\mathbf{w}^{\top}\mathbf{x}_{i}\mathbf{w}^{\top}+2b\mathbf{x}_{i}\mathbf{w}^{\top}+b^{2}-2\mathbf{x}_{i}\mathbf{w}^{\top}y_{i}-2by_{i}+y_{i}^{2}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y}|\mathbf{w},b\right)m=\mathbf{w}\left[\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+2b\left[\sum_{i=1}^{m}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+b^{2}\sum_{i=1}^{m}1-2\left[\sum_{i=1}^{m}y_{i}\mathbf{x}_{i}\right]\mathbf{w}^{\top}-2b\left[\sum_{i=1}^{m}y_{i}\right]+\left[\sum_{i=1}^{m}y_{i}^{2}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y}|\mathbf{w},b\right)m=\mathbf{w}\left[\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+2b\left[\sum_{i=1}^{m}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+mb^{2}-2\left[\sum_{i=1}^{m}y_{i}\mathbf{x}_{i}\right]\mathbf{w}^{\top}-2b\left[\sum_{i=1}^{m}y_{i}\right]+\left[\sum_{i=1}^{m}y_{i}^{2}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+J\left(\mathbf{X},\mathbf{y}|\mathbf{w},b\right)m=\mathbf{w}\left[\sum_{i=1}^{m}\mathbf{x}_{i}^{\top}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+2b\left[\sum_{i=1}^{m}\mathbf{x}_{i}\right]\mathbf{w}^{\top}+mb^{2}-2\left[\sum_{i=1}^{m}y_{i}\mathbf{x}_{i}\right]\mathbf{w}^{\top}-2b\Sigma\left(\mathbf{y}\right)+\mathbf{y}^{\top}\mathbf{y}
 \]
 
 \end_inset
