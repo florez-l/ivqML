@@ -5,36 +5,45 @@
 #define __PUJ_ML__Model__Base__hxx__
 
 // -------------------------------------------------------------------------
-template< class _R >
-PUJ_ML::Model::Base< _R >::
+template< class _D, class _R >
+PUJ_ML::Model::Base< _D, _R >::
 Base( const unsigned long long& n )
 {
   this->set_number_of_parameters( n );
 }
 
 // -------------------------------------------------------------------------
-template< class _R >
-unsigned long long PUJ_ML::Model::Base< _R >::
+template< class _D, class _R >
+unsigned long long PUJ_ML::Model::Base< _D, _R >::
 number_of_parameters( ) const
 {
   return( this->m_P.size( ) );
 }
 
 // -------------------------------------------------------------------------
-template< class _R >
-void PUJ_ML::Model::Base< _R >::
+template< class _D, class _R >
+unsigned long long PUJ_ML::Model::Base< _D, _R >::
+number_of_inputs( ) const
+{
+  return( this->number_of_parameters( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _D, class _R >
+void PUJ_ML::Model::Base< _D, _R >::
 set_number_of_parameters( const unsigned long long& n )
 {
-  this->m_P.resize( n, _R( 0 ) );
+  this->m_P.resize( n, TReal( 0 ) );
   this->m_P.shrink_to_fit( );
 }
 
 // -------------------------------------------------------------------------
-template< class _R >
-_R& PUJ_ML::Model::Base< _R >::
+template< class _D, class _R >
+typename PUJ_ML::Model::Base< _D, _R >::
+TReal& PUJ_ML::Model::Base< _D, _R >::
 operator()( const unsigned long long& i )
 {
-  static _R zero;
+  static TReal zero;
   if( i < this->m_P.size( ) )
     return( this->m_P[ i ] );
   else
@@ -45,11 +54,12 @@ operator()( const unsigned long long& i )
 }
 
 // -------------------------------------------------------------------------
-template< class _R >
-const _R& PUJ_ML::Model::Base< _R >::
+template< class _D, class _R >
+const typename PUJ_ML::Model::Base< _D, _R >::
+TReal& PUJ_ML::Model::Base< _D, _R >::
 operator()( const unsigned long long& i ) const
 {
-  static const _R zero = 0;
+  static const TReal zero = 0;
   if( i < this->m_P.size( ) )
     return( this->m_P[ i ] );
   else
@@ -57,45 +67,30 @@ operator()( const unsigned long long& i ) const
 }
 
 // -------------------------------------------------------------------------
-template< class _R >
-_R& PUJ_ML::Model::Base< _R >::
-operator()( const unsigned long long& i, const unsigned long long& j )
-{
-  return( this->operator()( i ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _R >
-const _R& PUJ_ML::Model::Base< _R >::
-operator()( const unsigned long long& i, const unsigned long long& j ) const
-{
-  return( this->operator()( i ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _R >
+template< class _D, class _R >
 template< class _Y, class _X >
-void PUJ_ML::Model::Base< _R >::
-evaluate( Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X ) const
-{
-}
-
-// -------------------------------------------------------------------------
-template< class _R >
-template< class _Y, class _X >
-void PUJ_ML::Model::Base< _R >::
+void PUJ_ML::Model::Base< _D, _R >::
 threshold( Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X ) const
 {
-  this->evaluate( Y, X );
+  static_cast< const _D* >( this )->evaluate( Y, X );
 }
 
 // -------------------------------------------------------------------------
-template< class _R >
-void PUJ_ML::Model::Base< _R >::
+template< class _D, class _R >
+void PUJ_ML::Model::Base< _D, _R >::
+move_parameters( const std::vector< TReal >& dir, const TReal& coeff )
+{
+  for( unsigned long long i = 0; i < this->m_P.size( ); ++i )
+    this->m_P[ i ] += dir[ i ] * coeff;
+}
+
+// -------------------------------------------------------------------------
+template< class _D, class _R >
+void PUJ_ML::Model::Base< _D, _R >::
 _to_stream( std::ostream& o ) const
 {
   o << this->m_P.size( );
-  for( const _R& v: this->m_P )
+  for( const TReal& v: this->m_P )
     o << " " << v;
 }
 

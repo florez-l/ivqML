@@ -14,11 +14,13 @@ namespace PUJ_ML
   {
     /**
      */
-    template< class _R >
+    template< class _D, class _R >
     class Base
     {
     public:
       using Self = Base;
+      using Derived = _D;
+
       using TReal = _R;
       using TMatrix = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
       using TCol = Eigen::Matrix< _R, Eigen::Dynamic, 1 >;
@@ -26,38 +28,30 @@ namespace PUJ_ML
 
     public:
       Base( const unsigned long long& n = 1 );
-        virtual ~Base( ) = default;
+      virtual ~Base( ) = default;
 
-      virtual unsigned long long number_of_parameters( ) const;
-      virtual void set_number_of_parameters( const unsigned long long& n );
+      unsigned long long number_of_parameters( ) const;
+      unsigned long long number_of_inputs( ) const;
+      void set_number_of_parameters( const unsigned long long& n );
 
-      virtual _R& operator()( const unsigned long long& i );
-      virtual const _R& operator()( const unsigned long long& i ) const;
-
-      virtual _R& operator()(
-        const unsigned long long& i,
-        const unsigned long long& j
-        );
-      virtual const _R& operator()(
-        const unsigned long long& i,
-        const unsigned long long& j
-        ) const;
-
-      template< class _Y, class _X >
-      void evaluate(
-        Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X
-        ) const;
+      TReal& operator()( const unsigned long long& i );
+      const TReal& operator()( const unsigned long long& i ) const;
 
       template< class _Y, class _X >
       void threshold(
         Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X
         ) const;
 
-    protected:
-      virtual void _to_stream( std::ostream& o ) const;
+      void move_parameters(
+        const std::vector< TReal >& dir,
+        const TReal& coeff = TReal( 1 )
+        );
 
     protected:
-      std::vector< _R > m_P;
+      void _to_stream( std::ostream& o ) const;
+
+    protected:
+      std::vector< TReal > m_P;
 
     public:
       friend std::ostream& operator<<( std::ostream& o, const Self& m )
