@@ -2,23 +2,24 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
-#include <PUJ_ML/IO/CSV.h>
-#include <PUJ_ML/Model/Linear.h>
+#include <PUJ_ML/Model/Regression/Linear.h>
 
 int main( int argc, char** argv )
 {
-  PUJ_ML::Model::Linear< double > model;
-  decltype( model )::TMatrix D;
+  PUJ_ML::Model::Regression::Linear< double > model;
+  model.set_number_of_parameters( 1 );
+  model( 0 ) = 1;
+  model( 1 ) = 3;
 
-  PUJ_ML::IO::CSV::read( D, argv[ 1 ] );
-
-  model.fit(
-    D.block( 0, 0, D.rows( ), D.cols( ) - 1 ),
-    D.block( 0, D.cols( ) - 1, D.rows( ), 1 )
-    );
+  decltype( model )::TMatrix X( 4, model.number_of_inputs( ) );
+  X << 1, 2, 3, 4;
+  decltype( model )::TCol Y;
+  model.evaluate( Y, X );
 
   std::cout << "===============" << std::endl;
   std::cout << model << std::endl;
+  std::cout << "===============" << std::endl;
+  std::cout << Y << std::endl;
   std::cout << "===============" << std::endl;
 
   return( EXIT_SUCCESS );

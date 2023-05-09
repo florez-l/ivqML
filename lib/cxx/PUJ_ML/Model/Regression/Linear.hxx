@@ -1,14 +1,14 @@
 // =========================================================================
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
-#ifndef __PUJ_ML__Model__Linear__hxx__
-#define __PUJ_ML__Model__Linear__hxx__
+#ifndef __PUJ_ML__Model__Regression__Linear__hxx__
+#define __PUJ_ML__Model__Regression__Linear__hxx__
 
 #include <Eigen/Dense>
 
 // -------------------------------------------------------------------------
 template< class _R >
-PUJ_ML::Model::Linear< _R >::
+PUJ_ML::Model::Regression::Linear< _R >::
 Linear( const unsigned long long& n )
   : Superclass( n )
 {
@@ -16,7 +16,7 @@ Linear( const unsigned long long& n )
 
 // -------------------------------------------------------------------------
 template< class _R >
-PUJ_ML::Model::Linear< _R >::
+PUJ_ML::Model::Regression::Linear< _R >::
 ~Linear( )
 {
   if( this->m_T != nullptr )
@@ -25,7 +25,7 @@ PUJ_ML::Model::Linear< _R >::
 
 // -------------------------------------------------------------------------
 template< class _R >
-unsigned long long PUJ_ML::Model::Linear< _R >::
+unsigned long long PUJ_ML::Model::Regression::Linear< _R >::
 number_of_inputs( ) const
 {
   return( this->m_P.size( ) - 1 );
@@ -33,7 +33,7 @@ number_of_inputs( ) const
 
 // -------------------------------------------------------------------------
 template< class _R >
-void PUJ_ML::Model::Linear< _R >::
+void PUJ_ML::Model::Regression::Linear< _R >::
 set_number_of_parameters( const unsigned long long& n )
 {
   this->Superclass::set_number_of_parameters( n + 1 );
@@ -43,7 +43,7 @@ set_number_of_parameters( const unsigned long long& n )
 // -------------------------------------------------------------------------
 template< class _R >
 template< class _Y, class _X >
-void PUJ_ML::Model::Linear< _R >::
+void PUJ_ML::Model::Regression::Linear< _R >::
 evaluate( Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X ) const
 {
   Y.derived( ) =
@@ -58,7 +58,7 @@ evaluate( Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X ) const
 // -------------------------------------------------------------------------
 template< class _R >
 template< class _Y, class _X >
-void PUJ_ML::Model::Linear< _R >::
+void PUJ_ML::Model::Regression::Linear< _R >::
 fit( const Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X )
 {
   /* TODO
@@ -91,8 +91,8 @@ fit( const Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X )
 
 // -------------------------------------------------------------------------
 template< class _R >
-PUJ_ML::Model::Linear< _R >::Cost_MSE::
-Cost_MSE( TModel* m )
+PUJ_ML::Model::Regression::Linear< _R >::Cost::
+Cost( TModel* m )
   : m_Model( m )
 {
 }
@@ -100,8 +100,8 @@ Cost_MSE( TModel* m )
 // -------------------------------------------------------------------------
 template< class _R >
 template< class _X, class _Y >
-typename PUJ_ML::Model::Linear< _R >::
-TReal PUJ_ML::Model::Linear< _R >::Cost_MSE::
+typename PUJ_ML::Model::Regression::Linear< _R >::
+TReal PUJ_ML::Model::Regression::Linear< _R >::Cost::
 evaluate(
   const Eigen::EigenBase< _X >& X,
   const Eigen::EigenBase< _Y >& Y
@@ -119,8 +119,8 @@ evaluate(
 // -------------------------------------------------------------------------
 template< class _R >
 template< class _X, class _Y >
-typename PUJ_ML::Model::Linear< _R >::
-TReal PUJ_ML::Model::Linear< _R >::Cost_MSE::
+typename PUJ_ML::Model::Regression::Linear< _R >::
+TReal PUJ_ML::Model::Regression::Linear< _R >::Cost::
 gradient(
   std::vector< TReal >& G,
   const Eigen::EigenBase< _X >& X,
@@ -146,6 +146,6 @@ gradient(
   return( ( ( Z.transpose( ) * Z ) / TReal( Z.rows( ) ) )( 0 ) );
 }
 
-#endif // __PUJ_ML__Model__Linear__hxx__
+#endif // __PUJ_ML__Model__Regression__Linear__hxx__
 
 // eof - $RCSfile$
