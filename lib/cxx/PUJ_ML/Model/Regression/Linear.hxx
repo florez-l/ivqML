@@ -34,9 +34,9 @@ number_of_inputs( ) const
 // -------------------------------------------------------------------------
 template< class _R >
 void PUJ_ML::Model::Regression::Linear< _R >::
-set_number_of_parameters( const unsigned long long& n )
+init( const unsigned long long& n )
 {
-  this->Superclass::set_number_of_parameters( n + 1 );
+  this->Superclass::init( n + 1 );
   this->m_T = new MCol( this->m_P.data( ) + 1, this->m_P.size( ) - 1, 1 );
 }
 
@@ -61,13 +61,32 @@ template< class _Y, class _X >
 void PUJ_ML::Model::Regression::Linear< _R >::
 fit( const Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X )
 {
+  unsigned long long n = X.cols( );
+  unsigned long long m = X.rows( );
+  this->init( n );
+
+  auto iX = X.derived( ).template cast< _R >( );
+  auto iY = Y.derived( ).template cast< _R >( );
+
+  TReal mY = iY.mean( );
+  TReal mXX = ( iX.transpose( ) * iX.transpose( ) ).diagonal( ).mean( );
+
+  TRow SX = iX.colwise( ).sum( );
+  TRow SyX = ( iX.array( ) * iY.array( ) ).colwise( ).sum( );
+
+  std::cout << SX * SyX.transpose( ) << std::endl;
+
+  /* TODO
+     TReal b = ( ( ( SX * SyX.transpose( ) ).sum( ) ) / ( mXX * TReal( m ) ) ) - mY;
+     b /= ( ( ( SX * SX.transpose( ) ).sum( ) ) / ( mXX * TReal( m ) ) ) - TReal( 1 );
+     std::cout << b << std::endl;
+  */
+     
+
+
   /* TODO
      unsigned long long m = X.rows( );
-     unsigned long long n = X.cols( );
-     this->set_number_of_parameters( n );
 
-     auto iX = X.derived( ).template cast< _R >( );
-     auto iY = Y.derived( ).template cast< _R >( );
 
      TMatrix b( 1, n + 1 );
      b( 0, 0 ) = iY.mean( );

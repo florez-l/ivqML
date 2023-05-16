@@ -32,7 +32,7 @@ namespace PUJ_ML
 
       unsigned long long number_of_parameters( ) const;
       unsigned long long number_of_inputs( ) const;
-      void set_number_of_parameters( const unsigned long long& n );
+      void init( const unsigned long long& n );
 
       TReal& operator()( const unsigned long long& i );
       const TReal& operator()( const unsigned long long& i ) const;

@@ -17,7 +17,7 @@ add_executable(LinearRegressionModel_Fit_02 LinearRegressionModel_Fit_02.cxx)
 target_link_libraries(LinearRegressionModel_Fit_02 Eigen3::Eigen)
 
 add_executable(LinearRegressionModel_Fit_03 LinearRegressionModel_Fit_03.cxx)
-target_link_libraries(LinearRegressionModel_Fit_03 Eigen3::Eigen)
+target_link_libraries(LinearRegressionModel_Fit_03 Eigen3::Eigen ${Boost_LIBRARIES})
 
 add_executable(LogisticRegressionModel_Fit_01 LogisticRegressionModel_Fit_01.cxx)
 target_link_libraries(LogisticRegressionModel_Fit_01 Eigen3::Eigen)

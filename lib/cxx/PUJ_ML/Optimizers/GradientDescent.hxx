@@ -20,7 +20,7 @@ fit( )
   auto iX = this->m_X->derived( ).template cast< TReal >( );
   auto iY = this->m_Y->derived( ).template cast< TReal >( );
 
-  this->m_Model->set_number_of_parameters( iX.cols( ) );
+  this->m_Model->init( iX.cols( ) );
 
   TCost cost( this->m_Model );
   std::vector< TReal > G;
@@ -30,16 +30,18 @@ fit( )
   TReal J, mG;
   while( !stop )
   {
-    // Descent
+    // Update gradient
     J = cost.gradient( G, iX, iY );
-    this->m_Model->move_parameters( G, -this->m_Alpha );
-    epoch++;
-
-    // Check stopping criteria
     mG =
       MRow( G.data( ), 1, G.size( ) )
       *
       MCol( G.data( ), G.size( ), 1 );
+
+    // Descent
+    this->m_Model->move_parameters( G, -this->m_Alpha );
+
+    // Check stopping criteria
+    epoch++;
     stop |= !( epoch < this->m_MaxEpochs && this->m_Epsilon < mG );
 
     // Show debug information and, possibly, stop.

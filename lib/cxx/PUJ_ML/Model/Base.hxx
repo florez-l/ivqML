@@ -9,7 +9,7 @@ template< class _D, class _R >
 PUJ_ML::Model::Base< _D, _R >::
 Base( const unsigned long long& n )
 {
-  this->set_number_of_parameters( n );
+  this->init( n );
 }
 
 // -------------------------------------------------------------------------
@@ -31,7 +31,7 @@ number_of_inputs( ) const
 // -------------------------------------------------------------------------
 template< class _D, class _R >
 void PUJ_ML::Model::Base< _D, _R >::
-set_number_of_parameters( const unsigned long long& n )
+init( const unsigned long long& n )
 {
   this->m_P.resize( n, TReal( 0 ) );
   this->m_P.shrink_to_fit( );

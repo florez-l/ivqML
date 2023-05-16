@@ -7,7 +7,7 @@
 int main( int argc, char** argv )
 {
   PUJ_ML::Model::Regression::Linear< double > model;
-  model.set_number_of_parameters( 1 );
+  model.init( 1 );
   model( 0 ) = 1;
   model( 1 ) = 3;
 

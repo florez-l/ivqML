@@ -37,9 +37,7 @@ namespace PUJ_ML
         virtual ~Linear( );
 
         unsigned long long number_of_inputs( ) const;
-        void set_number_of_parameters(
-          const unsigned long long& n
-          );
+        void init( const unsigned long long& n );
 
         template< class _Y, class _X >
         void evaluate(

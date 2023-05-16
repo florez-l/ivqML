@@ -24,7 +24,7 @@ fit( )
   auto iX = this->m_X->derived( ).template cast< TReal >( );
   auto iY = this->m_Y->derived( ).template cast< TReal >( );
 
-  this->m_Model->set_number_of_parameters( iX.cols( ) );
+  this->m_Model->init( iX.cols( ) );
 
   TCost cost( this->m_Model );
 

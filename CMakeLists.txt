@@ -41,6 +41,14 @@ if (OPENMP_FOUND)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+## -- Find Boost
+find_package(Boost COMPONENTS iostreams system filesystem REQUIRED)
+
+## -- Find gnuplot-iostream
+find_file(GNUplot_iostream gnuplot-iostream.h)
+get_filename_component(GNUplot_iostream_dir ${GNUplot_iostream} DIRECTORY)
+include_directories(${GNUplot_iostream_dir})
+
 ## -- Subdirs
 subdirs(lib/cxx examples/cxx)
 

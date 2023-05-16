@@ -2,6 +2,7 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+// TODO: #include <gnuplot-iostream.h>
 #include <PUJ_ML/IO/CSV.h>
 #include <PUJ_ML/Model/Regression/Linear.h>
 #include <PUJ_ML/Optimizers/ADAM.h>
@@ -20,6 +21,14 @@ int main( int argc, char** argv )
   PUJ_ML::IO::CSV::read( D, argv[ 1 ] );
   auto X = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
   auto Y = D.block( 0, D.cols( ) - 1, D.rows( ), 1 );
+
+  // Show data
+  /* TODO
+     Gnuplot gp;
+     gp << "plot '-' with points\n";
+     gp.send1d( X.col( 0 ) );
+     gp.send1d( X.col( 1 ) );
+  */
 
   // Optimization types
   using TOptimizer =
@@ -44,7 +53,10 @@ int main( int argc, char** argv )
       const unsigned long long& epoch
       ) -> bool
     {
-      std::cout << J << " " << nG << " " << epoch << std::endl;
+      std::cout
+        << "Cost=" << J
+        << " |Gradient|=" << nG
+        << " epoch=" << epoch << std::endl;
       return( false );
     }
     );
