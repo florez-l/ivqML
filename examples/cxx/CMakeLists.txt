@@ -25,4 +25,6 @@ target_link_libraries(LogisticRegressionModel_Fit_01 Eigen3::Eigen)
 add_executable(LogisticRegressionModel_Fit_02 LogisticRegressionModel_Fit_02.cxx)
 target_link_libraries(LogisticRegressionModel_Fit_02 Eigen3::Eigen)
 
+subdirs(minesweeper)
+
 ## eof - $RCSfile$
