@@ -57,9 +57,9 @@ evaluate( Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X ) const
 
 // -------------------------------------------------------------------------
 template< class _R >
-template< class _Y, class _X >
+template< class _X, class _Y >
 void PUJ_ML::Model::Regression::Linear< _R >::
-fit( const Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X )
+fit( const Eigen::EigenBase< _X >& X, const Eigen::EigenBase< _Y >& Y )
 {
   unsigned long long n = X.cols( );
   unsigned long long m = X.rows( );
@@ -68,44 +68,19 @@ fit( const Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X )
   auto iX = X.derived( ).template cast< _R >( );
   auto iY = Y.derived( ).template cast< _R >( );
 
-  TReal mY = iY.mean( );
-  TReal mXX = ( iX.transpose( ) * iX.transpose( ) ).diagonal( ).mean( );
+  TMatrix A( n + 1, n + 1 );
+  A( 0, 0 ) = 1;
+  A.block( 0, 1, 1, n ) = iX.colwise( ).mean( );
+  A.block( 1, 0, n, 1 ) = A.block( 0, 1, 1, n ).transpose( );
+  A.block( 1, 1, n, n ) = ( iX.transpose( ) * iX ) / TReal( m );
 
-  TRow SX = iX.colwise( ).sum( );
-  TRow SyX = ( iX.array( ) * iY.array( ) ).colwise( ).sum( );
+  TCol B( n + 1 );
+  B( 0 ) = iY.mean( );
+  B.block( 1, 0, n, 1 ) =
+    ( iX.array( ).colwise( ) * iY.array( ).col( 0 ) ).
+    colwise( ).mean( ).transpose( );
 
-  std::cout << SX * SyX.transpose( ) << std::endl;
-
-  /* TODO
-     TReal b = ( ( ( SX * SyX.transpose( ) ).sum( ) ) / ( mXX * TReal( m ) ) ) - mY;
-     b /= ( ( ( SX * SX.transpose( ) ).sum( ) ) / ( mXX * TReal( m ) ) ) - TReal( 1 );
-     std::cout << b << std::endl;
-  */
-     
-
-
-  /* TODO
-     unsigned long long m = X.rows( );
-
-
-     TMatrix b( 1, n + 1 );
-     b( 0, 0 ) = iY.mean( );
-     b.block( 0, 1, 1, n ) = ( iX.array( ) * iY.array( ) ).colwise( ).mean( );
-
-     TMatrix M( n + 1, n + 1 );
-     M( 0, 0 ) = _R( 1 );
-     M.block( 0, 1, 1, n ) = iX.colwise( ).mean( );
-     M.block( 1, 0, n, 1 ) = M.block( 0, 1, 1, n ).transpose( );
-     M.block( 1, 1, n, n ) = ( iX.transpose( ) * iX ).array( ) / _R( m );
-
-     std::cout << "--------------------" << std::endl;
-     std::cout << M << std::endl;
-     std::cout << "--------------------" << std::endl;
-     std::cout << M.inverse( ).transpose( ) * b.transpose( ) << std::endl;
-     std::cout << "--------------------" << std::endl;
-
-     Eigen::Map< TRow >( this->m_P.data( ), 1, n + 1 ) = b * M.inverse( );
-  */
+  MCol( this->m_P.data( ), n + 1, 1 ) = A.inverse( ) * B;
 }
 
 // -------------------------------------------------------------------------

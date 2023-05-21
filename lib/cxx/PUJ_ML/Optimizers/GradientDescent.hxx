@@ -24,6 +24,8 @@ fit( )
 
   TCost cost( this->m_Model );
   std::vector< TReal > G;
+  std::vector< std::vector< unsigned long long > > batches;
+  this->_batches( batches );
 
   unsigned long long epoch = 0;
   bool stop = false;
@@ -31,7 +33,8 @@ fit( )
   while( !stop )
   {
     // Update gradient
-    J = cost.gradient( G, iX, iY );
+    for( const auto& batch: batches )
+      J = cost.gradient( G, iX( batch, Eigen::all ), iY( batch, Eigen::all ) );
     mG =
       MRow( G.data( ), 1, G.size( ) )
       *

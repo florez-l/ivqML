@@ -19,7 +19,7 @@ configure( unsigned int w, unsigned int h, unsigned long n )
 {
   this->MineSweeperPlayerBase::configure( w, h, n );
 
-  this->m_Model.set_number_of_parameters( 8 );
+  this->m_Model.init( 8 );
   this->m_Inputs.resize( this->m_Width * this->m_Height, 8 );
 
   unsigned long long r = 0;

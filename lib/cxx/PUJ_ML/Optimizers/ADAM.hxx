@@ -27,6 +27,8 @@ fit( )
   this->m_Model->init( iX.cols( ) );
 
   TCost cost( this->m_Model );
+  std::vector< std::vector< unsigned long long > > batches;
+  this->_batches( batches );
 
   TReal J, mG;
   TReal b1 = this->m_Beta1;
@@ -43,20 +45,25 @@ fit( )
 
   while( !stop )
   {
-    // Gradient
-    J = cost.gradient( G, iX, iY );
-    mG = g.transpose( ) * g;
+    for( const auto& batch: batches )
+    {
+      // Gradient
+      J = cost.gradient( G, iX( batch, Eigen::all ), iY( batch, Eigen::all ) );
+      mG = g.transpose( ) * g;
 
-    // Modify gradient with moments
-    m = ( m * b1 ) + ( g * ( _1 - b1 ) );
-    v = ( v * b2 ) + TCol( g.array( ).pow( _2 ) * ( _1 - b2 ) );
-    g =
-      ( m / ( _1 - b1t ) ).array( )
-      /
-      ( ( v / ( _1 - b2t ) ).array( ).sqrt( ) + this->m_SlideEpsilon );
+      // Modify gradient with moments
+      m = ( m * b1 ) + ( g * ( _1 - b1 ) );
+      v = ( v * b2 ) + TCol( g.array( ).pow( _2 ) * ( _1 - b2 ) );
+      g =
+        ( m / ( _1 - b1t ) ).array( )
+        /
+        ( ( v / ( _1 - b2t ) ).array( ).sqrt( ) + this->m_SlideEpsilon );
 
-    // Descent
-    this->m_Model->move_parameters( G, -this->m_Alpha );
+      // Descent
+      this->m_Model->move_parameters( G, -this->m_Alpha );
+    } // end for
+
+    // Next epoch
     b1t *= b1;
     b2t *= b2;
     epoch++;

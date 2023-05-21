@@ -44,9 +44,9 @@ namespace PUJ_ML
           Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X
           ) const;
 
-        template< class _Y, class _X >
+        template< class _X, class _Y >
         void fit(
-          const Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X
+          const Eigen::EigenBase< _X >& X, const Eigen::EigenBase< _Y >& Y
           );
 
       protected:

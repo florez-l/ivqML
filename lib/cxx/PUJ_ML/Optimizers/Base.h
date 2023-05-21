@@ -74,6 +74,11 @@ namespace PUJ_ML
       virtual void fit( ) = 0;
 
     protected:
+      void _batches(
+        std::vector< std::vector< unsigned long long > >& indices
+        ) const;
+
+    protected:
       TModel* m_Model;
       const TX* m_X;
       const TY* m_Y;
