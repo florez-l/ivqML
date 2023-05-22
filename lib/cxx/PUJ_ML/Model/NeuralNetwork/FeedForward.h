@@ -7,6 +7,7 @@
 #include <functional>
 #include <vector>
 #include <PUJ_ML/Model/Base.h>
+#include <PUJ_ML/Model/NeuralNetwork/Activations.h>
 
 namespace PUJ_ML
 {
@@ -34,7 +35,10 @@ namespace PUJ_ML
         using MCol = Eigen::Map< TCol >;
         using MRow = Eigen::Map< TRow >;
 
-        using TActivation = std::function< void( TCol&, const TCol&, bool ) >;
+        using TActivationSignature = void( TMatrix&, const TMatrix&, bool );
+        using TActivation = std::function< TActivationSignature >;
+        using TBaseActivations =
+          PUJ_ML::Model::NeuralNetwork::Activations< Self >;
 
       public:
         FeedForward( const unsigned long long& n = 1 );
@@ -42,9 +46,7 @@ namespace PUJ_ML
 
         unsigned long long number_of_inputs( ) const;
         unsigned long long number_of_inputs( const unsigned long long& l ) const;
-        void set_number_of_parameters(
-          const unsigned long long& n
-          );
+        void init( const unsigned long long& n = 0 );
 
         void add_layer(
           const unsigned long long& input,
@@ -62,9 +64,18 @@ namespace PUJ_ML
           ) const;
 
       protected:
-        std::vector< MMatrix >     m_Weights;
-        std::vector< MCol >        m_Biases;
-        std::vector< TActivation > m_Activations;
+
+        template< class _Y, class _X >
+        void _evaluate(
+          Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X,
+          std::vector< TMatrix >* As = nullptr,
+          std::vector< TMatrix >* Zs = nullptr
+          ) const;
+
+      protected:
+        std::vector< MMatrix >     m_W;
+        std::vector< MCol >        m_B;
+        std::vector< TActivation > m_A;
 
       public:
         /**
