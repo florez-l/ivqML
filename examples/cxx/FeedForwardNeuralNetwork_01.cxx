@@ -2,6 +2,9 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+#include <algorithm>
+#include <random>
+
 #include <PUJ_ML/Model/NeuralNetwork/FeedForward.h>
 
 int main( int argc, char** argv )
@@ -15,22 +18,29 @@ int main( int argc, char** argv )
   model.add_layer( 2, TActivations( )( "SoftMax" ) );
   model.init( );
 
-  /* TODO
-     model.init( 1 );
-     model( 0 ) = 1;
-     model( 1 ) = 3;
-
-     decltype( model )::TMatrix X( 4, model.number_of_inputs( ) );
-     X << 1, 2, 3, 4;
-     decltype( model )::TCol Y;
-     model.evaluate( Y, X );
-
-     std::cout << Y << std::endl;
-     std::cout << "===============" << std::endl;
-  */
-
   std::cout << "===============" << std::endl;
   std::cout << model << std::endl;
+
+  TModel::TMatrix X( 13, model.number_of_inputs( ) );
+
+  std::random_device dev;
+  std::default_random_engine eng( dev( ) );
+  std::uniform_real_distribution< TModel::TReal > w( -10, 10 );
+  std::transform(
+    X.data( ), X.data( ) + X.size( ), X.data( ),
+    [&]( TModel::TReal v ) -> TModel::TReal
+    {
+      return( w( eng ) );
+    }
+    );
+
+  std::cout << X << std::endl;
+
+  TModel::TCol Y;
+  model.evaluate( Y, X );
+
+  std::cout << "===============" << std::endl;
+  std::cout << Y << std::endl;
   std::cout << "===============" << std::endl;
 
   return( EXIT_SUCCESS );

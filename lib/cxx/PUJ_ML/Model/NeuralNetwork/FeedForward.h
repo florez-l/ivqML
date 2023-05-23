@@ -72,6 +72,8 @@ namespace PUJ_ML
           std::vector< TMatrix >* Zs = nullptr
           ) const;
 
+        void _reassign_memory( );
+
       protected:
         std::vector< MMatrix >     m_W;
         std::vector< MCol >        m_B;

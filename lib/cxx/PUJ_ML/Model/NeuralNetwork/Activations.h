@@ -29,6 +29,9 @@ namespace PUJ_ML
 
         TFunction operator()( const std::string& n )
           {
+            static const TReal _0 = TReal( 0 );
+            static const TReal _1 = TReal( 1 );
+
             std::string a = n;
             std::transform(
               a.begin( ), a.end( ), a.begin( ),
@@ -53,14 +56,14 @@ namespace PUJ_ML
                     A = Z.unaryExpr(
                       [&]( TReal z ) -> TReal
                       {
-                        return( ( z <  TReal( 0 ) )? TReal( 0 ): TReal( 1 ) );
+                        return( ( z <  _0 )? _0: _1 );
                       }
                       );
                   else
                     A = Z.unaryExpr(
                       [&]( TReal z ) -> TReal
                       {
-                        return( ( z <  TReal( 0 ) )? TReal( 0 ): z );
+                        return( ( z <  _0 )? _0: z );
                       }
                       );
                 }
@@ -74,7 +77,7 @@ namespace PUJ_ML
                       [&]( TReal z ) -> TReal
                       {
                         return(
-                          ( z <  TReal( 0 ) )? TReal( 1e-2 ): TReal( 1 )
+                          ( z <  _0 )? TReal( 1e-2 ): _1
                           );
                       }
                       );
@@ -83,7 +86,7 @@ namespace PUJ_ML
                       [&]( TReal z ) -> TReal
                       {
                         return(
-                          ( ( z <  TReal( 0 ) )? TReal( 1e-2 ): TReal( 1 ) )
+                          ( ( z <  _0 )? TReal( 1e-2 ): _1 )
                           *
                           z
                           );
@@ -100,7 +103,7 @@ namespace PUJ_ML
                       [&]( TReal z ) -> TReal
                       {
                         return(
-                          -TReal( 1 ) / std::sqrt( TReal( 1 ) - ( z * z ) )
+                          -_1 / std::sqrt( _1 - ( z * z ) )
                           );
                       }
                       );
@@ -122,7 +125,7 @@ namespace PUJ_ML
                       [&]( TReal z ) -> TReal
                       {
                         TReal t = std::tanh( z );
-                        return( TReal( 1 ) - ( t * t ) );
+                        return( _1 - ( t * t ) );
                       }
                       );
                   else
@@ -139,30 +142,42 @@ namespace PUJ_ML
                 []( TMatrix& A, const TMatrix& Z, bool d ) -> void
                 {
                   if( d )
-                  {
-                  }
+                    A = Z.unaryExpr(
+                      [&]( TReal z ) -> TReal
+                      {
+                        TReal s;
+                        if     ( z >  TReal( 40 ) ) s = _1;
+                        else if( z < -TReal( 40 ) ) s = _0;
+                        else s = _1 / ( _1 + std::exp( -z ) );
+                        return( s * ( _1 - s ) );
+                      }
+                      );
                   else
-                  {
-                  } // end if
+                    A = Z.unaryExpr(
+                      [&]( TReal z ) -> TReal
+                      {
+                        if     ( z >  TReal( 40 ) ) return( _1 );
+                        else if( z < -TReal( 40 ) ) return( _0 );
+                        else return( _1 / ( _1 + std::exp( -z ) ) );
+                      }
+                      );
                 }
                 );
             else if( a == "softmax" )
               return(
                 []( TMatrix& A, const TMatrix& Z, bool d ) -> void
                 {
-                  if( d )
-                  {
-                  }
-                  else
-                  {
-                  } // end if
+                  TCol M = Z.rowwise( ).maxCoeff( );
+                  A = ( Z.array( ).colwise( ) - M.array( ) ).array( ).exp( );
+                  M = A.rowwise( ).sum( );
+                  A.array( ).colwise( ) /= M.array( );
                 }
                 );
             else
               return(
                 []( TMatrix& A, const TMatrix& Z, bool d ) -> void
                 {
-                  A = TMatrix::Zeros( Z.rows( ), Z.cols( ) );
+                  A = TMatrix::Zero( Z.rows( ), Z.cols( ) );
                 }
                 );
           }

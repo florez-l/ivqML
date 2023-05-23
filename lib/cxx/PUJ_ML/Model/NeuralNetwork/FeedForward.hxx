@@ -57,6 +57,7 @@ init( const unsigned long long& n )
       return( TReal( ( s( eng ) << 1 ) - 1 ) * w( eng ) );
     }
     );
+  this->_reassign_memory( );
 }
 
 // -------------------------------------------------------------------------
@@ -101,6 +102,7 @@ add_layer( const unsigned long long& output, TActivation activation )
   }
   else
     this->add_layer( output, output, activation );
+  this->_reassign_memory( );
 }
 
 // -------------------------------------------------------------------------
@@ -131,15 +133,40 @@ _evaluate(
   if( Zs != nullptr )
     Zs->clear( );
 
+#error CHECK SIZES!!!!
+
   for( unsigned long long i = 0; i < this->m_W.size( ); ++i )
   {
-    Z = ( A * this->m_W[ i ] ) + this->m_B[ i ];
-    this->m_A( A, Z, false );
+    Z = ( A * this->m_W[ i ] ).array( ).colwise( ) + this->m_B[ i ].array( );
+    this->m_A[ i ]( A, Z, false );
+    std::cout
+      << i << " ---> "
+      << Z.rows( ) << " " << Z.cols( ) << " : "
+      << A.rows( ) << " " << A.cols( ) << std::endl;
 
     if( As != nullptr ) As->push_back( A );
     if( Zs != nullptr ) Zs->push_back( Z );
   } // end for
-  Y.derived( ) = Z.template cast< typename _R::Scalar >( );
+  Y.derived( ) = Z.template cast< typename _Y::Scalar >( );
+}
+
+// -------------------------------------------------------------------------
+template< class _R >
+void PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
+_reassign_memory( )
+{
+  _R* data = this->m_P.data( );
+  unsigned long long s = 0;
+  for( unsigned long long l = 0; l < this->m_W.size( ); ++l )
+  {
+    unsigned long long i = this->m_W[ l ].rows( );
+    unsigned long long o = this->m_W[ l ].cols( );
+
+    this->m_W[ l ] = MMatrix( data + s, i, o );
+    this->m_B[ l ] = MCol( data + s + ( i * o ), o, 1 );
+
+    s += ( i * o ) + o;
+  } // end for
 }
 
 // -------------------------------------------------------------------------
