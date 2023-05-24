@@ -48,12 +48,18 @@ namespace PUJ_ML
         );
 
     protected:
-      void _to_stream( std::ostream& o ) const;
+      virtual void _from_stream( std::istream& i );
+      virtual void _to_stream( std::ostream& o ) const;
 
     protected:
       std::vector< TReal > m_P;
 
     public:
+      friend std::istream& operator>>( std::istream& i,  Self& m )
+        {
+          m._from_stream( i );
+          return( i );
+        }
       friend std::ostream& operator<<( std::ostream& o, const Self& m )
         {
           m._to_stream( o );

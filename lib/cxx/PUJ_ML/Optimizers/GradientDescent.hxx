@@ -34,7 +34,7 @@ fit( )
   {
     // Update gradient
     for( const auto& batch: batches )
-      J = cost.gradient( G, iX( batch, Eigen::all ), iY( batch, Eigen::all ) );
+      J = cost.gradient( G, iX( batch, Eigen::placeholders::all ), iY( batch, Eigen::placeholders::all ) );
     mG =
       MRow( G.data( ), 1, G.size( ) )
       *

@@ -28,6 +28,9 @@ target_link_libraries(LogisticRegressionModel_Fit_02 Eigen3::Eigen)
 add_executable(FeedForwardNeuralNetwork_01 FeedForwardNeuralNetwork_01.cxx)
 target_link_libraries(FeedForwardNeuralNetwork_01 Eigen3::Eigen)
 
+add_executable(FeedForwardNeuralNetwork_02 FeedForwardNeuralNetwork_02.cxx)
+target_link_libraries(FeedForwardNeuralNetwork_02 Eigen3::Eigen)
+
 subdirs(minesweeper)
 
 ## eof - $RCSfile$

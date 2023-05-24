@@ -48,7 +48,7 @@ fit( )
     for( const auto& batch: batches )
     {
       // Gradient
-      J = cost.gradient( G, iX( batch, Eigen::all ), iY( batch, Eigen::all ) );
+      J = cost.gradient( G, iX( batch, Eigen::placeholders::all ), iY( batch, Eigen::placeholders::all ) );
       mG = g.transpose( ) * g;
 
       // Modify gradient with moments

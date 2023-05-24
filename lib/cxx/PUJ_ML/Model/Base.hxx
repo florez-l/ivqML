@@ -87,6 +87,13 @@ move_parameters( const std::vector< TReal >& dir, const TReal& coeff )
 // -------------------------------------------------------------------------
 template< class _D, class _R >
 void PUJ_ML::Model::Base< _D, _R >::
+_from_stream( std::istream& i )
+{
+}
+
+// -------------------------------------------------------------------------
+template< class _D, class _R >
+void PUJ_ML::Model::Base< _D, _R >::
 _to_stream( std::ostream& o ) const
 {
   o << this->m_P.size( );

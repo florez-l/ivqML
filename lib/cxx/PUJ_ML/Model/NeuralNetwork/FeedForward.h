@@ -5,6 +5,7 @@
 #define __PUJ_ML__Model__NeuralNetwork__FeedForward__h__
 
 #include <functional>
+#include <string>
 #include <vector>
 #include <PUJ_ML/Model/Base.h>
 #include <PUJ_ML/Model/NeuralNetwork/Activations.h>
@@ -51,15 +52,20 @@ namespace PUJ_ML
         void add_layer(
           const unsigned long long& input,
           const unsigned long long& output,
-          TActivation activation
+          const std::string& activation
           );
         void add_layer(
           const unsigned long long& output,
-          TActivation activation
+          const std::string& activation
           );
 
         template< class _Y, class _X >
         void evaluate(
+          Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X
+          ) const;
+
+        template< class _Y, class _X >
+        void threshold(
           Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X
           ) const;
 
@@ -74,10 +80,16 @@ namespace PUJ_ML
 
         void _reassign_memory( );
 
+        virtual void _from_stream( std::istream& i ) override;
+        virtual void _to_stream( std::ostream& o ) const override;
+
       protected:
+        TBaseActivations s_Activations;
+
         std::vector< MMatrix >     m_W;
         std::vector< MCol >        m_B;
         std::vector< TActivation > m_A;
+        std::vector< std::string > m_S;
 
       public:
         /**

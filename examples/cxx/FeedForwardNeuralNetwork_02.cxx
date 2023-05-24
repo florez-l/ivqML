@@ -3,21 +3,30 @@
 // =========================================================================
 
 #include <algorithm>
+#include <fstream>
 #include <random>
 
 #include <PUJ_ML/Model/NeuralNetwork/FeedForward.h>
 
 int main( int argc, char** argv )
 {
+  if( argc < 2 )
+  {
+    std::cerr << "Usage: " << argv[ 0 ] << " descriptor_file" << std::endl;
+    return( EXIT_FAILURE );
+  } // end if
+
   using TModel = PUJ_ML::Model::NeuralNetwork::FeedForward< double >;
   using TActivations = TModel::TBaseActivations;
 
   TModel model;
-  model.add_layer( 2, 16, "ReLU" );
-  model.add_layer( 8, "ReLU" );
-  model.add_layer( 4, "ReLU" );
-  model.add_layer( 2, "SoftMax" );
-  model.init( );
+  std::ifstream in( argv[ 1 ] );
+  std::istringstream in_str( std::string( std::istreambuf_iterator< char >( in ), { } ) );
+  in.close( );
+  in_str >> model;
+
+
+/* TODO
 
   TModel::TMatrix X( 10, model.number_of_inputs( ) );
 
@@ -44,7 +53,7 @@ int main( int argc, char** argv )
   std::cout << "===============" << std::endl;
   std::cout << T << std::endl;
   std::cout << "===============" << std::endl;
-
+*/
   return( EXIT_SUCCESS );
 }
 

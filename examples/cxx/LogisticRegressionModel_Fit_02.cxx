@@ -36,7 +36,7 @@ int main( int argc, char** argv )
   // TODO: opt.set_regularization_type_to_LASSO( );
   // TODO: opt.set_gradient_epsilon( 1e-8 );
   opt.set_maximum_epochs( 100000 );
-  opt.set_debugging_epochs( 1000 );
+  opt.set_debugging_epochs( 10 );
   opt.set_debug(
     [](
       const TReal& J,
