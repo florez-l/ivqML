@@ -87,7 +87,7 @@ namespace PUJ_ML
         TBaseActivations s_Activations;
 
         std::vector< MMatrix >     m_W;
-        std::vector< MCol >        m_B;
+        std::vector< MRow >        m_B;
         std::vector< TActivation > m_A;
         std::vector< std::string > m_S;
 

@@ -48,18 +48,39 @@ template< class _R >
 void PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
 init( const unsigned long long& n )
 {
+  unsigned long long L = this->m_W.size( );
+
+  std::vector< unsigned long long > sizes( L + 1 );
+  unsigned long long s = 0;
+  sizes[ 0 ] = this->m_W[ 0 ].rows( );
+  for( unsigned long long l = 0; l < L; ++l )
+  {
+    sizes[ l + 1 ] = this->m_W[ l ].cols( );
+    s += this->m_W[ l ].cols( ) * ( this->m_W[ l ].rows( ) + 1 );
+  } // end for
+  this->m_P.clear( );
+  this->m_W.clear( );
+  this->m_B.clear( );
   std::random_device dev;
   std::default_random_engine eng( dev( ) );
   std::uniform_real_distribution< TReal > w( 1e-2, 1 );
-  std::uniform_int_distribution< char > s( 0, 1 );
-  std::transform(
-    this->m_P.begin( ), this->m_P.end( ), this->m_P.begin( ),
-    [&]( TReal v ) -> TReal
-    {
-      return( TReal( ( s( eng ) << 1 ) - 1 ) * w( eng ) );
-    }
-    );
-  this->_reassign_memory( );
+  std::uniform_int_distribution< char > sgn( 0, 1 );
+  for( unsigned long long i = 0; i < s; ++i )
+    this->m_P.push_back( TReal( ( sgn( eng ) << 1 ) - 1 ) * w( eng ) );
+
+  // Reassign memory
+  TReal* data = this->m_P.data( );
+  s = 0;
+  for( unsigned long long l = 0; l < L; ++l )
+  {
+    unsigned long long i = sizes[ l ];
+    unsigned long long o = sizes[ l + 1 ];
+
+    this->m_W.push_back( MMatrix( data + s, i, o ) );
+    this->m_B.push_back( MRow( data + s + ( i * o ), 1, o ) );
+
+    s += ( i * o ) + o;
+  } // end for
 }
 
 // -------------------------------------------------------------------------
@@ -78,16 +99,9 @@ add_layer(
   this->m_S.clear( );
 
   unsigned long long p = output * input;
-  // this->m_P.resize( p + output, 0 );
-  /* TODO
-     while( this->m_P.size( ) < p + output )
-     this->m_P.push_back( TReal( 0 ) );
-     this->m_P.shrink_to_fit( );
-  */
-  this->m_P = std::vector< TReal >( p + output );
 
-  this->m_W.push_back( MMatrix( this->m_P.data( ), input, output ) );
-  this->m_B.push_back( MCol( this->m_P.data( ) + p, output, 1 ) );
+  this->m_W.push_back( MMatrix( nullptr, input, output ) );
+  this->m_B.push_back( MRow( nullptr, 1, output ) );
   this->m_A.push_back( Self::s_Activations( activation ) );
   this->m_S.push_back( activation );
 }
@@ -103,26 +117,13 @@ add_layer( const unsigned long long& output, const std::string& activation )
     unsigned long long n = this->m_P.size( );
     unsigned long long p = output * input;
 
-    std::cout << "new size: " << n + p + output << std::endl;
-
-    // this->m_P.resize( n + p + output, 0 );
-    /* TODO
-       while( this->m_P.size( ) < n + p + output )
-       this->m_P.push_back( TReal( 0 ) );
-       this->m_P.shrink_to_fit( );
-    */
-    this->m_P = std::vector< TReal >( n + p + output );
-
-    std::cout << "ok" << std::endl;
-
-    this->m_W.push_back( MMatrix( this->m_P.data( ) + n, input, output ) );
-    this->m_B.push_back( MCol( this->m_P.data( ) + n + p, output, 1 ) );
+    this->m_W.push_back( MMatrix( nullptr, input, output ) );
+    this->m_B.push_back( MRow( nullptr, 1, output ) );
     this->m_A.push_back( Self::s_Activations( activation ) );
     this->m_S.push_back( activation );
   }
   else
     this->add_layer( output, output, activation );
-  this->_reassign_memory( );
 }
 
 // -------------------------------------------------------------------------
@@ -196,8 +197,7 @@ _evaluate(
 
   for( unsigned long long l = 0; l < this->m_W.size( ); ++l )
   {
-    Z = A * this->m_W[ l ];
-    Z += this->m_B[ l ];
+    Z = ( A * this->m_W[ l ] ).rowwise( ) + this->m_B[ l ];
     this->m_A[ l ]( A, Z, false );
 
     if( As != nullptr ) As->push_back( A );
@@ -209,36 +209,15 @@ _evaluate(
 // -------------------------------------------------------------------------
 template< class _R >
 void PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
-_reassign_memory( )
-{
-  _R* data = this->m_P.data( );
-  unsigned long long s = 0;
-  for( unsigned long long l = 0; l < this->m_W.size( ); ++l )
-  {
-    unsigned long long i = this->m_W[ l ].rows( );
-    unsigned long long o = this->m_W[ l ].cols( );
-
-    this->m_W[ l ] = MMatrix( data + s, i, o );
-    this->m_B[ l ] = MCol( data + s + ( i * o ), o, 1 );
-
-    s += ( i * o ) + o;
-  } // end for
-}
-
-// -------------------------------------------------------------------------
-template< class _R >
-void PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
 _from_stream( std::istream& i )
 {
   // Network's topology
   unsigned long long L, in, out;
   std::string activation;
   i >> L >> in;
-  std::cout << L << " " << in << std::endl;
   for( unsigned long long l = 0; l < L; ++l )
   {
     i >> out >> activation;
-    std::cout << out << " \"" << activation << "\"" << std::endl;
     if( l == 0 )
       this->add_layer( in, out, activation );
     else
@@ -247,15 +226,12 @@ _from_stream( std::istream& i )
   this->init( );
 
   // Weights
-  /*
   std::string n_params;
   i >> n_params;
-  std::cout << n_params << std::endl;
   std::transform(
     n_params.begin( ), n_params.end( ), n_params.begin( ),
     []( unsigned char c ){ return( std::tolower( c ) ); }
     );
-  std::cout << ".... " << n_params << std::endl;
   if( n_params != "random" )
   {
     std::istringstream n_params_str( n_params );
@@ -264,16 +240,7 @@ _from_stream( std::istream& i )
     if( this->m_P.size( ) == N )
       for( unsigned long long n = 0; n < N; ++n )
         i >> this->m_P[ n ];
-    else
-      this->init( );
-  }
-  else
-    this->init( );
-  */
-  std::cout << *this << std::endl;
-  std::cout << "EXIT" << std::endl;
-
-
+  } // end if
 }
 
 // -------------------------------------------------------------------------

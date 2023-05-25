@@ -25,9 +25,6 @@ int main( int argc, char** argv )
   in.close( );
   in_str >> model;
 
-
-/* TODO
-
   TModel::TMatrix X( 10, model.number_of_inputs( ) );
 
   std::random_device dev;
@@ -53,7 +50,7 @@ int main( int argc, char** argv )
   std::cout << "===============" << std::endl;
   std::cout << T << std::endl;
   std::cout << "===============" << std::endl;
-*/
+
   return( EXIT_SUCCESS );
 }
 
