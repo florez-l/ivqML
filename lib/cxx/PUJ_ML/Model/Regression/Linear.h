@@ -31,10 +31,13 @@ namespace PUJ_ML
         using MMatrix = Eigen::Map< TMatrix >;
         using MCol = Eigen::Map< TCol >;
         using MRow = Eigen::Map< TRow >;
+        using ConstMMatrix = Eigen::Map< const TMatrix >;
+        using ConstMCol = Eigen::Map< const TCol >;
+        using ConstMRow = Eigen::Map< const TRow >;
 
       public:
         Linear( const unsigned long long& n = 1 );
-        virtual ~Linear( );
+        virtual ~Linear( ) = default;
 
         unsigned long long number_of_inputs( ) const;
         void init( const unsigned long long& n );
@@ -48,9 +51,6 @@ namespace PUJ_ML
         void fit(
           const Eigen::EigenBase< _X >& X, const Eigen::EigenBase< _Y >& Y
           );
-
-      protected:
-        MCol* m_T { nullptr };
 
       public:
         /**
@@ -68,14 +68,8 @@ namespace PUJ_ML
           template< class _X, class _Y >
           TReal evaluate(
             const Eigen::EigenBase< _X >& X,
-            const Eigen::EigenBase< _Y >& Y
-            ) const;
-
-          template< class _X, class _Y >
-          TReal gradient(
-            std::vector< TReal >& G,
-            const Eigen::EigenBase< _X >& X,
-            const Eigen::EigenBase< _Y >& Y
+            const Eigen::EigenBase< _Y >& Y,
+            TReal* G = nullptr
             ) const;
 
         protected:

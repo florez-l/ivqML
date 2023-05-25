@@ -67,7 +67,8 @@ typename PUJ_ML::Model::Regression::Logistic< _R >::
 TReal PUJ_ML::Model::Regression::Logistic< _R >::Cost::
 evaluate(
   const Eigen::EigenBase< _X >& X,
-  const Eigen::EigenBase< _Y >& Y
+  const Eigen::EigenBase< _Y >& Y,
+  TReal* G
   ) const
 {
   auto iX = X.derived( ).template cast< TReal >( );
@@ -81,7 +82,14 @@ evaluate(
     _V( const TCol& Z )
       {
         this->Z = &Z;
-        this->E = std::numeric_limits< TReal >::epsilon( );
+        this->E =
+          std::pow(
+            TReal( 10 ),
+            std::log10( std::numeric_limits< TReal >::epsilon( ) )
+            *
+            TReal( 0.5 )
+            );
+        this->D = std::log( this->E );
       }
     void init(
       const typename _Y::Scalar& y,
@@ -98,81 +106,26 @@ evaluate(
       const Eigen::Index& j
       )
       {
+        TReal lv = this->Z->operator()( i );
         if( y == ( typename _Y::Scalar )( 0 ) )
-          this->J -= std::log( TReal( 1 ) - this->Z->operator()( i ) + this->E );
-        else if( y == ( typename _Y::Scalar )( 1 ) )
-          this->J -= std::log( this->Z->operator()( i ) + this->E );
+          lv = TReal( 1 ) - lv;
+        this->J -= ( this->E < lv )? std::log( lv ): this->D;
       }
     const TCol* Z;
     TReal J;
     TReal E;
+    TReal D;
   } visitor( Z );
   iY.visit( visitor );
 
-  return( visitor.J / TReal( Z.rows( ) ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _R >
-template< class _X, class _Y >
-typename PUJ_ML::Model::Regression::Logistic< _R >::
-TReal PUJ_ML::Model::Regression::Logistic< _R >::Cost::
-gradient(
-  std::vector< TReal >& G,
-  const Eigen::EigenBase< _X >& X,
-  const Eigen::EigenBase< _Y >& Y
-  ) const
-{
-  if( G.size( ) != this->m_Model->number_of_parameters( ) )
+  if( G != nullptr )
   {
-    G.resize( this->m_Model->number_of_parameters( ), 0 );
-    G.shrink_to_fit( );
+    G[ 0 ] = Z.mean( ) - iY.mean( );
+    MRow( G + 1, 1, this->m_Model->number_of_inputs( ) ) =
+      ( iX.array( ).colwise( ) * Z.array( ) ).colwise( ).mean( )
+      -
+      ( iX.array( ).colwise( ) * iY.col( 0 ).array( ) ).colwise( ).mean( );
   } // end if
-
-  auto iX = X.derived( ).template cast< TReal >( );
-  auto iY = Y.derived( ).template cast< TReal >( );
-
-  TCol Z;
-  this->m_Model->evaluate( Z, iX );
-
-  struct _V
-  {
-    _V( const TCol& Z )
-      {
-        this->Z = &Z;
-        this->E = std::numeric_limits< TReal >::epsilon( );
-      }
-    void init(
-      const typename _Y::Scalar& y,
-      const Eigen::Index& i,
-      const Eigen::Index& j
-      )
-      {
-        this->J = TReal( 0 );
-        this->operator()( y, i, j );
-      }
-    void operator()(
-      const typename _Y::Scalar& y,
-      const Eigen::Index& i,
-      const Eigen::Index& j
-      )
-      {
-        if( y == ( typename _Y::Scalar )( 0 ) )
-          this->J -= std::log( TReal( 1 ) - this->Z->operator()( i ) + this->E );
-        else if( y == ( typename _Y::Scalar )( 1 ) )
-          this->J -= std::log( this->Z->operator()( i ) + this->E );
-      }
-    const TCol* Z;
-    TReal J;
-    TReal E;
-  } visitor( Z );
-  iY.visit( visitor );
-
-  G[ 0 ] = Z.mean( ) - iY.mean( );
-  MRow( G.data( ) + 1, 1, G.size( ) - 1 ) =
-    ( iX.array( ).colwise( ) * Z.array( ) ).colwise( ).mean( )
-    -
-    ( iX.array( ).colwise( ) * iY.col( 0 ).array( ) ).colwise( ).mean( );
 
   return( visitor.J / TReal( Z.rows( ) ) );
 }

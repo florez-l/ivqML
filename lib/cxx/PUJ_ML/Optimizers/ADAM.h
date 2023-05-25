@@ -31,6 +31,9 @@ namespace PUJ_ML
       using MMatrix = typename Superclass::MMatrix;
       using MCol = typename Superclass::MCol;
       using MRow = typename Superclass::MRow;
+      using ConstMMatrix = typename Superclass::ConstMMatrix;
+      using ConstMCol = typename Superclass::ConstMCol;
+      using ConstMRow = typename Superclass::ConstMRow;
 
     public:
       PUJ_ML_Attribute( TReal, Beta1, beta1, 0.9 );

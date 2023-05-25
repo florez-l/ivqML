@@ -23,7 +23,7 @@ fit( )
   this->m_Model->init( iX.cols( ) );
 
   TCost cost( this->m_Model );
-  std::vector< TReal > G;
+  TRow G( this->m_Model->number_of_parameters( ) );
   std::vector< std::vector< unsigned long long > > batches;
   this->_batches( batches );
 
@@ -34,14 +34,15 @@ fit( )
   {
     // Update gradient
     for( const auto& batch: batches )
-      J = cost.gradient( G, iX( batch, Eigen::placeholders::all ), iY( batch, Eigen::placeholders::all ) );
-    mG =
-      MRow( G.data( ), 1, G.size( ) )
-      *
-      MCol( G.data( ), G.size( ), 1 );
+      J = cost.evaluate(
+        iX( batch, Eigen::placeholders::all ),
+        iY( batch, Eigen::placeholders::all ),
+        G.data( )
+        );
+    mG = G * G.transpose( );
 
     // Descent
-    this->m_Model->move_parameters( G, -this->m_Alpha );
+    this->m_Model->move_parameters( G.data( ), -this->m_Alpha );
 
     // Check stopping criteria
     epoch++;

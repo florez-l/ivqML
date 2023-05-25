@@ -43,9 +43,13 @@ namespace PUJ_ML
       using MMatrix = typename TModel::MMatrix;
       using MCol = typename TModel::MCol;
       using MRow = typename TModel::MRow;
+      using ConstMMatrix = typename TModel::ConstMMatrix;
+      using ConstMCol = typename TModel::ConstMCol;
+      using ConstMRow = typename TModel::ConstMRow;
 
       // Cost, gradient magnitude, batch, epoch -> should stop?
-      using TDebug = std::function< bool( const TReal&, const TReal&, const unsigned long long& ) >;
+      using TSgn = bool( const TReal&, const TReal&, const unsigned long long& );
+      using TDebug = std::function< TSgn >;
 
     public:
       PUJ_ML_Attribute( TReal, Alpha, learning_rate, 1e-2 );

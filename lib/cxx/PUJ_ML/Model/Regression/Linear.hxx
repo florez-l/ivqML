@@ -16,15 +16,6 @@ Linear( const unsigned long long& n )
 
 // -------------------------------------------------------------------------
 template< class _R >
-PUJ_ML::Model::Regression::Linear< _R >::
-~Linear( )
-{
-  if( this->m_T != nullptr )
-    delete this->m_T;
-}
-
-// -------------------------------------------------------------------------
-template< class _R >
 unsigned long long PUJ_ML::Model::Regression::Linear< _R >::
 number_of_inputs( ) const
 {
@@ -37,7 +28,6 @@ void PUJ_ML::Model::Regression::Linear< _R >::
 init( const unsigned long long& n )
 {
   this->Superclass::init( n + 1 );
-  this->m_T = new MCol( this->m_P.data( ) + 1, this->m_P.size( ) - 1, 1 );
 }
 
 // -------------------------------------------------------------------------
@@ -48,9 +38,11 @@ evaluate( Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X ) const
 {
   Y.derived( ) =
     (
-      ( X.derived( ).template cast< _R >( ) * *( this->m_T ) ).array( )
-      +
-      this->m_P[ 0 ]
+      (
+        X.derived( ).template cast< _R >( )
+        *
+        ConstMCol( this->m_P.data( ) + 1, this->m_P.size( ) - 1, 1 )
+        ).array( ) + this->m_P[ 0 ]
       )
     .template cast< typename _Y::Scalar >( );
 }
@@ -98,7 +90,8 @@ typename PUJ_ML::Model::Regression::Linear< _R >::
 TReal PUJ_ML::Model::Regression::Linear< _R >::Cost::
 evaluate(
   const Eigen::EigenBase< _X >& X,
-  const Eigen::EigenBase< _Y >& Y
+  const Eigen::EigenBase< _Y >& Y,
+  TReal* G
   ) const
 {
   auto iX = X.derived( ).template cast< TReal >( );
@@ -107,36 +100,13 @@ evaluate(
   TCol Z;
   this->m_Model->evaluate( Z, iX );
   Z -= iY;
-  return( ( ( Z.transpose( ) * Z ) / TReal( Z.rows( ) ) )( 0 ) );
-}
 
-// -------------------------------------------------------------------------
-template< class _R >
-template< class _X, class _Y >
-typename PUJ_ML::Model::Regression::Linear< _R >::
-TReal PUJ_ML::Model::Regression::Linear< _R >::Cost::
-gradient(
-  std::vector< TReal >& G,
-  const Eigen::EigenBase< _X >& X,
-  const Eigen::EigenBase< _Y >& Y
-  ) const
-{
-  if( G.size( ) != this->m_Model->number_of_parameters( ) )
+  if( G != nullptr )
   {
-    G.resize( this->m_Model->number_of_parameters( ), 0 );
-    G.shrink_to_fit( );
+    G[ 0 ] = Z.mean( );
+    MRow( G + 1, 1, this->m_Model->number_of_inputs( ) ) =
+      ( iX.array( ).colwise( ) * Z.array( ) ).colwise( ).mean( );
   } // end if
-
-  auto iX = X.derived( ).template cast< TReal >( );
-  auto iY = Y.derived( ).template cast< TReal >( );
-
-  TCol Z;
-  this->m_Model->evaluate( Z, iX );
-  Z -= iY;
-
-  G[ 0 ] = Z.mean( );
-  MRow( G.data( ) + 1, 1, G.size( ) - 1 ) =
-    ( iX.array( ).colwise( ) * Z.array( ) ).colwise( ).mean( );
   return( ( ( Z.transpose( ) * Z ) / TReal( Z.rows( ) ) )( 0 ) );
 }
 

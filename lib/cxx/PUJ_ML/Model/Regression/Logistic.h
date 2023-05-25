@@ -30,6 +30,9 @@ namespace PUJ_ML
         using MMatrix = typename Superclass::MMatrix;
         using MCol = typename Superclass::MCol;
         using MRow = typename Superclass::MRow;
+        using ConstMMatrix = typename Superclass::ConstMMatrix;
+        using ConstMCol = typename Superclass::ConstMCol;
+        using ConstMRow = typename Superclass::ConstMRow;
 
       public:
         Logistic( const unsigned long long& n = 1 );
@@ -61,14 +64,8 @@ namespace PUJ_ML
           template< class _X, class _Y >
           TReal evaluate(
             const Eigen::EigenBase< _X >& X,
-            const Eigen::EigenBase< _Y >& Y
-            ) const;
-
-          template< class _X, class _Y >
-          TReal gradient(
-            std::vector< TReal >& G,
-            const Eigen::EigenBase< _X >& X,
-            const Eigen::EigenBase< _Y >& Y
+            const Eigen::EigenBase< _Y >& Y,
+            TReal* G = nullptr
             ) const;
 
         protected:

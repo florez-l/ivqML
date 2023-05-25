@@ -65,7 +65,7 @@ configure( unsigned int w, unsigned int h, unsigned long n )
         )
       );
   this->m_Options.shrink_to_fit( );
-  this->m_Inputs = this->m_Inputs( idx, Eigen::all );
+  this->m_Inputs = this->m_Inputs( idx, Eigen::placeholders::all );
 }
 
 // -------------------------------------------------------------------------

@@ -4,12 +4,21 @@
 #ifndef __PUJ_ML__Model__Base__hxx__
 #define __PUJ_ML__Model__Base__hxx__
 
+#include <cstring>
+
 // -------------------------------------------------------------------------
 template< class _D, class _R >
 PUJ_ML::Model::Base< _D, _R >::
 Base( const unsigned long long& n )
 {
   this->init( n );
+}
+
+// -------------------------------------------------------------------------
+template< class _D, class _R >
+PUJ_ML::Model::Base< _D, _R >::
+~Base( )
+{
 }
 
 // -------------------------------------------------------------------------
@@ -78,7 +87,7 @@ threshold( Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X ) const
 // -------------------------------------------------------------------------
 template< class _D, class _R >
 void PUJ_ML::Model::Base< _D, _R >::
-move_parameters( const std::vector< TReal >& dir, const TReal& coeff )
+move_parameters( const TReal* dir, const TReal& coeff )
 {
   for( unsigned long long i = 0; i < this->m_P.size( ); ++i )
     this->m_P[ i ] += dir[ i ] * coeff;
@@ -89,6 +98,11 @@ template< class _D, class _R >
 void PUJ_ML::Model::Base< _D, _R >::
 _from_stream( std::istream& i )
 {
+  unsigned long long n;
+  i >> n;
+  this->init( n );
+  for( n = 0; n < this->m_P.size( ); ++n )
+    i >> this->m_P[ n ];
 }
 
 // -------------------------------------------------------------------------
@@ -97,8 +111,8 @@ void PUJ_ML::Model::Base< _D, _R >::
 _to_stream( std::ostream& o ) const
 {
   o << this->m_P.size( );
-  for( const TReal& v: this->m_P )
-    o << " " << v;
+  for( unsigned long long n = 0; n < this->m_P.size( ); ++n )
+    o << " " << this->m_P[ n ];
 }
 
 #endif // __PUJ_ML__Model__Base__hxx__

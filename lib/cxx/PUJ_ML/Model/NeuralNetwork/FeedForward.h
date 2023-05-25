@@ -35,6 +35,9 @@ namespace PUJ_ML
         using MMatrix = Eigen::Map< TMatrix >;
         using MCol = Eigen::Map< TCol >;
         using MRow = Eigen::Map< TRow >;
+        using ConstMMatrix = Eigen::Map< const TMatrix >;
+        using ConstMCol = Eigen::Map< const TCol >;
+        using ConstMRow = Eigen::Map< const TRow >;
 
         using TActivationSignature = void( TMatrix&, const TMatrix&, bool );
         using TActivation = std::function< TActivationSignature >;
@@ -86,10 +89,12 @@ namespace PUJ_ML
       protected:
         TBaseActivations s_Activations;
 
-        std::vector< MMatrix >     m_W;
-        std::vector< MRow >        m_B;
-        std::vector< TActivation > m_A;
-        std::vector< std::string > m_S;
+        /* TODO
+           std::vector< MMatrix >     m_W;
+           std::vector< MRow >        m_B;
+        */
+        std::vector< unsigned long long > m_S;
+        std::vector< std::pair< std::string, TActivation > > m_A;
 
       public:
         /**
@@ -107,14 +112,8 @@ namespace PUJ_ML
           template< class _X, class _Y >
           TReal evaluate(
             const Eigen::EigenBase< _X >& X,
-            const Eigen::EigenBase< _Y >& Y
-            ) const;
-
-          template< class _X, class _Y >
-          TReal gradient(
-            std::vector< TReal >& G,
-            const Eigen::EigenBase< _X >& X,
-            const Eigen::EigenBase< _Y >& Y
+            const Eigen::EigenBase< _Y >& Y,
+            TReal* G = nullptr
             ) const;
 
         protected:

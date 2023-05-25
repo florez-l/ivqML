@@ -28,7 +28,7 @@ namespace PUJ_ML
 
     public:
       Base( const unsigned long long& n = 1 );
-      virtual ~Base( ) = default;
+      virtual ~Base( );
 
       unsigned long long number_of_parameters( ) const;
       unsigned long long number_of_inputs( ) const;
@@ -42,10 +42,7 @@ namespace PUJ_ML
         Eigen::EigenBase< _Y >& Y, const Eigen::EigenBase< _X >& X
         ) const;
 
-      void move_parameters(
-        const std::vector< TReal >& dir,
-        const TReal& coeff = TReal( 1 )
-        );
+      void move_parameters( const TReal* dir, const TReal& coeff = TReal( 1 ) );
 
     protected:
       virtual void _from_stream( std::istream& i );
