@@ -62,7 +62,10 @@ set_regularization_type_to_LASSO( )
 // -------------------------------------------------------------------------
 template< class _C, class _X, class _Y >
 void PUJ_ML::Optimizers::Base< _C, _X, _Y >::
-_batches( std::vector< std::vector< unsigned long long > >& indices ) const
+_batches(
+  std::vector< std::vector< unsigned long long > >& indices,
+  std::vector< TCost >& costs
+  ) const
 {
   // Create indices and shuffle them
   unsigned long long m = this->m_X->derived( ).rows( );
@@ -85,6 +88,7 @@ _batches( std::vector< std::vector< unsigned long long > >& indices ) const
     indices.push_back(
       std::vector< unsigned long long >( idx.begin( ) + i, idx.begin( ) + j )
       );
+    costs.push_back( TCost( this->m_Model ) );
   } // end for
 }
 

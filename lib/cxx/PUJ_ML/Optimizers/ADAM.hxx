@@ -26,9 +26,9 @@ fit( )
 
   this->m_Model->init( iX.cols( ) );
 
-  TCost cost( this->m_Model );
   std::vector< std::vector< unsigned long long > > batches;
-  this->_batches( batches );
+  std::vector< TCost > costs;
+  this->_batches( batches, costs );
 
   TReal J, mG;
   TReal b1 = this->m_Beta1;
@@ -43,12 +43,12 @@ fit( )
 
   while( !stop )
   {
-    for( const auto& batch: batches )
+    for( unsigned long long b = 0; b < batches.size( ); ++b )
     {
       // Gradient
-      J = cost.evaluate(
-        iX( batch, Eigen::placeholders::all ),
-        iY( batch, Eigen::placeholders::all ),
+      J = costs[ b ].evaluate(
+        iX( batches[ b ], Eigen::placeholders::all ),
+        iY( batches[ b ], Eigen::placeholders::all ),
         G.data( )
         );
       mG = G.transpose( ) * G;

@@ -22,10 +22,10 @@ fit( )
 
   this->m_Model->init( iX.cols( ) );
 
-  TCost cost( this->m_Model );
   TRow G( this->m_Model->number_of_parameters( ) );
   std::vector< std::vector< unsigned long long > > batches;
-  this->_batches( batches );
+  std::vector< TCost > costs;
+  this->_batches( batches, costs );
 
   unsigned long long epoch = 0;
   bool stop = false;
@@ -33,10 +33,10 @@ fit( )
   while( !stop )
   {
     // Update gradient
-    for( const auto& batch: batches )
-      J = cost.evaluate(
-        iX( batch, Eigen::placeholders::all ),
-        iY( batch, Eigen::placeholders::all ),
+    for( unsigned long long b = 0; b < batches.size( ); ++b )
+      J = costs[ b ].evaluate(
+        iX( batches[ b ], Eigen::placeholders::all ),
+        iY( batches[ b ], Eigen::placeholders::all ),
         G.data( )
         );
     mG = G * G.transpose( );

@@ -48,7 +48,8 @@ namespace PUJ_ML
       using ConstMRow = typename TModel::ConstMRow;
 
       // Cost, gradient magnitude, batch, epoch -> should stop?
-      using TSgn = bool( const TReal&, const TReal&, const unsigned long long& );
+      using TSgn =
+        bool( const TReal&, const TReal&, const unsigned long long& );
       using TDebug = std::function< TSgn >;
 
     public:
@@ -79,7 +80,8 @@ namespace PUJ_ML
 
     protected:
       void _batches(
-        std::vector< std::vector< unsigned long long > >& indices
+        std::vector< std::vector< unsigned long long > >& indices,
+        std::vector< TCost >& costs
         ) const;
 
     protected:
