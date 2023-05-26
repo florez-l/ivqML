@@ -27,6 +27,14 @@ PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
 // -------------------------------------------------------------------------
 template< class _R >
 unsigned long long PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
+number_of_layers( ) const
+{
+  return( this->m_A.size( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _R >
+unsigned long long PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
 number_of_inputs( ) const
 {
   return( this->number_of_inputs( 0 ) );
@@ -37,7 +45,7 @@ template< class _R >
 unsigned long long PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
 number_of_inputs( const unsigned long long& l ) const
 {
-  if( l < this->m_S.size( ) - 1 )
+  if( l < this->m_S.size( ) )
     return( this->m_S[ l ] );
   else
     return( 0 );
@@ -74,11 +82,15 @@ add_layer(
   this->m_S.clear( );
   this->m_A.clear( );
 
+  std::string a = activation;
+  std::transform(
+    a.begin( ), a.end( ), a.begin( ),
+    []( unsigned char c ){ return( std::tolower( c ) ); }
+    );
+
   this->m_S.push_back( input );
   this->m_S.push_back( output );
-  this->m_A.push_back(
-    std::make_pair( activation, Self::s_Activations( activation ) )
-    );
+  this->m_A.push_back( std::make_pair( a, Self::s_Activations( a ) ) );
 }
 
 // -------------------------------------------------------------------------
@@ -88,13 +100,43 @@ add_layer( const unsigned long long& output, const std::string& activation )
 {
   if( this->m_S.size( ) > 1 )
   {
-    this->m_S.push_back( output );
-    this->m_A.push_back(
-      std::make_pair( activation, Self::s_Activations( activation ) )
+    std::string a = activation;
+    std::transform(
+      a.begin( ), a.end( ), a.begin( ),
+      []( unsigned char c ){ return( std::tolower( c ) ); }
       );
+
+    this->m_S.push_back( output );
+    this->m_A.push_back( std::make_pair( a, Self::s_Activations( a ) ) );
   }
   else
     this->add_layer( output, output, activation );
+}
+
+// -------------------------------------------------------------------------
+template< class _R >
+typename PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
+ConstMMatrix PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
+weights( unsigned long long L ) const
+{
+  unsigned long long s = 0, i, o;
+  for( unsigned long long l = 0; l < L; ++l )
+  {
+    i = this->m_S[ l ];
+    o = this->m_S[ l + 1 ];
+    s += o * ( i + 1 );
+  } // end for
+  s -= o * ( i + 1 );
+  return( ConstMMatrix( this->m_P.data( ) + s, i, o ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _R >
+const std::pair< std::string, typename PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::TActivation >&
+PUJ_ML::Model::NeuralNetwork::FeedForward< _R >::
+activation( unsigned long long l ) const
+{
+  return( this->m_A[ l ] );
 }
 
 // -------------------------------------------------------------------------
@@ -182,7 +224,7 @@ _evaluate(
     if( As != nullptr ) As->push_back( A );
     if( Zs != nullptr ) Zs->push_back( Z );
 
-    s += i * ( o + 1 );
+    s += o * ( i + 1 );
   } // end for
   Y.derived( ) = A.template cast< typename _Y::Scalar >( );
 }
@@ -255,7 +297,74 @@ evaluate(
   TReal* G
   ) const
 {
-  return( TReal( 0 ) );
+  auto iX = X.derived( ).template cast< TReal >( );
+  auto iY = Y.derived( ).template cast< TReal >( );
+
+  // Forward propagation
+  std::vector< TMatrix > As, Zs, Ds;
+  TMatrix rY;
+  this->m_Model->_evaluate( rY, iX, &As, &Zs );
+
+  // Cost
+  TReal J = 0;
+  /* TODO
+     # 2. Cost
+      J = float( 0 )
+      last_activation = str( self.m_Model.m_S[ -1 ] )
+      if last_activation == 'SoftMax':
+        for k in range( Y.shape[ 1 ] ):
+          J -= numpy.log( A[ -1 ][ : , Y[ : , k ] == 1 ] + 1e-12 ).sum( )
+          J -= numpy.log( 1.0 - A[ -1 ][ : , Y[ : , k ] == 0 ] + 1e-12 ).sum( )
+        # end for
+        J /= float( X.shape[ 0 ] )
+      elif last_activation == 'Sigmoid':
+        a = A[ -1 ].T
+        J -= numpy.log( a[ Y == 1 ] + 1e-12 ).sum( )
+        J -= numpy.log( 1 - a[ Y == 0 ] + 1e-12 ).sum( )
+        J /= float( X.shape[ 0 ] )
+      else:
+        pass
+      # end if
+  */
+
+  // Backpropagation
+  if( G != nullptr )
+  {
+    unsigned long long L = this->m_Model->number_of_layers( );
+    TReal m = TReal( iX.rows( ) );
+
+    // Compute deltas
+    std::string la = this->m_Model->activation( L - 1 ).first;
+    if( la == "softmax" || la == "sigmoid" )
+      Ds.push_back( ( As.back( ) - iY ) / m );
+    else
+    {
+      // TODO
+    } // end if
+    for( unsigned long long l = 1; l < L; ++l )
+    {
+      auto B = Ds.back( ) * this->m_Model->weights( L - l + 1 ).transpose( );
+      TMatrix dZ;
+      this->m_Model->activation( L - l - 1 ).
+        second( dZ, Zs[ L - l - 1 ], true );
+      dZ.array( ) *= B.array( );
+      Ds.push_back( dZ );
+    } // end for
+
+    // Compute derivatives
+    unsigned long long s = 0;
+    for( unsigned long long l = 0; l < L; ++l )
+    {
+      unsigned long long i = this->m_Model->number_of_inputs( l );
+      unsigned long long o = this->m_Model->number_of_inputs( l + 1 );
+
+      MMatrix( G + s, i, o ) = As[ l ].transpose( ) * Ds[ L - 1 - l ];
+      MRow( G + s + ( i * o ), 1, o ) = Ds[ L - 1 - l ].colwise( ).mean( );
+
+      s += o * ( i + 1 );
+    } // end for
+  } // end if
+  return( J );
 }
 
 #endif // __PUJ_ML__Model__NeuralNetwork__FeedForward__hxx__

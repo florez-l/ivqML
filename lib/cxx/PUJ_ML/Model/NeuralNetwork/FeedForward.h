@@ -48,6 +48,8 @@ namespace PUJ_ML
         FeedForward( const unsigned long long& n = 1 );
         virtual ~FeedForward( );
 
+        unsigned long long number_of_layers( ) const;
+
         unsigned long long number_of_inputs( ) const;
         unsigned long long number_of_inputs( const unsigned long long& l ) const;
         void init( const unsigned long long& n = 0 );
@@ -61,6 +63,12 @@ namespace PUJ_ML
           const unsigned long long& output,
           const std::string& activation
           );
+
+        ConstMMatrix weights( unsigned long long L ) const;
+
+        const std::pair< std::string, TActivation >& activation(
+          unsigned long long l
+          ) const;
 
         template< class _Y, class _X >
         void evaluate(
@@ -88,11 +96,6 @@ namespace PUJ_ML
 
       protected:
         TBaseActivations s_Activations;
-
-        /* TODO
-           std::vector< MMatrix >     m_W;
-           std::vector< MRow >        m_B;
-        */
         std::vector< unsigned long long > m_S;
         std::vector< std::pair< std::string, TActivation > > m_A;
 
