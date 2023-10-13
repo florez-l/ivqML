@@ -1,2 +1,2 @@
-# PUJ_ML
-ML examples for teaching in PUJ.
+# ivqML
+ML algorhithms based on ivq.
