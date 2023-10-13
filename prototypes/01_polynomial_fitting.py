@@ -20,7 +20,7 @@ def p( X, T ):
 # end def
 
 # --------------------------------------------------------------------------
-def fit( X, Y, n ):
+def fit( X, Y, l, n ):
   R = numpy.identity( n + 1 )
   if n > 0:
     R[ 1 : , 1 : ] = ( X.T @ X ) / float( m )
@@ -60,10 +60,12 @@ parser = argparse.ArgumentParser( )
 parser.add_argument( '-n', default = 1, type = int )
 parser.add_argument( '-m', default = 10, type = int )
 parser.add_argument( '-s', default = 0.05, type = float )
+parser.add_argument( '-l', default = 0, type = float )
 args = vars( parser.parse_args( sys.argv[ 1 : ] ) )
 n = args[ 'n' ]
 m = args[ 'm' ]
 s = args[ 's' ]
+l = args[ 'l' ]
 
 # Test data
 X = numpy.random.uniform( 0, 1, ( m, 1 ) )
@@ -73,7 +75,7 @@ Y += numpy.random.normal( scale = s, size = Y.shape )
 X = extend_polynomial( X, n )
 
 # Fit paramters
-T = fit( X, Y, n )
+T = fit( X, Y, l, n )
 print( 'Parameters: ', T )
 
 # Draw results

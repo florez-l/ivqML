@@ -1,0 +1,511 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Base model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(\mathbf{x}\right)=b+\mathbf{w}\cdot\mathbf{x}=b+\mathbf{w}^{\top}\mathbf{x}=\boldsymbol{\theta}\cdot\boldsymbol{\xi}=\boldsymbol{\theta}^{\top}\boldsymbol{\xi}
+\]
+
+\end_inset
+
+where:
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\mathbf{x}\in\mathbb{R}^{n\times1}$
+\end_inset
+
+, model inputs.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\mathbf{w}\in\mathbb{R}^{n\times1}$
+\end_inset
+
+, model weights.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $b\in\mathbb{R}^{1\times1}$
+\end_inset
+
+, model bias.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\boldsymbol{\theta}\in\mathbb{R}^{\left(1+n\right)\times1}=\left\langle b^{\frown}\mathbf{w}\right\rangle $
+\end_inset
+
+, model parameters.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\boldsymbol{\xi}\in\mathbb{R}^{\left(1+n\right)\times1}=\left\langle 1^{\frown}\mathbf{x}\right\rangle $
+\end_inset
+
+, homogeinized model inputs.
+\end_layout
+
+\begin_layout Section
+Loss function from a particular sample
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\left(\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}-2\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}y_{i}+y_{i}^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}\boldsymbol{\xi}_{i}^{\top}\boldsymbol{\theta}-2y_{i}\boldsymbol{\xi}_{i}^{\top}\boldsymbol{\theta}+y_{i}^{2}
+\]
+
+\end_inset
+
+`
+\end_layout
+
+\begin_layout Section
+Cost function
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i=1}^{m}l\left(y_{i},\boldsymbol{\Xi}_{i}^{\top},\boldsymbol{\theta}\right)
+\]
+
+\end_inset
+
+where:
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\mathbf{Y}\in\mathbb{R}^{m\times1}$
+\end_inset
+
+, example outputs.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\boldsymbol{\Xi}\in\mathbb{R}^{m\times\left(1+n\right)}$
+\end_inset
+
+, example inputs.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $\boldsymbol{\Xi}_{i}\equiv\boldsymbol{\xi}_{i}^{\top}$
+\end_inset
+
+, the i-th row of the input matrix is the i-th example.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Gradient
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{\partial}{\partial\theta_{j}}\left(\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)^{2}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)^{2}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(2\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\Xi_{i,1}\theta_{1}+\Xi_{i,2}\theta_{2}+\cdots+\Xi_{i,j}\theta_{j}+\cdots+\Xi_{i,n+1}\theta_{n+1}\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\Xi_{i,j}\theta_{j}\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)\Xi_{i,j}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\left(\sum_{i=1}^{m}\Xi_{i,j}\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-\sum_{i=1}^{m}\Xi_{i,j}y_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=2\frac{1}{m}\left[\begin{array}{c}
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,1}\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-\sum_{i=1}^{m}\Xi_{i,1}y_{i}}\\
+\\
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,2}\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-\sum_{i=1}^{m}\Xi_{i,2}y_{i}}\\
+\vdots\\
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,2}\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-\sum_{i=1}^{m}\Xi_{i,2}y_{i}}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=2\frac{1}{m}\left(\left[\begin{array}{c}
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,1}\boldsymbol{\Xi}_{i}\boldsymbol{\theta}}\\
+\\
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,2}\boldsymbol{\Xi}_{i}\boldsymbol{\theta}}\\
+\vdots\\
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,2}\boldsymbol{\Xi}_{i}\boldsymbol{\theta}}
+\end{array}\right]-\left[\begin{array}{c}
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,1}y_{i}}\\
+\\
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,2}y_{i}}\\
+\vdots\\
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,2}y_{i}}
+\end{array}\right]\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=2\frac{1}{m}\left[\begin{array}{c}
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,1}\boldsymbol{\Xi}_{i}}\\
+\\
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,2}\boldsymbol{\Xi}_{i}}\\
+\vdots\\
+{\displaystyle \sum_{i=1}^{m}\Xi_{i,2}\boldsymbol{\Xi}_{i}}
+\end{array}\right]\boldsymbol{\theta}-\left[2\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=2\left(\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}^{\top}\boldsymbol{\Xi}_{i}\right]\boldsymbol{\theta}-\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=2\left(\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}-\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Gradient with regularization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)^{2}+\lambda R\left(\boldsymbol{\theta}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=2\left(\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}-\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}\right)+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Ridge regularization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R\left(\boldsymbol{\theta}\right)=\boldsymbol{\theta}^{\top}\boldsymbol{\theta}=\theta_{1}^{2}+\theta_{2}^{2}+\cdots+\theta_{n+1}^{2}=\sum_{i=1}^{n+1}\theta_{i}^{2}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=2\boldsymbol{\theta}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Analytical regression
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=2\left(\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}-\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}\right)+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=\mathbf{0}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+2\left(\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}-\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}\right)+\frac{2}{2}\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=\mathbf{0}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+2\left(\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}-\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}+\frac{\lambda}{2}\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)\right)=\mathbf{0}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}-\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}+\frac{\lambda}{2}\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=\mathbf{0}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Analytical regression without regularization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}=\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boldsymbol{\theta}=\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]^{-1}\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Analytical regression with ridge regularization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}-\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}+\frac{\lambda}{2}2\boldsymbol{\theta}=\mathbf{0}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}-\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}+\lambda\boldsymbol{\theta}=\mathbf{0}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}+\lambda\boldsymbol{\theta}=\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\boldsymbol{\theta}+\lambda\mathbf{I}\boldsymbol{\theta}=\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left[\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]+\lambda\mathbf{I}\right]\boldsymbol{\theta}=\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\boldsymbol{\theta}=\left[\left[\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]+\lambda\mathbf{I}\right]^{-1}\left[\frac{1}{m}\sum_{i=1}^{m}\boldsymbol{\Xi}_{i}y_{i}\right]^{\top}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
