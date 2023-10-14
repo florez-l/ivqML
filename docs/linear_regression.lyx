@@ -387,6 +387,33 @@ R\left(\boldsymbol{\theta}\right)=\boldsymbol{\theta}^{\top}\boldsymbol{\theta}=
 
 \end_layout
 
+\begin_layout Subsubsection
+LASSO regularization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R\left(\boldsymbol{\theta}\right)=\left|\theta_{1}\right|+\left|\theta_{2}\right|+\cdots+\left|\theta_{n+1}\right|=\sum_{i=1}^{n+1}\left|\theta_{i}\right|
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial R\left(\boldsymbol{\theta}\right)}{\partial\theta_{i}}=\left\{ \begin{array}{rcc}
+-1 & ; & \theta_{i}<0\\
+0 & ; & \theta_{i}=0\\
+1 & ; & \theta_{i}>0
+\end{array}\right.
+\]
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Analytical regression
 \end_layout
