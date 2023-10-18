@@ -27,7 +27,7 @@ X = D[ : , : -1 ]
 Y = D[ : , -1 : ]
 X = Helpers.extend_polynomial( X, n )
 
-# Fit paramters
+# Fit parameters
 T = LinearRegression.fit( X, Y, r, l, n )
 print( 'Parameters: ', T )
 

@@ -33,7 +33,7 @@ X += numpy.random.normal( scale = s, size = X.shape )
 Y += numpy.random.normal( scale = s, size = Y.shape )
 X = Helpers.extend_polynomial( X, n )
 
-# Fit paramters
+# Fit parameters
 T = LinearRegression.fit( X, Y, r, l, n )
 print( 'Parameters: ', T )
 
