@@ -55,6 +55,12 @@ class Linear:
 
   '''
   '''
+  def parameters( self ):
+    return self.m_T
+  # end def
+
+  '''
+  '''
   def fit( self, X, Y, r = 2, l = 0 ):
     m = X.shape[ 0 ]
     n = X.shape[ 1 ]
