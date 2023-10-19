@@ -12,6 +12,8 @@ parser.add_argument( '-d', default = '', type = str )
 parser.add_argument( '-n', default = 1, type = int )
 parser.add_argument( '-s', default = 0.05, type = float )
 parser.add_argument( '-a', default = 1e-1, type = float )
+parser.add_argument( '-b1', default = 0.9, type = float )
+parser.add_argument( '-b2', default = 0.999, type = float )
 parser.add_argument( '-l', default = 0, type = float )
 parser.add_argument( '-r', default = 2, type = int )
 args = vars( parser.parse_args( sys.argv[ 1 : ] ) )
@@ -19,6 +21,8 @@ d = args[ 'd' ]
 n = args[ 'n' ]
 s = args[ 's' ]
 a = args[ 'a' ]
+b1 = args[ 'b1' ]
+b2 = args[ 'b2' ]
 l = args[ 'l' ]
 r = args[ 'r' ]
 
@@ -56,7 +60,7 @@ def visual_debug( J, d ):
 # end def
 
 # Fit with optimizer
-opt = Optimizers.GradientDescent( cost )
+opt = Optimizers.ADAM( cost )
 opt.set_learning_rate( a )
 if r == 1:
   opt.set_regularization_to_LASSO( )
