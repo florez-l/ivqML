@@ -56,11 +56,10 @@ class GradientDescent:
     e = 10.0 ** ( math.log10( self.m_A ) * 2.0 )
     stop = False
     m = self.m_Cost.model( )
-    a = self.m_A * float( -1 )
     i = 0
     while not stop:
       J, D = self.m_Cost( )
-      D *= a
+      D *= self.m_A * float( -1 )
       d = ( D @ D.T ) ** 0.5
       stop = d <= e
       if i % 1000 == 0 or stop:
@@ -105,7 +104,6 @@ class ADAM( GradientDescent ):
     e = 10.0 ** ( math.log10( self.m_A ) * 2.0 )
     stop = False
     m = self.m_Cost.model( )
-    a = self.m_A * float( -1 )
     b1 = self.m_B1
     b2 = self.m_B2
     b1t = self.m_B1
@@ -124,7 +122,7 @@ class ADAM( GradientDescent ):
         ( mv / ( 1.0 - b2t ) ) ** -0.5 \
         ) \
       * \
-      a
+      self.m_A * float( -1 )
 
       d = ( ( D @ D.T ) ** 0.5 ).sum( )
       stop = d <= e

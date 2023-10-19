@@ -35,7 +35,7 @@ a_model.fit( X, Y )
 # Model and cost
 o_model = Regressions.Linear( X.shape[ 1 ] )
 cost = Costs.MSE( o_model, X, Y )
-print( 'Initial model:', o_model )
+print( 'Initial model  :', o_model )
 
 # Visual debugger
 draw_X = numpy.reshape( numpy.linspace( 0, 1, 100 ), ( 100, 1 ) )

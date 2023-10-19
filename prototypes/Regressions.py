@@ -90,4 +90,39 @@ class Linear:
   # end def
 # end class
 
+'''
+'''
+class Logistic( Linear ):
+
+  '''
+  '''
+  def __init__( self, n = 0 ):
+    super( Logistic, self ).__init__( n )
+  # end def
+
+  '''
+  '''
+  def __call__( self, X, derivative = False ):
+    if derivative:
+      y = self( X, False )
+      return numpy.multiply( y, 1.0 - y )
+    else:
+      y = super( Logistic, self ).__call__( X, False )
+      return ( numpy.exp( y * -1.0 ) + 1.0 ) ** ( -1.0 )
+    # end if
+  # end def
+
+  '''
+  '''
+  def threshold( self, X ):
+    return ( self( X ) >= 0.5 ).astype( int )
+  # end def
+
+  '''
+  '''
+  def fit( self, X, Y, r = 2, l = 0 ):
+    self.m_T = numpy.zeros( ( 1, X.shape[ 1 ] + 1 ) )
+  # end def
+# end class
+
 ## eof - $RCSfile$
