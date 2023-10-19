@@ -20,7 +20,10 @@ class Linear:
   '''
   def __call__( self, X, derivative = False ):
     if derivative:
-      return numpy.concatenate( ( numpy.ones( ( X.shape[ 0 ], 1 ) ), X ), axis = 1 )
+      return \
+        numpy.concatenate( \
+          ( numpy.ones( ( X.shape[ 0 ], 1 ) ), X ), axis = 1 \
+          )
     else:
       return X @ self.m_T[ : , 1 : ].T + self.m_T[ 0 , 0 ]
     # end if
