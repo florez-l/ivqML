@@ -13,7 +13,7 @@ model[ 2 ] = 30
 print( 'Model', model )
 
 # Some values
-X = ( numpy.random.rand( 3, model.parameters( ).shape[ 1 ] - 1 ) * 10 ) - 5
+X = ( numpy.random.rand( 5, model.parameters( ).shape[ 1 ] - 1 ) * 10 ) - 5
 print( 'Basic evaluation:\n', model( X ) )
 print( 'Basic derivative evaluation:\n', model( X, True ) )
 print( 'Threshold evaluation:\n', model.threshold( X ) )

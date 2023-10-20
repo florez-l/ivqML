@@ -59,8 +59,8 @@ class CrossEntropy( MSE ):
   '''
   def __call__( self ):
     s = self.m_Model( self.m_X )
-    J  = numpy.log( ( 1.0 - s[ self.m_Z , : ] ) ).sum( )
-    J += numpy.log( s[ self.m_O , : ] ).sum( )
+    J  = numpy.log( ( 1.0 - s[ self.m_Z , : ] ) + 1e-8 ).sum( )
+    J += numpy.log( s[ self.m_O , : ] + 1e-8 ).sum( )
 
     G = numpy.zeros( self.m_Model.parameters( ).shape )
     G[ 0 , 0 ] = s.mean( ) - self.m_Y.mean( )

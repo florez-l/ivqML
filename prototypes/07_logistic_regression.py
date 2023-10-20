@@ -25,47 +25,7 @@ l = args[ 'l' ]
 r = args[ 'r' ]
 
 # Read image and convert it to data
-I = cv2.imread( d ).astype( float ).mean( axis = 2 )
-mI = I.min( )
-MI = I.max( )
-I = ( ( I - mI ) / ( MI - mI ) ).astype( int )
-drawX, drawY = \
-  numpy.meshgrid( \
-    numpy.linspace( 0, I.shape[ 0 ] - 1, I.shape[ 0 ] ), \
-    numpy.linspace( 0, I.shape[ 1 ] - 1, I.shape[ 1 ] ) \
-    )
-IX = \
-  numpy.concatenate( \
-    ( \
-      numpy.reshape( drawX, ( drawX.shape[ 0 ] * drawX.shape[ 1 ], 1 ) ), \
-      numpy.reshape( drawY, ( drawY.shape[ 0 ] * drawY.shape[ 1 ], 1 ) ) \
-    ), \
-    axis = 1 \
-    )
-IY = numpy.reshape( I, ( I.shape[ 0 ] * I.shape[ 1 ], 1 ) )
-IZ = ( IY == 0 ).nonzero( )[ 0 ].tolist( )
-IO = ( IY == 1 ).nonzero( )[ 0 ].tolist( )
-random.shuffle( IZ )
-random.shuffle( IO )
-IZ = IZ[ : n ]
-IO = IO[ : n ]
-D = \
-  numpy.concatenate( \
-    ( \
-      numpy.concatenate( ( IX[ IZ , : ], IX[ IO , : ] ), axis = 0 ), \
-      numpy.concatenate( \
-        ( \
-          numpy.zeros( ( len( IZ ), 1 ) ), \
-          numpy.ones( ( len( IZ ), 1 ) ) \
-        ), axis = 0 ) \
-        ), \
-      axis = 1 \
-    )
-
-Di = list( range( D.shape[ 0 ] ) )
-random.shuffle( Di )
-X = D[ Di , : ][ : , : -1 ]
-Y = D[ Di , : ][ : , -1 : ]
+X, Y = Helpers.extract_data_from_grayscaleimage( cv2.imread( d ), n )
 
 # Prepare data
 Z = ( Y == 0 ).nonzero( )[ 0 ]
@@ -81,30 +41,31 @@ print( 'Initial model  :', o_model )
 # Visual debugger
 plt.ion( )
 
-drawN = 1000
-drawX, drawY = \
+dN = 1000
+dX, dY = \
   numpy.meshgrid( \
-    numpy.linspace( -1, 1, drawN ), numpy.linspace( -1, 1, drawN ) \
+    numpy.linspace( X.min( axis = 0 )[ 0 ], X.max( axis = 0 )[ 0 ], dN ), \
+    numpy.linspace( X.min( axis = 0 )[ 1 ], X.max( axis = 0 )[ 1 ], dN ) \
     )
-evalX = numpy.reshape( drawX, ( drawX.shape[ 0 ] * drawX.shape[ 1 ], 1 ) )
-evalY = numpy.reshape( drawY, ( drawX.shape[ 0 ] * drawX.shape[ 1 ], 1 ) )
-evalZ = o_model( numpy.concatenate( ( evalX, evalY ), axis = 1 ) )
-drawZ = numpy.reshape( evalZ, ( drawN, drawN ) )
+eX = numpy.reshape( dX, ( dX.shape[ 0 ] * dX.shape[ 1 ], 1 ) )
+eY = numpy.reshape( dY, ( dY.shape[ 0 ] * dY.shape[ 1 ], 1 ) )
+eZ = o_model( numpy.concatenate( ( eX, eY ), axis = 1 ) )
+dZ = numpy.reshape( eZ, ( dN, dN ) )
 
 figure, ax = plt.subplots( )
 plt.scatter( XZ[ : , 0 ], XZ[ : , 1 ] )
 plt.scatter( XO[ : , 0 ], XO[ : , 1 ] )
-cnt = plt.contourf( drawX, drawY, drawZ, 8, alpha = .5 )
+cnt = plt.contourf( dX, dY, dZ, 8, alpha = .5 )
 contour_axis = plt.gca( )
 
 def visual_debug( J, d ):
-  evalZ = o_model( numpy.concatenate( ( evalX, evalY ), axis = 1 ) )
-  drawZ = numpy.reshape( evalZ, ( drawN, drawN ) )
+  eZ = o_model( numpy.concatenate( ( eX, eY ), axis = 1 ) )
+  dZ = numpy.reshape( eZ, ( dN, dN ) )
   contour_axis.clear( )
   plt.title( 'J={:.3e}, d={:.3e}'.format( J, d ) )
   plt.scatter( XZ[ : , 0 ], XZ[ : , 1 ] )
   plt.scatter( XO[ : , 0 ], XO[ : , 1 ] )
-  contour_axis.contourf( drawX, drawY, drawZ, 8, alpha = .5 )
+  contour_axis.contourf( dX, dY, dZ, 8, alpha = .5 )
   figure.canvas.draw( )
   figure.canvas.flush_events( )
   time.sleep( 1e-2 )

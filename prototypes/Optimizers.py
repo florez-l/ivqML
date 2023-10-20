@@ -60,7 +60,7 @@ class GradientDescent:
     while not stop:
       J, D = self.m_Cost( )
       D *= self.m_A * float( -1 )
-      d = ( D @ D.T ) ** 0.5
+      d = ( ( D @ D.T ) ** 0.5 ).sum( )
       stop = d <= e
       if i % 1000 == 0 or stop:
         self.m_Debug( J, d )
@@ -118,15 +118,15 @@ class ADAM( GradientDescent ):
       mm = ( mm * b1 ) + ( D * ( 1.0 - b1 ) )
       mv = ( mv * b2 ) + ( ( D ** 2 ) * ( 1.0 - b2 ) )
       D = numpy.multiply( \
-        mm / ( 1.0 - b1t ), \
-        ( mv / ( 1.0 - b2t ) ) ** -0.5 \
-        ) \
-      * \
-      self.m_A * float( -1 )
+            mm / ( 1.0 - b1t ), \
+            ( mv / ( 1.0 - b2t ) ) ** -0.5 \
+            ) \
+          * \
+          self.m_A * float( -1 )
 
       d = ( ( D @ D.T ) ** 0.5 ).sum( )
       stop = d <= e
-      if i % 1000 == 0 or stop:
+      if i % 10 == 0 or stop:
         self.m_Debug( J, d )
       # end if
       m += D

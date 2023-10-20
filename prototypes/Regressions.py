@@ -111,7 +111,20 @@ class Logistic( Linear ):
       return numpy.multiply( y, 1.0 - y )
     else:
       y = super( Logistic, self ).__call__( X, False )
-      return ( numpy.exp( y * -1.0 ) + 1.0 ) ** ( -1.0 )
+      z = ( y < -40 )
+      o = ( y > 40 )
+      e = ( ( z.astype( int ) + o.astype( int ) ) == 0 ).nonzero( )[ 0 ]
+      o = o.nonzero( )[ 0 ]
+      r = numpy.zeros( y.shape )
+      if len( o ) > 0:
+        r[ o ] = 1.0
+      # end if
+      if len( e ):
+        print( len( e ), len( z ), len( o ), y.shape[ 0 ] )
+        r[ e ] = ( numpy.exp( y[ e ] * -1.0 ) + 1.0 ) ** -1.0
+        sys.exit( 1 )
+      # end if
+      return r
     # end if
   # end def
 
