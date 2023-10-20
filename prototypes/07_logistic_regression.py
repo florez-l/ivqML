@@ -2,13 +2,14 @@
 ## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 ## =========================================================================
 
-import argparse, cv2, numpy, sys, time
+import argparse, cv2, numpy, random, sys, time
 import matplotlib.pyplot as plt
 import Costs, Helpers, Optimizers, Regressions
 
 # Arguments
 parser = argparse.ArgumentParser( )
 parser.add_argument( '-d', default = '', type = str )
+parser.add_argument( '-n', default = 10, type = int )
 parser.add_argument( '-a', default = 1e-2, type = float )
 parser.add_argument( '-b1', default = 0.9, type = float )
 parser.add_argument( '-b2', default = 0.999, type = float )
@@ -16,8 +17,14 @@ parser.add_argument( '-l', default = 0, type = float )
 parser.add_argument( '-r', default = 2, type = int )
 args = vars( parser.parse_args( sys.argv[ 1 : ] ) )
 d = args[ 'd' ]
+n = args[ 'n' ]
+a = args[ 'a' ]
+b1 = args[ 'b1' ]
+b2 = args[ 'b2' ]
+l = args[ 'l' ]
+r = args[ 'r' ]
 
-# Read image
+# Read image and convert it to data
 I = cv2.imread( d ).astype( float ).mean( axis = 2 )
 mI = I.min( )
 MI = I.max( )
@@ -36,78 +43,88 @@ IX = \
     axis = 1 \
     )
 IY = numpy.reshape( I, ( I.shape[ 0 ] * I.shape[ 1 ], 1 ) )
-#print( IX.shape )
-#print( len( ( IY == 0 ).nonzero( )[ 0 ].tolist( ) ) )
-#print( len( ( IY == 1 ).nonzero( )[ 0 ].tolist( ) ) )
+IZ = ( IY == 0 ).nonzero( )[ 0 ].tolist( )
+IO = ( IY == 1 ).nonzero( )[ 0 ].tolist( )
+random.shuffle( IZ )
+random.shuffle( IO )
+IZ = IZ[ : n ]
+IO = IO[ : n ]
+D = \
+  numpy.concatenate( \
+    ( \
+      numpy.concatenate( ( IX[ IZ , : ], IX[ IO , : ] ), axis = 0 ), \
+      numpy.concatenate( \
+        ( \
+          numpy.zeros( ( len( IZ ), 1 ) ), \
+          numpy.ones( ( len( IZ ), 1 ) ) \
+        ), axis = 0 ) \
+        ), \
+      axis = 1 \
+    )
 
-# a = args[ 'a' ]
-# b1 = args[ 'b1' ]
-# b2 = args[ 'b2' ]
-# l = args[ 'l' ]
-# r = args[ 'r' ]
+Di = list( range( D.shape[ 0 ] ) )
+random.shuffle( Di )
+X = D[ Di , : ][ : , : -1 ]
+Y = D[ Di , : ][ : , -1 : ]
 
-# # Read data
-# D = numpy.genfromtxt( d, delimiter = ',' )
-# X = D[ : , : -1 ]
-# Y = D[ : , -1 : ]
+# Prepare data
+Z = ( Y == 0 ).nonzero( )[ 0 ]
+O = ( Y == 1 ).nonzero( )[ 0 ]
+XZ = X[ Z , : ]
+XO = X[ O , : ]
 
-# Z = ( Y == 0 ).nonzero( )[ 0 ]
-# O = ( Y == 1 ).nonzero( )[ 0 ]
-# XZ = X[ Z , : ]
-# XO = X[ O , : ]
+# Model and cost
+o_model = Regressions.Logistic( X.shape[ 1 ] )
+cost = Costs.CrossEntropy( o_model, X, Y )
+print( 'Initial model  :', o_model )
 
-# # Model and cost
-# o_model = Regressions.Logistic( X.shape[ 1 ] )
-# cost = Costs.CrossEntropy( o_model, X, Y )
-# print( 'Initial model  :', o_model )
+# Visual debugger
+plt.ion( )
 
-# # Visual debugger
-# plt.ion( )
+drawN = 1000
+drawX, drawY = \
+  numpy.meshgrid( \
+    numpy.linspace( -1, 1, drawN ), numpy.linspace( -1, 1, drawN ) \
+    )
+evalX = numpy.reshape( drawX, ( drawX.shape[ 0 ] * drawX.shape[ 1 ], 1 ) )
+evalY = numpy.reshape( drawY, ( drawX.shape[ 0 ] * drawX.shape[ 1 ], 1 ) )
+evalZ = o_model( numpy.concatenate( ( evalX, evalY ), axis = 1 ) )
+drawZ = numpy.reshape( evalZ, ( drawN, drawN ) )
 
-# drawN = 1000
-# drawX, drawY = \
-#   numpy.meshgrid( \
-#     numpy.linspace( -1, 1, drawN ), numpy.linspace( -1, 1, drawN ) \
-#     )
-# evalX = numpy.reshape( drawX, ( drawX.shape[ 0 ] * drawX.shape[ 1 ], 1 ) )
-# evalY = numpy.reshape( drawY, ( drawX.shape[ 0 ] * drawX.shape[ 1 ], 1 ) )
-# evalZ = o_model( numpy.concatenate( ( evalX, evalY ), axis = 1 ) )
-# drawZ = numpy.reshape( evalZ, ( drawN, drawN ) )
+figure, ax = plt.subplots( )
+plt.scatter( XZ[ : , 0 ], XZ[ : , 1 ] )
+plt.scatter( XO[ : , 0 ], XO[ : , 1 ] )
+cnt = plt.contourf( drawX, drawY, drawZ, 8, alpha = .5 )
+contour_axis = plt.gca( )
 
-# figure, ax = plt.subplots( )
-# plt.scatter( XZ[ : , 0 ], XZ[ : , 1 ] )
-# plt.scatter( XO[ : , 0 ], XO[ : , 1 ] )
-# cnt = plt.contourf( drawX, drawY, drawZ, 8, alpha = .5 )
-# contour_axis = plt.gca( )
+def visual_debug( J, d ):
+  evalZ = o_model( numpy.concatenate( ( evalX, evalY ), axis = 1 ) )
+  drawZ = numpy.reshape( evalZ, ( drawN, drawN ) )
+  contour_axis.clear( )
+  plt.title( 'J={:.3e}, d={:.3e}'.format( J, d ) )
+  plt.scatter( XZ[ : , 0 ], XZ[ : , 1 ] )
+  plt.scatter( XO[ : , 0 ], XO[ : , 1 ] )
+  contour_axis.contourf( drawX, drawY, drawZ, 8, alpha = .5 )
+  figure.canvas.draw( )
+  figure.canvas.flush_events( )
+  time.sleep( 1e-2 )
+  return False
+# end def
 
-# def visual_debug( J, d ):
-#   evalZ = o_model( numpy.concatenate( ( evalX, evalY ), axis = 1 ) )
-#   drawZ = numpy.reshape( evalZ, ( drawN, drawN ) )
-#   contour_axis.clear( )
-#   plt.title( 'J={:.3e}, d={:.3e}'.format( J, d ) )
-#   plt.scatter( XZ[ : , 0 ], XZ[ : , 1 ] )
-#   plt.scatter( XO[ : , 0 ], XO[ : , 1 ] )
-#   contour_axis.contourf( drawX, drawY, drawZ, 8, alpha = .5 )
-#   figure.canvas.draw( )
-#   figure.canvas.flush_events( )
-#   time.sleep( 1e-2 )
-#   return False
-# # end def
+# Fit with optimizer
+opt = Optimizers.ADAM( cost )
+opt.set_learning_rate( a )
+if r == 1:
+  opt.set_regularization_to_LASSO( )
+else:
+  opt.set_regularization_to_ridge( )
+# end if
+opt.set_regularization_coefficient( l )
+opt.set_debug( visual_debug )
+opt.fit( )
+print( 'Optimized model:', o_model )
 
-# # Fit with optimizer
-# opt = Optimizers.ADAM( cost )
-# opt.set_learning_rate( a )
-# if r == 1:
-#   opt.set_regularization_to_LASSO( )
-# else:
-#   opt.set_regularization_to_ridge( )
-# # end if
-# opt.set_regularization_coefficient( l )
-# opt.set_debug( visual_debug )
-# opt.fit( )
-# print( 'Optimized model:', o_model )
-
-# plt.ioff( )
-# plt.show( )
+plt.ioff( )
+plt.show( )
 
 ## eof - $RCSfile$
