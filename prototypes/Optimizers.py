@@ -115,22 +115,24 @@ class ADAM( GradientDescent ):
     while not stop:
       J, D = self.m_Cost( )
 
+      print( '--->', mv, D )
       mm = ( mm * b1 ) + ( D * ( 1.0 - b1 ) )
       mv = ( mv * b2 ) + ( ( D ** 2 ) * ( 1.0 - b2 ) )
-      D = numpy.multiply( \
+      print( '+++>', mv, D )
+      G = numpy.multiply( \
             mm / ( 1.0 - b1t ), \
             ( mv / ( 1.0 - b2t ) ) ** -0.5 \
             ) \
           * \
           self.m_A * float( -1 )
 
-      d = ( ( D @ D.T ) ** 0.5 ).sum( )
+      d = ( ( G @ G.T ) ** 0.5 ).sum( )
       stop = d <= e
       if i % 10 == 0 or stop:
         self.m_Debug( J, d )
       # end if
-      m += D
-      pD = D
+      m += G
+      pD = G
       i += 1
       b1t *= b1
       b2t *= b2

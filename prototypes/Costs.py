@@ -65,6 +65,7 @@ class CrossEntropy( MSE ):
     G = numpy.zeros( self.m_Model.parameters( ).shape )
     G[ 0 , 0 ] = s.mean( ) - self.m_Y.mean( )
     G[ 0 , 1 : ] = numpy.multiply( self.m_X, s ).mean( axis = 0 ) - self.m_XY
+    print( '###', G )
     return ( J / float( -self.m_X.shape[ 0 ] ), G )
   # end def
 # end class
