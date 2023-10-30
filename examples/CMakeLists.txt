@@ -10,6 +10,7 @@ include_directories(
 set(
   _simple_examples
   LinearModel_00
+  LinearModel_GradientDescentFit_00
   LogisticModel_00
   )
 foreach(_e ${_simple_examples})
