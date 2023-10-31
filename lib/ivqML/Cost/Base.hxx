@@ -12,8 +12,14 @@ Base( const _M& m, const TX& iX, const TY& iY )
     m_X( &iX ),
     m_Y( &iY )
 {
-  this->m_G = new TScalar[ m.number_of_parameters( ) ];
-  this->m_Ym = new TScalar[ iY.derived( ).size( ) ];
+  this->m_G =
+    std::shared_ptr< TScalar[ ] >(
+      new TScalar[ m.number_of_parameters( ) ] { 0 }
+      );
+  this->m_Ym =
+    std::shared_ptr< TScalar[ ] >(
+      new TScalar[ iY.derived( ).size( ) ] { 0 }
+      );
 }
 
 // -------------------------------------------------------------------------
@@ -21,10 +27,8 @@ template< class _M, class _X, class _Y >
 ivqML::Cost::Base< _M, _X, _Y >::
 ~Base( )
 {
-  if( this->m_G != nullptr )
-    delete this->m_G;
-  if( this->m_Ym != nullptr )
-    delete this->m_Ym;
+  this->m_G.reset( );
+  this->m_Ym.reset( );
 }
 
 #endif // __ivqML__Cost__Base__hxx__

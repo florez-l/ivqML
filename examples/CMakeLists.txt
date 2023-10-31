@@ -13,6 +13,8 @@ set(
   LinearModel_ADAMFit_00
   LinearModel_GradientDescentFit_00
   LogisticModel_00
+  LogisticModel_ADAMFit_00
+  LogisticModel_GradientDescentFit_00
   )
 foreach(_e ${_simple_examples})
   add_executable(ivqML_example_${_e} ${_e}.cxx)

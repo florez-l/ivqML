@@ -4,12 +4,7 @@
 #ifndef __ivqML__Cost__Base__h__
 #define __ivqML__Cost__Base__h__
 
-/* TODO
-   #include <Eigen/Core>
-   #include <cmath>
-   #include <ostream>
-   #include <limits>
-*/
+#include <memory>
 #include <utility>
    
 namespace ivqML
@@ -48,8 +43,8 @@ namespace ivqML
       const TX* m_X { nullptr };
       const TY* m_Y { nullptr };
 
-      TScalar* m_G  { nullptr };
-      TScalar* m_Ym { nullptr };
+      std::shared_ptr< TScalar[ ] > m_G;
+      std::shared_ptr< TScalar[ ] > m_Ym;
     };
   } // end namespace
 } // end namespace
