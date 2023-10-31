@@ -18,8 +18,7 @@ template< class _S >
 ivqML::Model::Base< _S >::
 ~Base( )
 {
-  if( this->m_T != nullptr )
-    delete this->m_T;
+  this->m_T.reset( );
 }
 
 // -------------------------------------------------------------------------
@@ -31,7 +30,7 @@ random_fill( )
   std::mt19937 g( r( ) );
   std::uniform_real_distribution< _S > d( 0, 1 );
   for( TNatural i = 0; i < this->m_P; ++i )
-    *( this->m_T + i ) = d( g );
+    this->m_T[ i ] = d( g );
 }
 
 // -------------------------------------------------------------------------
@@ -41,7 +40,7 @@ operator[]( const TNatural& i )
 {
   static _S zero = 0;
   if( i < this->m_P )
-    return( *( this->m_T + i ) );
+    return( this->m_T[ i ] );
   else
   {
     zero = 0;
@@ -56,7 +55,7 @@ operator[]( const TNatural& i ) const
 {
   static const _S zero = 0;
   if( i < this->m_P )
-    return( *( this->m_T + i ) );
+    return( this->m_T[ i ] );
   else
     return( zero );
 }
@@ -77,13 +76,13 @@ set_number_of_parameters( const TNatural& p )
 {
   if( this->m_P != p )
   {
-    if( this->m_T != nullptr )
-      delete this->m_T;
-    this->m_T = ( p > 0 )? new _S[ p ]: nullptr;
+    this->m_T.reset( );
+    if( p > 0 )
+      this->m_T = std::shared_ptr< _S[ ] >( new _S[ p ] );
     this->m_P = p;
   } // end if
   if( p > 0 )
-    std::memset( this->m_T, 0, p * sizeof( _S ) );
+    std::memset( this->m_T.get( ), 0, p * sizeof( _S ) );
 }
 
 // -------------------------------------------------------------------------
@@ -91,7 +90,7 @@ template< class _S >
 _S* ivqML::Model::Base< _S >::
 begin( )
 {
-  return( this->m_T );
+  return( this->m_T.get( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -99,7 +98,7 @@ template< class _S >
 const _S* ivqML::Model::Base< _S >::
 begin( ) const
 {
-  return( this->m_T );
+  return( this->m_T.get( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -107,7 +106,7 @@ template< class _S >
 _S* ivqML::Model::Base< _S >::
 end( )
 {
-  return( this->m_T + this->m_P );
+  return( this->m_T.get( ) + this->m_P );
 }
 
 // -------------------------------------------------------------------------
@@ -115,7 +114,7 @@ template< class _S >
 const _S* ivqML::Model::Base< _S >::
 end( ) const
 {
-  return( this->m_T + this->m_P );
+  return( this->m_T.get( ) + this->m_P );
 }
 
 // -------------------------------------------------------------------------
@@ -125,7 +124,7 @@ _to_stream( std::ostream& o ) const
 {
   o << this->m_P;
   for( TNatural i = 0; i < this->m_P; ++i )
-    o << " " << *( this->m_T + i );
+    o << " " << this->m_T[ i ];
 }
 
 // -------------------------------------------------------------------------

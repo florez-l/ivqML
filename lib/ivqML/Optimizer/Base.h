@@ -4,6 +4,7 @@
 #ifndef __ivqML__Optimizer__Base__h__
 #define __ivqML__Optimizer__Base__h__
 
+#include <functional>
 #include <map>
 
 namespace ivqML
@@ -30,48 +31,23 @@ namespace ivqML
       using TConstMap = typename _C::TConstMap;
       using TResult = typename _C::TResult;
 
-    public:
-      Base( TModel& m, const TX& iX, const TY& iY )
-        : m_M( &m ),
-          m_X( &iX ),
-          m_Y( &iY )
-        {
-          this->m_P[ "lambda" ] = "0";
-          this->m_P[ "regularization" ] = "ridge";
-          this->m_P[ "max_iterations" ] = "100000";
-          this->m_P[ "debug_iterations" ] = "100";
-        }
+      using TDebug =
+        std::function< bool( const TScalar&, const TScalar&, const TModel*, const TNatural& ) >;
 
+    public:
+      Base( TModel& m, const TX& iX, const TY& iY );
       virtual ~Base( ) = default;
 
       template< class _V >
-      _V parameter( const std::string& n ) const
-        {
-          static const _V z;
-
-          auto p = this->m_P.find( n );
-          if( p != this->m_P.end( ) )
-          {
-            std::istringstream s( p->second );
-            _V v;
-            s >> v;
-            return( v );
-          }
-          else
-            return( z );
-        }
+      bool parameter( _V& v, const std::string& n ) const;
 
       template< class _V >
-      void set_parameter( const std::string& n, const _V& v )
-        {
-          auto p = this->m_P.find( n );
-          if( p != this->m_P.end( ) )
-          {
-            std::stringstream s;
-            s << v;
-            p->second = s.str( );
-          } // end if
-        }
+      void configure_parameter( const std::string& n, const _V& v );
+
+      template< class _V >
+      void set_parameter( const std::string& n, const _V& v );
+
+      void set_debug( TDebug d );
 
       virtual void fit( ) = 0;
 
@@ -81,9 +57,21 @@ namespace ivqML
       const TY* m_Y { nullptr };
 
       std::map< std::string, std::string > m_P;
+
+      TDebug m_D
+        {
+          [](
+            const TScalar&, const TScalar&, const TModel*, const TNatural&
+            ) -> bool
+          {
+            return( false );
+          }
+        };
     };
   } // end namespace
 } // end namespace
+
+#include <ivqML/Optimizer/Base.hxx>
 
 #endif // __ivqML__Optimizer__Base__h__
 

@@ -28,7 +28,7 @@ namespace ivqML
 
     public:
       Linear( const TNatural& n = 0 );
-      virtual ~Linear( ) = default;
+      virtual ~Linear( ) override = default;
 
       TNatural number_of_inputs( ) const;
       void set_number_of_inputs( const TNatural& i );

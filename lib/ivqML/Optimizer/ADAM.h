@@ -1,8 +1,8 @@
 // =========================================================================
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
-#ifndef __ivqML__Optimizer__GradientDescent__h__
-#define __ivqML__Optimizer__GradientDescent__h__
+#ifndef __ivqML__Optimizer__ADAM__h__
+#define __ivqML__Optimizer__ADAM__h__
 
 #include <ivqML/Optimizer/Base.h>
 
@@ -13,11 +13,11 @@ namespace ivqML
     /**
      */
     template< class _C >
-    class GradientDescent
+    class ADAM
       : public ivqML::Optimizer::Base< _C >
     {
     public:
-      using Self = GradientDescent;
+      using Self = ADAM;
       using Superclass = ivqML::Optimizer::Base< _C >;
       using TCost = typename Superclass::TCost;
       using TModel = typename Superclass::TModel;
@@ -33,16 +33,16 @@ namespace ivqML
       using TResult = typename Superclass::TResult;
 
     public:
-      GradientDescent( TModel& m, const TX& iX, const TY& iY );
-      virtual ~GradientDescent( ) override = default;
+      ADAM( TModel& m, const TX& iX, const TY& iY );
+      virtual ~ADAM( ) override = default;
 
       virtual void fit( ) override;
     };
   } // end namespace
 } // end namespace
 
-#include <ivqML/Optimizer/GradientDescent.hxx>
+#include <ivqML/Optimizer/ADAM.hxx>
 
-#endif // __ivqML__Optimizer__GradientDescent__h__
+#endif // __ivqML__Optimizer__ADAM__h__
 
 // eof - $RCSfile$

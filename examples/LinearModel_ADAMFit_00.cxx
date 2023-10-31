@@ -6,7 +6,7 @@
 
 #include <ivqML/Model/Linear.h>
 #include <ivqML/Cost/MSE.h>
-#include <ivqML/Optimizer/GradientDescent.h>
+#include <ivqML/Optimizer/ADAM.h>
 
 using _R = long double;
 using _M = ivqML::Model::Linear< _R >;
@@ -37,7 +37,7 @@ int main( int argc, char** argv )
 
   // Optimization algorithm
   using _C = ivqML::Cost::MSE< _M >;
-  ivqML::Optimizer::GradientDescent< _C > opt( fitted_model, X, Y );
+  ivqML::Optimizer::ADAM< _C > opt( fitted_model, X, Y );
   opt.set_debug(
     []( const _R& J, const _R& G, const _M* m, const _M::TNatural& i )
     -> bool

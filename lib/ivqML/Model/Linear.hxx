@@ -24,9 +24,9 @@ operator()(
   else
     iY.derived( ) =
       (
-        ( X * TMap( this->m_T + 1, this->m_P - 1, 1 ) ).array( )
+        ( X * TMap( this->m_T.get( ) + 1, this->m_P - 1, 1 ) ).array( )
         +
-        *( this->m_T )
+        *( this->m_T.get( ) )
         ).template cast< _YS >( );
 }
       
@@ -66,7 +66,7 @@ fit(
   c.block( 0, 1, 1, n ) =
     ( X.array( ).colwise( ) * Y.array( ).col( 0 ) )
     .colwise( ).mean( );
-  TMap( this->m_T, 1, this->m_P ) = c * R.inverse( );
+  TMap( this->m_T.get( ), 1, this->m_P ) = c * R.inverse( );
 }
 
 #endif // __ivqML__Model__Linear__hxx__

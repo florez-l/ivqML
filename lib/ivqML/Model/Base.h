@@ -5,6 +5,7 @@
 #define __ivqML__Model__Base__h__
 
 #include <ivqML/Config.h>
+#include <memory>
 #include <ostream>
 
 namespace ivqML
@@ -59,7 +60,7 @@ namespace ivqML
       virtual void _to_stream( std::ostream& o ) const;
 
     protected:
-      _S* m_T { nullptr };
+      std::shared_ptr< _S[ ] > m_T;
       TNatural m_P { 0 };
 
     public:
