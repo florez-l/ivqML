@@ -33,6 +33,11 @@ namespace ivqML
       using TResult = typename Superclass::TResult;
 
     public:
+      ivqMLAttributeMacro( alpha, TScalar, 1e-3 );
+      ivqMLAttributeMacro( beta1, TScalar, 0.9 );
+      ivqMLAttributeMacro( beta2, TScalar, 0.999 );
+
+    public:
       ADAM( TModel& m, const TX& iX, const TY& iY );
       virtual ~ADAM( ) override = default;
 

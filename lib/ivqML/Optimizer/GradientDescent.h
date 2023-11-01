@@ -33,6 +33,9 @@ namespace ivqML
       using TResult = typename Superclass::TResult;
 
     public:
+      ivqMLAttributeMacro( alpha, TScalar, 1e-3 );
+
+    public:
       GradientDescent( TModel& m, const TX& iX, const TY& iY );
       virtual ~GradientDescent( ) override = default;
 

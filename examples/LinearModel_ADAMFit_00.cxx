@@ -46,10 +46,16 @@ int main( int argc, char** argv )
       return( false );
     }
     );
+  std::string ret = opt.parse_options( argc, argv );
+  if( ret != "" )
+  {
+    std::cerr << ret << std::endl;
+    return( EXIT_FAILURE );
+  } // end if
   opt.fit( );
   std::cout << "Fitted model  : " << fitted_model << std::endl;
 
-  return( 0 );
+  return( EXIT_SUCCESS );
 }
 
 // eof - $RCSfile$

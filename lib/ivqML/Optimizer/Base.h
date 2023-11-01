@@ -5,7 +5,18 @@
 #define __ivqML__Optimizer__Base__h__
 
 #include <functional>
-#include <map>
+#include <limits>
+#include <boost/program_options.hpp>
+#include <ivqML/Config.h>
+
+// -------------------------------------------------------------------------
+#define ivqML_Optimizer_OptionMacro( _N, _O )                           \
+  (                                                                     \
+    _O,                                                                 \
+    boost::program_options::value< decltype( this->m_##_N ) >           \
+    ( &( this->m_##_N ) )->default_value( this->m_##_N ), ""            \
+    )
+
 
 namespace ivqML
 {
@@ -32,20 +43,25 @@ namespace ivqML
       using TResult = typename _C::TResult;
 
       using TDebug =
-        std::function< bool( const TScalar&, const TScalar&, const TModel*, const TNatural& ) >;
+        std::function<
+          bool(
+            const TScalar&, const TScalar&, const TModel*, const TNatural&
+            )
+          >;
+
+    public:
+      ivqMLAttributeMacro( lambda, TScalar, 0 );
+      ivqMLAttributeMacro( debug_iterations, TNatural, 100 );
+      ivqMLAttributeMacro(
+        max_iterations, TNatural, std::numeric_limits< TNatural >::max( )
+        );
+      // TODO: this->_configure_parameter( "regularization", "ridge" );
 
     public:
       Base( TModel& m, const TX& iX, const TY& iY );
       virtual ~Base( ) = default;
 
-      template< class _V >
-      bool parameter( _V& v, const std::string& n ) const;
-
-      template< class _V >
-      void configure_parameter( const std::string& n, const _V& v );
-
-      template< class _V >
-      void set_parameter( const std::string& n, const _V& v );
+      virtual std::string parse_options( int argc, char** argv );
 
       void set_debug( TDebug d );
 
@@ -56,8 +72,6 @@ namespace ivqML
       const TX* m_X { nullptr };
       const TY* m_Y { nullptr };
 
-      std::map< std::string, std::string > m_P;
-
       TDebug m_D
         {
           [](
@@ -67,6 +81,8 @@ namespace ivqML
             return( false );
           }
         };
+
+      boost::program_options::options_description m_P { "Options." };
     };
   } // end namespace
 } // end namespace

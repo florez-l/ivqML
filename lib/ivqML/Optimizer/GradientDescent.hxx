@@ -10,7 +10,8 @@ ivqML::Optimizer::GradientDescent< _C >::
 GradientDescent( TModel& m, const TX& iX, const TY& iY )
   : Superclass( m, iX, iY )
 {
-  this->configure_parameter( "alpha", TScalar( 1e-3 ) );
+  this->m_P.add_options( )
+    ivqML_Optimizer_OptionMacro( alpha, "alpha,a" );
 }
 
 // -------------------------------------------------------------------------
@@ -18,12 +19,8 @@ template< class _C >
 void ivqML::Optimizer::GradientDescent< _C >::
 fit( )
 {
-  TScalar a;
-  TNatural I, Di;
-  this->parameter( a, "alpha" );
-  this->parameter( I, "max_iterations" );
-  this->parameter( Di, "debug_iterations" );
-  TScalar e = std::pow( TScalar( 10 ), std::log10( a ) * TScalar( 2 ) );
+  TScalar e =
+    std::pow( TScalar( 10 ), std::log10( this->m_alpha ) * TScalar( 2 ) );
 
   // Cost function
   _C cost( *( this->m_M ), *( this->m_X ), *( this->m_Y ) );
@@ -35,11 +32,16 @@ fit( )
   TNatural i = 0;
   while( !stop )
   {
-    *( this->m_M ) -= G * a;
-    if( i % Di == 0 )
+    *( this->m_M ) -= G * this->m_alpha;
+    if( i % this->m_debug_iterations == 0 )
       debug_stop = this->m_D( J.first, G.norm( ), this->m_M, i );
     i++;
-    stop = ( G.norm( ) <= e ) || ( I == i ) || debug_stop;
+    stop =
+      ( G.norm( ) <= e )
+      ||
+      ( this->m_max_iterations == i )
+      ||
+      debug_stop;
     if( !stop )
       J = cost( );
   } // end while

@@ -12,56 +12,32 @@ Base( TModel& m, const TX& iX, const TY& iY )
     m_X( &iX ),
     m_Y( &iY )
 {
-  this->configure_parameter( "lambda", TScalar( 0 ) );
-  this->configure_parameter( "regularization", "ridge" );
-  this->configure_parameter(
-    "max_iterations", std::numeric_limits< TNatural >::max( )
-    );
-  this->configure_parameter( "debug_iterations", TNatural( 100 ) );
+  this->m_P.add_options( )( "help,h", "help message" )
+    ivqML_Optimizer_OptionMacro( lambda, "lambda,l" )
+    ivqML_Optimizer_OptionMacro( max_iterations, "max_iterations,M" )
+    ivqML_Optimizer_OptionMacro( debug_iterations, "debug_iterations,D" );
+
+  // TODO: this->_configure_parameter( "regularization", "ridge" );
 }
 
 // -------------------------------------------------------------------------
 template< class _C >
-template< class _V >
-bool ivqML::Optimizer::Base< _C >::
-parameter( _V& v, const std::string& n ) const
+std::string ivqML::Optimizer::Base< _C >::
+parse_options( int argc, char** argv )
 {
-  auto p = this->m_P.find( n );
-  if( p != this->m_P.end( ) )
+  boost::program_options::variables_map m;
+  boost::program_options::store(
+    boost::program_options::parse_command_line( argc, argv, this->m_P ), m
+    );
+  boost::program_options::notify( m );
+  if( m.count( "help" ) )
   {
-    std::istringstream s( p->second );
-    s >> v;
-    return( true );
+    std::stringstream r;
+    r << this->m_P;
+    return( r.str( ) );
   }
   else
-    return( false );
-}
-
-// -------------------------------------------------------------------------
-template< class _C >
-template< class _V >
-void ivqML::Optimizer::Base< _C >::
-configure_parameter( const std::string& n, const _V& v )
-{
-  auto p = this->m_P.insert( std::make_pair( n, "" ) );
-  std::stringstream s;
-  s << v;
-  p.first->second = s.str( );
-}
-
-// -------------------------------------------------------------------------
-template< class _C >
-template< class _V >
-void ivqML::Optimizer::Base< _C >::
-set_parameter( const std::string& n, const _V& v )
-{
-  auto p = this->m_P.find( n );
-  if( p != this->m_P.end( ) )
-  {
-    std::stringstream s;
-    s << v;
-    p->second = s.str( );
-  } // end if
+    return( "" );
 }
 
 // -------------------------------------------------------------------------
