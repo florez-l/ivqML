@@ -33,11 +33,14 @@ namespace ivqML
 
     public:
       CrossEntropy( const _M& m, const TX& iX, const TY& iY );
-      virtual ~CrossEntropy( );
+      virtual ~CrossEntropy( ) override = default;
 
       virtual TResult operator()( ) const override;
 
     protected:
+      TScalar m_mY;
+      std::shared_ptr< TScalar[ ] > m_Xy;
+
       struct
       {
         std::vector< Eigen::Index > zeros, ones;

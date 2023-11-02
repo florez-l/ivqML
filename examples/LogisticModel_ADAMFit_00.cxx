@@ -2,28 +2,29 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+#include <csignal>
 #include <iostream>
 
 #include "Helpers.h"
 
 #include <itkImage.h>
+#include <itkImageFileWriter.h>
 #include <ivq/ITK/ImageFileReader.h>
 
 #include <ivqML/Model/Logistic.h>
+#include <ivqML/Cost/CrossEntropy.h>
+#include <ivqML/Optimizer/ADAM.h>
 
-/* TODO
-   #include <algorithm>
-   #include <random>
-
-   #include <ivq/ITK/EigenUtils.h>
-
-   #include <ivqML/Cost/CrossEntropy.h>
-   #include <ivqML/Optimizer/ADAM.h>
-*/
-
-using _R = long double;
+using _R = double;
 using _M = ivqML::Model::Logistic< _R >;
 using _I = itk::Image< _R, 2 >;
+
+// Detect ctrl-c event to stop optimization and finish training
+bool general_stop = false;
+void sigint_handler( int s )
+{
+  general_stop = true;
+}
 
 int main( int argc, char** argv )
 {
@@ -34,89 +35,75 @@ int main( int argc, char** argv )
   reader->Update( );
   auto D =
     ivqML::Helpers::extract_discrete_samples_from_image< _I, _M::TMatrix >(
-      reader->GetOutput( ), 5, 2
+      reader->GetOutput( ), 500, 2
       );
+  _M::TMatrix X = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
+  _M::TMatrix Y = D.block( 0, D.cols( ) - 1, D.rows( ), 1 );
 
-  std::cout << D << std::endl;
+  // Model to be fitted
+  _M fitted_model( 2 );
+  fitted_model.random_fill( );
+  std::cout << "Initial model : " << fitted_model << std::endl;
+
+  // Optimization algorithm
+  using _C = ivqML::Cost::CrossEntropy< _M >;
+  ivqML::Optimizer::ADAM< _C > opt( fitted_model, X, Y );
+
+  signal( SIGINT, sigint_handler );
+  opt.set_debug(
+    []( const _R& J, const _R& G, const _M* m, const _M::TNatural& i )
+    -> bool
+    {
+      std::cerr << "J=" << J << ", Gn=" << G << ", i=" << i << std::endl;
+      return( general_stop );
+    }
+    );
+
+  std::string ret = opt.parse_options( argc, argv );
+  if( ret != "" )
+  {
+    std::cerr << ret << std::endl;
+    return( EXIT_FAILURE );
+  } // end if
+  opt.fit( );
+  std::cout << "Fitted model  : " << fitted_model << std::endl;
 
 
-  /* TODO
-     unsigned int m = 50;
+  _I::Pointer output = _I::New( );
+  output->CopyInformation( reader->GetOutput( ) );
+  output->SetRequestedRegionToLargestPossibleRegion( );
+  output->SetBufferedRegion( output->GetRequestedRegion( ) );
+  output->Allocate( );
 
-     auto Iy = ivq::ITK::ImageToMatrix( reader->GetOutput( ) ).transpose( );
-     auto roi = reader->GetOutput( )->GetRequestedRegion( );
-     unsigned long long Iw = roi.GetSize( )[ 0 ];
-     unsigned long long Ih = roi.GetSize( )[ 1 ];
-     unsigned long long Is = Iw * Ih;
+  auto roi = output->GetRequestedRegion( );
+  unsigned long long Iw = roi.GetSize( )[ 0 ];
+  unsigned long long Ih = roi.GetSize( )[ 1 ];
+  unsigned long long Is = Iw * Ih;
+  auto spac = output->GetSpacing( );
+  auto orig = output->GetOrigin( );
 
-     _M::TMatrix rows( Ih, 1 ), cols( Iw, 1 );
-     rows.col( 0 ).setLinSpaced( Ih, 0, Ih - 1 );
-     cols.col( 0 ).setLinSpaced( Iw, 0, Iw - 1 );
-     _M::TMatrix Ix( Is, 2 );
-     Ix
-     <<
-     cols.replicate( 1, Ih ).reshaped( Is, 1 ),
-     rows.replicate( 1, Iw ).transpose( ).reshaped( Is, 1 );
+  _M::TMatrix S = Eigen::Map< const Eigen::Matrix< typename decltype( spac )::ValueType, Eigen::Dynamic, Eigen::Dynamic > >( spac.data( ), 1, _I::ImageDimension ).template cast< _R >( );
+  _M::TMatrix O = Eigen::Map< const Eigen::Matrix< typename decltype( orig )::ValueType, Eigen::Dynamic, Eigen::Dynamic > >( orig.data( ), 1, _I::ImageDimension ).template cast< _R >( );
 
-     struct
-     {
-     std::vector< Eigen::Index > zeros, ones;
-     void init( const _R& y, const Eigen::Index& i, const Eigen::Index& j )
-     {
-     zeros.clear( );
-     ones.clear( );
-     this->operator()( y, i, j );
-     }
-     void operator()(
-     const _R& y, const Eigen::Index& i, const Eigen::Index& j
-     )
-     {
-     if( y < 0.5 ) zeros.push_back( i );
-     else          ones.push_back( i );
-     }
-     } Iy_visitor;
-     Iy.visit( Iy_visitor );
+  _M::TMatrix rows( Ih, 1 ), cols( Iw, 1 );
+  rows.col( 0 ).setLinSpaced( Ih, 0, Ih - 1 );
+  cols.col( 0 ).setLinSpaced( Iw, 0, Iw - 1 );
+  _M::TMatrix Ix( Is, _I::ImageDimension );
+  Ix
+    <<
+    cols.replicate( 1, Ih ).reshaped( Is, 1 ),
+    rows.replicate( 1, Iw ).transpose( ).reshaped( Is, 1 );
+  Ix.array( ).rowwise( ) *= S.array( ).row( 0 );
+  Ix.array( ).rowwise( ) += O.array( ).row( 0 );
 
-     // Shuffle indices and get 'm' samples
-     std::random_device dev;
-     std::mt19937 eng( dev( ) );
-     std::shuffle( Iy_visitor.zeros.begin( ), Iy_visitor.zeros.end( ), eng );
-     std::shuffle( Iy_visitor.ones.begin( ), Iy_visitor.ones.end( ), eng );
-     Iy_visitor.zeros.erase(
-     Iy_visitor.zeros.begin( ) + m, Iy_visitor.zeros.end( )
-     );
-     Iy_visitor.ones.erase(
-     Iy_visitor.ones.begin( ) + m, Iy_visitor.ones.end( )
-     );
+  auto Z = ivq::ITK::ImageToMatrix( output.GetPointer( ) ).transpose( );
+  fitted_model( Z, Ix );
 
-     _M::TMatrix X( m << 1, Ix.cols( ) );
-     _M::TMatrix Y( m << 1, Iy.cols( ) );
-     X <<
-     Ix( Iy_visitor.zeros, ivq_EIGEN_ALL ),
-     Ix( Iy_visitor.ones, ivq_EIGEN_ALL );
-     Y << _M::TMatrix::Zero( m, 1 ), _M::TMatrix::Ones( m, 1 );
+  auto writer = itk::ImageFileWriter< _I >::New( );
+  writer->SetInput( output );
+  writer->SetFileName( "out.mha" );
+  writer->Update( );
 
-     // Model to be fitted
-     _M fitted_model( 2 );
-     fitted_model.random_fill( );
-     std::cout << "Initial model : " << fitted_model << std::endl;
-
-     // Optimization algorithm
-     using _C = ivqML::Cost::CrossEntropy< _M >;
-     ivqML::Optimizer::ADAM< _C > opt( fitted_model, X, Y );
-     opt.set_parameter( "alpha", 1e-3 );
-     opt.set_parameter( "debug_iterations", 100000 );
-     opt.set_debug(
-     []( const _R& J, const _R& G, const _M* m, const _M::TNatural& i )
-     -> bool
-     {
-     std::cerr << "J=" << J << ", Gn=" << G << ", i=" << i << std::endl;
-     return( false );
-     }
-     );
-     opt.fit( );
-     std::cout << "Fitted model  : " << fitted_model << std::endl;
-  */
   return( EXIT_SUCCESS );
 }
 
