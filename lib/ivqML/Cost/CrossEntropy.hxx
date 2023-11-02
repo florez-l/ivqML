@@ -19,7 +19,7 @@ CrossEntropy( const _M& m, const TX& iX, const TY& iY )
       *
       iY.derived( ).template cast< TScalar >( ).col( 0 ).array( )
       ).colwise( ).mean( );
-  iY.derived( ).visit( this->m_YVisitor );
+  // iY.derived( ).visit( this->m_YVisitor );
 }
 
 // -------------------------------------------------------------------------

@@ -6,7 +6,6 @@
 
 #include <ivq/ITK/EigenUtils.h>
 
-
 // -------------------------------------------------------------------------
 template< class _I, class _M >
 _M ivqML::Common::ImageHelpers::meshgrid( const _I* image )

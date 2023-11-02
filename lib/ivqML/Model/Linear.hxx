@@ -23,13 +23,10 @@ operator()(
     iY.derived( ) << _YM::Ones( X.rows( ), 1 ), X.template cast< _YS >( );
   else
     iY.derived( ) =
-      (
-        ( X * TMap( this->m_T.get( ) + 1, this->m_P - 1, 1 ) ).array( )
-        +
-        *( this->m_T.get( ) )
-        ).template cast< _YS >( );
+      ( ( X * this->m_cT ).array( ) + this->m_T.get( )[ 0 ] )
+      .template cast< _YS >( );
 }
-      
+
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _Y, class _X >
@@ -64,9 +61,8 @@ fit(
   TMatrix c = TMatrix::Zero( 1, this->m_P );
   c( 0, 0 ) = Y.mean( );
   c.block( 0, 1, 1, n ) =
-    ( X.array( ).colwise( ) * Y.array( ).col( 0 ) )
-    .colwise( ).mean( );
-  TMap( this->m_T.get( ), 1, this->m_P ) = c * R.inverse( );
+    ( X.array( ).colwise( ) * Y.array( ).col( 0 ) ).colwise( ).mean( );
+  this->m_nT = c * R.inverse( );
 }
 
 #endif // __ivqML__Model__Linear__hxx__

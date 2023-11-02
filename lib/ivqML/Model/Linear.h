@@ -30,6 +30,7 @@ namespace ivqML
       Linear( const TNatural& n = 0 );
       virtual ~Linear( ) override = default;
 
+      virtual void set_number_of_parameters( const TNatural& p ) override;
       TNatural number_of_inputs( ) const;
       void set_number_of_inputs( const TNatural& i );
 
@@ -44,6 +45,10 @@ namespace ivqML
         const Eigen::EigenBase< _X >& iX, const Eigen::EigenBase< _Y >& iY,
         const _S& l = 0
         );
+
+    protected:
+      TMap      m_nT { nullptr, 0, 0 };
+      TConstMap m_cT { nullptr, 0, 0 };
     };
   } // end namespace
 } // end namespace

@@ -54,7 +54,6 @@ operator-=( const Eigen::EigenBase< _D >& d )
   return( *this );
 }
 
-
 #endif // __ivqML__Model__Base__hxx__
 
 // eof - $RCSfile$

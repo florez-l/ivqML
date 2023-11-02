@@ -23,6 +23,8 @@ namespace ivqML
       using TDY = _Y;
       using TX = Eigen::EigenBase< _X >;
       using TY = Eigen::EigenBase< _Y >;
+      using TBX = Eigen::Block< TX >;
+      using TBY = Eigen::Block< TY >;
       using TScalar = typename _M::TScalar;
       using TNatural = typename _M::TNatural;
       using TMatrix = typename _M::TMatrix;
@@ -36,7 +38,6 @@ namespace ivqML
       virtual ~Base( );
 
       virtual TResult operator()( ) const = 0;
-
 
     protected:
       const _M* m_M { nullptr };

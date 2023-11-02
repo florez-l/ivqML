@@ -48,7 +48,7 @@ namespace ivqML
       Self& operator-=( const Eigen::EigenBase< _D >& d );
 
       const TNatural& number_of_parameters( ) const;
-      void set_number_of_parameters( const TNatural& p );
+      virtual void set_number_of_parameters( const TNatural& p );
 
       _S* begin( );
       const _S* begin( ) const;
