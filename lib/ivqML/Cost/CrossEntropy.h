@@ -19,49 +19,18 @@ namespace ivqML
     public:
       using Self = CrossEntropy;
       using Superclass = ivqML::Cost::Base< _M, _X, _Y >;
-      using TModel = typename Superclass::TModel;
-      using TDX = typename Superclass::TDX;
-      using TDY = typename Superclass::TDY;
-      using TX = typename Superclass::TX;
-      using TY = typename Superclass::TY;
-      using TScalar = typename Superclass::TScalar;
-      using TNatural = typename Superclass::TNatural;
-      using TMatrix = typename Superclass::TMatrix;
-      using TMap = typename Superclass::TMap;
-      using TConstMap = typename Superclass::TConstMap;
-      using TResult = typename Superclass::TResult;
+
+      ivqML_Cost_Typedefs;
 
     public:
       CrossEntropy( const _M& m, const TX& iX, const TY& iY );
       virtual ~CrossEntropy( ) override = default;
 
-      virtual TResult operator()( ) const override;
+      virtual TResult operator()( ) override;
 
     protected:
-      TScalar m_mY;
-      std::shared_ptr< TScalar[ ] > m_Xy;
-
-      struct
-      {
-        std::vector< Eigen::Index > zeros, ones;
-        void init(
-          const TScalar& y, const Eigen::Index& i, const Eigen::Index& j
-          )
-          {
-            zeros.clear( );
-            ones.clear( );
-            this->operator()( y, i, j );
-          }
-        void operator()(
-          const TScalar& y, const Eigen::Index& i, const Eigen::Index& j
-          )
-          {
-            if( y == TScalar( 0 ) )
-              zeros.push_back( i );
-            else
-              ones.push_back( i );
-          }
-      } m_YVisitor;
+      TScalar m_Ym;
+      TMatrix m_Xy;
     };
   } // end namespace
 } // end namespace

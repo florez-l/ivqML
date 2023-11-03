@@ -60,7 +60,7 @@ namespace ivqML
       virtual void _to_stream( std::ostream& o ) const;
 
     protected:
-      std::shared_ptr< _S[ ] > m_T;
+      std::shared_ptr< _S[] > m_T;
       TNatural m_P { 0 };
 
     public:

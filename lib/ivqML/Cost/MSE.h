@@ -19,26 +19,17 @@ namespace ivqML
     public:
       using Self = MSE;
       using Superclass = ivqML::Cost::Base< _M, _X, _Y >;
-      using TModel = typename Superclass::TModel;
-      using TDX = typename Superclass::TDX;
-      using TDY = typename Superclass::TDY;
-      using TX = typename Superclass::TX;
-      using TY = typename Superclass::TY;
-      using TScalar = typename Superclass::TScalar;
-      using TNatural = typename Superclass::TNatural;
-      using TMatrix = typename Superclass::TMatrix;
-      using TMap = typename Superclass::TMap;
-      using TConstMap = typename Superclass::TConstMap;
-      using TResult = typename Superclass::TResult;
+
+      ivqML_Cost_Typedefs;
 
     public:
       MSE( const _M& m, const TX& iX, const TY& iY );
-      virtual ~MSE( );
+      virtual ~MSE( ) override = default;
 
-      virtual TResult operator()( ) const override;
+      virtual TResult operator()( ) override;
 
     protected:
-      std::shared_ptr< TScalar[ ] > m_Dm;
+      TMatrix m_D;
     };
   } // end namespace
 } // end namespace

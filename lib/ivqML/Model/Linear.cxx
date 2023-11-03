@@ -8,8 +8,9 @@
 template< class _S >
 ivqML::Model::Linear< _S >::
 Linear( const TNatural& n )
-  : Superclass( n + 1 )
+  : Superclass( TNatural( 0 ) )
 {
+  this->set_number_of_parameters( n + 1 );
 }
 
 // -------------------------------------------------------------------------
@@ -18,8 +19,8 @@ void ivqML::Model::Linear< _S >::
 set_number_of_parameters( const TNatural& p )
 {
   this->Superclass::set_number_of_parameters( p );
-  new( &this->m_nT ) TMap( this->m_T.get( ) + 1, this->m_P - 1, 1 );
-  new( &this->m_cT ) TConstMap( this->m_T.get( ) + 1, this->m_P - 1, 1 );
+  new( &this->m_nT ) TMap( this->m_T.get( ) + 1, p - 1, 1 );
+  new( &this->m_cT ) TConstMap( this->m_T.get( ) + 1, p - 1, 1 );
 }
 
 // -------------------------------------------------------------------------

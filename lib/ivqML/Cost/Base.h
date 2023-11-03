@@ -4,9 +4,23 @@
 #ifndef __ivqML__Cost__Base__h__
 #define __ivqML__Cost__Base__h__
 
-#include <memory>
 #include <utility>
-   
+
+// -------------------------------------------------------------------------
+#define ivqML_Cost_Typedefs                             \
+  public:                                               \
+  using TModel = typename Superclass::TModel;           \
+  using TDX = typename Superclass::TDX;                 \
+  using TDY = typename Superclass::TDY;                 \
+  using TX = typename Superclass::TX;                   \
+  using TY = typename Superclass::TY;                   \
+  using TScalar = typename Superclass::TScalar;         \
+  using TNatural = typename Superclass::TNatural;       \
+  using TMatrix = typename Superclass::TMatrix;         \
+  using TMap = typename Superclass::TMap;               \
+  using TConstMap = typename Superclass::TConstMap;     \
+  using TResult = typename Superclass::TResult
+  
 namespace ivqML
 {
   namespace Cost
@@ -23,29 +37,26 @@ namespace ivqML
       using TDY = _Y;
       using TX = Eigen::EigenBase< _X >;
       using TY = Eigen::EigenBase< _Y >;
-      using TBX = Eigen::Block< TX >;
-      using TBY = Eigen::Block< TY >;
       using TScalar = typename _M::TScalar;
       using TNatural = typename _M::TNatural;
       using TMatrix = typename _M::TMatrix;
       using TMap = typename _M::TMap;
       using TConstMap = typename _M::TConstMap;
-
       using TResult = std::pair< TScalar, const TScalar* >;
 
     public:
       Base( const _M& m, const TX& iX, const TY& iY );
-      virtual ~Base( );
+      virtual ~Base( ) = default;
 
-      virtual TResult operator()( ) const = 0;
+     virtual TResult operator()( ) = 0;
 
     protected:
       const _M* m_M { nullptr };
       const TX* m_X { nullptr };
       const TY* m_Y { nullptr };
 
-      std::shared_ptr< TScalar[ ] > m_G;
-      std::shared_ptr< TScalar[ ] > m_Ym;
+      TMatrix m_G;
+      TMatrix m_Z;
     };
   } // end namespace
 } // end namespace
