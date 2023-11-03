@@ -50,6 +50,8 @@ namespace ivqML
       const TNatural& number_of_parameters( ) const;
       virtual void set_number_of_parameters( const TNatural& p );
 
+      TNatural number_of_outputs( ) const;
+
       _S* begin( );
       const _S* begin( ) const;
 

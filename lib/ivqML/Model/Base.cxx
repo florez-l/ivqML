@@ -87,6 +87,15 @@ set_number_of_parameters( const TNatural& p )
 
 // -------------------------------------------------------------------------
 template< class _S >
+typename ivqML::Model::Base< _S >::
+TNatural ivqML::Model::Base< _S >::
+number_of_outputs( ) const
+{
+  return( 1 );
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
 _S* ivqML::Model::Base< _S >::
 begin( )
 {

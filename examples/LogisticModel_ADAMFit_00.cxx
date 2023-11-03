@@ -14,10 +14,13 @@
 #include <ivqML/Model/Logistic.h>
 #include <ivqML/Cost/CrossEntropy.h>
 #include <ivqML/Optimizer/ADAM.h>
+#include <ivqML/ITK/ApplyModelToImageMeshFilter.h>
 
 using _R = double;
 using _M = ivqML::Model::Logistic< _R >;
 using _I = itk::Image< _R, 2 >;
+using _C = ivqML::Cost::CrossEntropy< _M >;
+using _O = ivqML::Optimizer::ADAM< _C >;
 
 // Detect ctrl-c event to stop optimization and finish training
 bool general_stop = false;
@@ -28,14 +31,21 @@ void sigint_handler( int s )
 
 int main( int argc, char** argv )
 {
+  if( argc < 4 )
+  {
+    std::cerr << "Usage: " << argv[ 0 ] << " input output n" << std::endl;
+    return( EXIT_FAILURE );
+  } // end if
+
   // Get input data
   auto reader = ivq::ITK::ImageFileReader< _I >::New( );
   reader->SetFileName( argv[ 1 ] );
   reader->NormalizeOn( );
   reader->Update( );
+
   auto D =
     ivqML::Helpers::extract_discrete_samples_from_image< _I, _M::TMatrix >(
-      reader->GetOutput( ), 500, 2
+      reader->GetOutput( ), std::atoi( argv[ 3 ] ), 2
       );
   _M::TMatrix X = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
   _M::TMatrix Y = D.block( 0, D.cols( ) - 1, D.rows( ), 1 );
@@ -46,8 +56,7 @@ int main( int argc, char** argv )
   std::cout << "Initial model : " << fitted_model << std::endl;
 
   // Optimization algorithm
-  using _C = ivqML::Cost::CrossEntropy< _M >;
-  ivqML::Optimizer::ADAM< _C > opt( fitted_model, X, Y );
+  _O opt( fitted_model, X, Y );
 
   signal( SIGINT, sigint_handler );
   opt.set_debug(
@@ -68,40 +77,14 @@ int main( int argc, char** argv )
   opt.fit( );
   std::cout << "Fitted model  : " << fitted_model << std::endl;
 
+  using _A = ivqML::ITK::ApplyModelToImageMeshFilter< _I, _M >;
+  auto apply_model = _A::New( );
+  apply_model->SetInput( reader->GetOutput( ) );
+  apply_model->SetModel( fitted_model );
 
-  _I::Pointer output = _I::New( );
-  output->CopyInformation( reader->GetOutput( ) );
-  output->SetRequestedRegionToLargestPossibleRegion( );
-  output->SetBufferedRegion( output->GetRequestedRegion( ) );
-  output->Allocate( );
-
-  auto roi = output->GetRequestedRegion( );
-  unsigned long long Iw = roi.GetSize( )[ 0 ];
-  unsigned long long Ih = roi.GetSize( )[ 1 ];
-  unsigned long long Is = Iw * Ih;
-  auto spac = output->GetSpacing( );
-  auto orig = output->GetOrigin( );
-
-  _M::TMatrix S = Eigen::Map< const Eigen::Matrix< typename decltype( spac )::ValueType, Eigen::Dynamic, Eigen::Dynamic > >( spac.data( ), 1, _I::ImageDimension ).template cast< _R >( );
-  _M::TMatrix O = Eigen::Map< const Eigen::Matrix< typename decltype( orig )::ValueType, Eigen::Dynamic, Eigen::Dynamic > >( orig.data( ), 1, _I::ImageDimension ).template cast< _R >( );
-
-  _M::TMatrix rows( Ih, 1 ), cols( Iw, 1 );
-  rows.col( 0 ).setLinSpaced( Ih, 0, Ih - 1 );
-  cols.col( 0 ).setLinSpaced( Iw, 0, Iw - 1 );
-  _M::TMatrix Ix( Is, _I::ImageDimension );
-  Ix
-    <<
-    cols.replicate( 1, Ih ).reshaped( Is, 1 ),
-    rows.replicate( 1, Iw ).transpose( ).reshaped( Is, 1 );
-  Ix.array( ).rowwise( ) *= S.array( ).row( 0 );
-  Ix.array( ).rowwise( ) += O.array( ).row( 0 );
-
-  auto Z = ivq::ITK::ImageToMatrix( output.GetPointer( ) ).transpose( );
-  fitted_model( Z, Ix );
-
-  auto writer = itk::ImageFileWriter< _I >::New( );
-  writer->SetInput( output );
-  writer->SetFileName( "out.mha" );
+  auto writer = itk::ImageFileWriter< _A::TOutput >::New( );
+  writer->SetInput( apply_model->GetOutput( ) );
+  writer->SetFileName( argv[ 2 ] );
   writer->Update( );
 
   return( EXIT_SUCCESS );
