@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <limits>
+#include <vector>
 #include <boost/program_options.hpp>
 #include <ivqML/Config.h>
 
@@ -42,6 +43,9 @@ namespace ivqML
       using TConstMap = typename _C::TConstMap;
       using TResult = typename _C::TResult;
 
+      using TBX = Eigen::Block< TDX >;
+      using TBY = Eigen::Block< TDY >;
+
       using TDebug =
         std::function<
           bool(
@@ -50,6 +54,7 @@ namespace ivqML
           >;
 
     public:
+      ivqMLAttributeMacro( batch_size, TNatural, 0 );
       ivqMLAttributeMacro( lambda, TScalar, 0 );
       ivqMLAttributeMacro( debug_iterations, TNatural, 100 );
       ivqMLAttributeMacro(
@@ -66,6 +71,9 @@ namespace ivqML
       void set_debug( TDebug d );
 
       virtual void fit( ) = 0;
+
+    protected:
+      void _batches( std::vector< TBX >& X, std::vector< TBY >& Y );
 
     protected:
       TModel*   m_M { nullptr };

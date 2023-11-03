@@ -31,6 +31,8 @@ namespace ivqML
       using TMap = typename Superclass::TMap;
       using TConstMap = typename Superclass::TConstMap;
       using TResult = typename Superclass::TResult;
+      using TBX = typename Superclass::TBX;
+      using TBY = typename Superclass::TBY;
 
     public:
       ivqMLAttributeMacro( alpha, TScalar, 1e-3 );
