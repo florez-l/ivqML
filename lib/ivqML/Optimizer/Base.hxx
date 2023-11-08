@@ -49,37 +49,6 @@ set_debug( TDebug d )
   this->m_D = d;
 }
 
-// -------------------------------------------------------------------------
-template< class _C >
-void ivqML::Optimizer::Base< _C >::
-_batches( std::vector< TBX >& X, std::vector< TBY >& Y )
-{
-  auto all_X = this->m_X->derived( );
-  auto all_Y = this->m_Y->derived( );
-  X.clear( );
-  Y.clear( );
-  TNatural m = X.rows( );
-  TNatural nb = 1;
-  if( this->m_batch_size > 0 )
-    nb = TNatural( std::ceil( double( m ) / double( this->m_batch_size ) ) );
-  if( nb == 0 )
-    nb = 1;
-
-  if( nb > 1 )
-  {
-    for( TNatural b = 0; b < nb; ++b )
-    {
-      X.push_back( all_X.block( ???, 0, ???, all_X.cols( ) ) );
-      Y.push_back( all_Y.block( ???, 0, ???, all_Y.cols( ) ) );
-    } // end for
-  }
-  else
-  {
-    X.push_back( all_X.block( 0, 0, all_X.rows( ), all_X.cols( ) ) );
-    Y.push_back( all_Y.block( 0, 0, all_Y.rows( ), all_Y.cols( ) ) );
-  } // end if
-}
-
 #endif // __ivqML__Optimizer__Base__hxx__
 
 // eof - $RCSfile$

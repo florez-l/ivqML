@@ -48,12 +48,16 @@ namespace ivqML
       Base( const _M& m, const TX& iX, const TY& iY );
       virtual ~Base( ) = default;
 
-     virtual TResult operator()( ) = 0;
+      TNatural number_of_batches( ) const;
+      void set_batch_size( const TNatural& bs );
+      virtual TResult operator()( const TNatural& batch = 0 ) = 0;
 
     protected:
       const _M* m_M { nullptr };
       const TX* m_X { nullptr };
       const TY* m_Y { nullptr };
+
+      std::vector< std::pair< TNatural, TNatural > > m_B;
 
       TMatrix m_G;
       TMatrix m_Z;

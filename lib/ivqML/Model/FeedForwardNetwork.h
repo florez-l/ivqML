@@ -4,6 +4,7 @@
 #ifndef __ivqML__Model__FeedForwardNetwork__h__
 #define __ivqML__Model__FeedForwardNetwork__h__
 
+#include <functional>
 #include <vector>
 #include <ivqML/Model/Base.h>
 
@@ -26,6 +27,9 @@ namespace ivqML
       using TMatrix = typename Superclass::TMatrix;
       using TMap = typename Superclass::TMap;
       using TConstMap = typename Superclass::TConstMap;
+
+      using TSignature = void( TMatrix&, const TMatrix&, bool );
+      using TActivation = std::function< TSignature >;
 
     public:
       FeedForwardNetwork( );

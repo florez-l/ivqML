@@ -26,7 +26,7 @@ namespace ivqML
       MSE( const _M& m, const TX& iX, const TY& iY );
       virtual ~MSE( ) override = default;
 
-      virtual TResult operator()( ) override;
+      virtual TResult operator()( const TNatural& b = 0 ) override;
 
     protected:
       TMatrix m_D;

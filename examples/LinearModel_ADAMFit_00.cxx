@@ -2,6 +2,7 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+#include <csignal>
 #include <iostream>
 
 #include <ivqML/Model/Linear.h>
@@ -11,9 +12,24 @@
 using _R = long double;
 using _M = ivqML::Model::Linear< _R >;
 
+// -------------------------------------------------------------------------
+bool manual_stop = false;
+bool debug(
+  const _R& J, const _R& G, const _M* m, const _M::TNatural& i, bool d
+  )
+{
+  if( d )
+    std::cout << "J=" << J << ", Gn=" << G << ", i=" << i << std::endl;
+  return( manual_stop );
+}
+
+// -------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-  unsigned int m = 10;
+  // Detect ctrl-c event to stop optimization and finish training
+  signal( SIGINT, []( int s ) -> void { manual_stop = true; } );
+
+  unsigned int m = 600;
 
   // Model to generate data
   _M real_model( 1 );
@@ -38,14 +54,8 @@ int main( int argc, char** argv )
   // Optimization algorithm
   using _C = ivqML::Cost::MSE< _M >;
   ivqML::Optimizer::ADAM< _C > opt( fitted_model, X, Y );
-  opt.set_debug(
-    []( const _R& J, const _R& G, const _M* m, const _M::TNatural& i )
-    -> bool
-    {
-      std::cout << "J=" << J << ", Gn=" << G << ", i=" << i << std::endl;
-      return( false );
-    }
-    );
+  opt.set_debug( debug );
+
   std::string ret = opt.parse_options( argc, argv );
   if( ret != "" )
   {

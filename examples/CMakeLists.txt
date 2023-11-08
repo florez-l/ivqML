@@ -9,6 +9,7 @@ include_directories(
 
 set(
   _simple_examples
+  FeedForwardNetwork_00
   LinearModel_00
   LinearModel_ADAMFit_00
   LinearModel_GradientDescentFit_00

@@ -17,10 +17,17 @@ MSE( const _M& m, const TX& iX, const TY& iY )
 template< class _M, class _X, class _Y >
 typename ivqML::Cost::MSE< _M, _X, _Y >::
 TResult ivqML::Cost::MSE< _M, _X, _Y >::
-operator()( )
+operator()( const TNatural& b )
 {
-  auto X = this->m_X->derived( ).template cast< TScalar >( );
-  auto Y = this->m_Y->derived( ).template cast< TScalar >( );
+  const auto& i = this->m_B[ b ];
+  auto X =
+    this->m_X->derived( )
+    .block( i.first, 0, i.second, this->m_X->cols( ) )
+    .template cast< TScalar >( );
+  auto Y =
+    this->m_Y->derived( )
+    .block( i.first, 0, i.second, this->m_Y->cols( ) )
+    .template cast< TScalar >( );
 
   this->m_M->operator()( this->m_Z, X );
   this->m_M->operator()( this->m_D, X, true );

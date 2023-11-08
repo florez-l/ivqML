@@ -43,15 +43,15 @@ namespace ivqML
       using TConstMap = typename _C::TConstMap;
       using TResult = typename _C::TResult;
 
-      using TBX = Eigen::Block< TDX >;
-      using TBY = Eigen::Block< TDY >;
-
-      using TDebug =
-        std::function<
-          bool(
-            const TScalar&, const TScalar&, const TModel*, const TNatural&
-            )
-          >;
+      using TSignature =
+        bool(
+          const TScalar&,
+          const TScalar&,
+          const TModel*,
+          const TNatural&,
+          bool
+          );
+      using TDebug = std::function< TSignature >;
 
     public:
       ivqMLAttributeMacro( batch_size, TNatural, 0 );
@@ -73,9 +73,6 @@ namespace ivqML
       virtual void fit( ) = 0;
 
     protected:
-      void _batches( std::vector< TBX >& X, std::vector< TBY >& Y );
-
-    protected:
       TModel*   m_M { nullptr };
       const TX* m_X { nullptr };
       const TY* m_Y { nullptr };
@@ -83,7 +80,11 @@ namespace ivqML
       TDebug m_D
         {
           [](
-            const TScalar&, const TScalar&, const TModel*, const TNatural&
+            const TScalar&,
+            const TScalar&,
+            const TModel*,
+            const TNatural&,
+            bool
             ) -> bool
           {
             return( false );
