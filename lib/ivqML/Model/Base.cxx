@@ -129,6 +129,14 @@ end( ) const
 // -------------------------------------------------------------------------
 template< class _S >
 void ivqML::Model::Base< _S >::
+_from_stream( std::istream& i )
+{
+  // TODO
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::Base< _S >::
 _to_stream( std::ostream& o ) const
 {
   o << this->m_P;

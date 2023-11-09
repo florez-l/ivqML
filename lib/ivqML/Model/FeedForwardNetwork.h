@@ -5,8 +5,12 @@
 #define __ivqML__Model__FeedForwardNetwork__h__
 
 #include <functional>
+#include <string>
+#include <utility>
 #include <vector>
+
 #include <ivqML/Model/Base.h>
+#include <ivqML/Model/ActivationFactory.h>
 
 namespace ivqML
 {
@@ -30,17 +34,24 @@ namespace ivqML
 
       using TSignature = void( TMatrix&, const TMatrix&, bool );
       using TActivation = std::function< TSignature >;
+      using TActivationFactory = ivqML::Model::ActivationFactory< Self >;
 
     public:
       FeedForwardNetwork( );
       virtual ~FeedForwardNetwork( ) override = default;
 
-      virtual void set_number_of_parameters( const TNatural& p ) override;
+      virtual void random_fill( ) override;
+
+      TNatural number_of_inputs( ) const;
+      TNatural number_of_outputs( ) const;
+
+      virtual void set_number_of_parameters( const TNatural& p ) final;
 
       void add_layer(
         const TNatural& i, const TNatural& o, const std::string& a
         );
       void add_layer( const TNatural& o, const std::string& a );
+      TNatural number_of_layers( ) const;
       void init( );
 
       template< class _Y, class _X >
@@ -50,12 +61,19 @@ namespace ivqML
         ) const;
 
     protected:
-      std::vector< TNatural > m_Sizes;
+      virtual void _from_stream( std::istream& i ) override;
+      virtual void _to_stream( std::ostream& o ) const override;
+
+    protected:
+      std::vector< TNatural > m_S;
+      std::vector< TMap > m_W;
+      std::vector< TMap > m_B;
+      std::vector< std::pair< std::string, TActivation > > m_F;
     };
   } // end namespace
 } // end namespace
 
-// TODO: #include <ivqML/Model/FeedForwardNetwork.hxx>
+#include <ivqML/Model/FeedForwardNetwork.hxx>
 
 #endif // __ivqML__Model__FeedForwardNetwork__h__
 

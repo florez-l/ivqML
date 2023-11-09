@@ -6,6 +6,7 @@
 
 #include <ivqML/Config.h>
 #include <memory>
+#include <istream>
 #include <ostream>
 
 namespace ivqML
@@ -59,6 +60,7 @@ namespace ivqML
       const _S* end( ) const;
 
     protected:
+      virtual void _from_stream( std::istream& i );
       virtual void _to_stream( std::ostream& o ) const;
 
     protected:
@@ -66,6 +68,11 @@ namespace ivqML
       TNatural m_P { 0 };
 
     public:
+      friend std::istream& operator>>( std::istream& i, Self& m )
+        {
+          m._from_stream( i );
+          return( i );
+        }
       friend std::ostream& operator<<( std::ostream& o, const Self& m )
         {
           m._to_stream( o );
