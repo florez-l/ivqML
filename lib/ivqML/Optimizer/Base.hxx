@@ -7,10 +7,7 @@
 // -------------------------------------------------------------------------
 template< class _C >
 ivqML::Optimizer::Base< _C >::
-Base( TModel& m, const TX& iX, const TY& iY )
-  : m_M( &m ),
-    m_X( &iX ),
-    m_Y( &iY )
+Base( )
 {
   this->m_P.add_options( )( "help,h", "help message" )
     ivqML_Optimizer_OptionMacro( lambda, "lambda,l" )
@@ -39,6 +36,16 @@ parse_options( int argc, char** argv )
   }
   else
     return( "" );
+}
+
+// -------------------------------------------------------------------------
+template< class _C >
+void ivqML::Optimizer::Base< _C >::
+init( TModel& m, const TX& iX, const TY& iY )
+{
+  this->m_M = &m;
+  this->m_X = &iX;
+  this->m_Y = &iY;
 }
 
 // -------------------------------------------------------------------------

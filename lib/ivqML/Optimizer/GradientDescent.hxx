@@ -7,8 +7,8 @@
 // -------------------------------------------------------------------------
 template< class _C >
 ivqML::Optimizer::GradientDescent< _C >::
-GradientDescent( TModel& m, const TX& iX, const TY& iY )
-  : Superclass( m, iX, iY )
+GradientDescent( )
+  : Superclass( )
 {
   this->m_P.add_options( )
     ivqML_Optimizer_OptionMacro( alpha, "alpha,a" );

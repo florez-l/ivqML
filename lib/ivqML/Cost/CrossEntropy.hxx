@@ -25,11 +25,17 @@ CrossEntropy( const _M& m, const TX& iX, const TY& iY )
 template< class _M, class _X, class _Y >
 typename ivqML::Cost::CrossEntropy< _M, _X, _Y >::
 TResult ivqML::Cost::CrossEntropy< _M, _X, _Y >::
-operator()( )
+operator()( const TNatural& b )
 {
   static const TScalar _e = std::numeric_limits< TScalar >::epsilon( );
-  auto X = this->m_X->derived( ).template cast< TScalar >( );
-  auto Y = this->m_Y->derived( );
+  const auto& i = this->m_B[ b ];
+  auto X =
+    this->m_X->derived( )
+    .block( i.first, 0, i.second, this->m_X->cols( ) )
+    .template cast< TScalar >( );
+  auto Y =
+    this->m_Y->derived( )
+    .block( i.first, 0, i.second, this->m_Y->cols( ) );
 
   this->m_M->operator()( this->m_Z, X );
 

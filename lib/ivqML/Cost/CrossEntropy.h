@@ -26,7 +26,7 @@ namespace ivqML
       CrossEntropy( const _M& m, const TX& iX, const TY& iY );
       virtual ~CrossEntropy( ) override = default;
 
-      virtual TResult operator()( ) override;
+      virtual TResult operator()( const TNatural& b = 0 ) override;
 
     protected:
       TScalar m_Ym;

@@ -19,18 +19,7 @@ namespace ivqML
     public:
       using Self = ADAM;
       using Superclass = ivqML::Optimizer::Base< _C >;
-      using TCost = typename Superclass::TCost;
-      using TModel = typename Superclass::TModel;
-      using TDX = typename Superclass::TDX;
-      using TDY = typename Superclass::TDY;
-      using TX = typename Superclass::TX;
-      using TY = typename Superclass::TY;
-      using TScalar = typename Superclass::TScalar;
-      using TNatural = typename Superclass::TNatural;
-      using TMatrix = typename Superclass::TMatrix;
-      using TMap = typename Superclass::TMap;
-      using TConstMap = typename Superclass::TConstMap;
-      using TResult = typename Superclass::TResult;
+      ivqML_Optimizer_Typedefs;
 
     public:
       ivqMLAttributeMacro( alpha, TScalar, 1e-3 );
@@ -38,7 +27,7 @@ namespace ivqML
       ivqMLAttributeMacro( beta2, TScalar, 0.999 );
 
     public:
-      ADAM( TModel& m, const TX& iX, const TY& iY );
+      ADAM( );
       virtual ~ADAM( ) override = default;
 
       virtual void fit( ) override;

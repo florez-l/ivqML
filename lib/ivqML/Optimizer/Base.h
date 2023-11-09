@@ -18,6 +18,20 @@
     ( &( this->m_##_N ) )->default_value( this->m_##_N ), ""            \
     )
 
+// -------------------------------------------------------------------------
+#define ivqML_Optimizer_Typedefs                        \
+  using TCost = typename Superclass::TCost;             \
+  using TModel = typename Superclass::TModel;           \
+  using TDX = typename Superclass::TDX;                 \
+  using TDY = typename Superclass::TDY;                 \
+  using TX = typename Superclass::TX;                   \
+  using TY = typename Superclass::TY;                   \
+  using TScalar = typename Superclass::TScalar;         \
+  using TNatural = typename Superclass::TNatural;       \
+  using TMatrix = typename Superclass::TMatrix;         \
+  using TMap = typename Superclass::TMap;               \
+  using TConstMap = typename Superclass::TConstMap;     \
+  using TResult = typename Superclass::TResult 
 
 namespace ivqML
 {
@@ -63,10 +77,11 @@ namespace ivqML
       // TODO: this->_configure_parameter( "regularization", "ridge" );
 
     public:
-      Base( TModel& m, const TX& iX, const TY& iY );
+      Base( );
       virtual ~Base( ) = default;
 
       virtual std::string parse_options( int argc, char** argv );
+      virtual void init( TModel& m, const TX& iX, const TY& iY );
 
       void set_debug( TDebug d );
 

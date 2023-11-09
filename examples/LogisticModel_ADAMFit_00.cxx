@@ -18,76 +18,121 @@
 
 using _R = double;
 using _M = ivqML::Model::Logistic< _R >;
-using _I = itk::Image< _R, 2 >;
 using _C = ivqML::Cost::CrossEntropy< _M >;
-using _O = ivqML::Optimizer::ADAM< _C >;
+using _I = itk::Image< _R, 2 >;
 
-// Detect ctrl-c event to stop optimization and finish training
-bool general_stop = false;
-void sigint_handler( int s )
+/**
+ */
+class Training
+  : public ivqML::Optimizer::ADAM< _C >
 {
-  general_stop = true;
-}
+public:
+  using Self = Training;
+  using Superclass = ivqML::Optimizer::ADAM< _C >;
+  ivqML_Optimizer_Typedefs;
+
+public:
+  ivqMLAttributeMacro( input, std::string, "" );
+  ivqMLAttributeMacro( output, std::string, "" );
+  ivqMLAttributeMacro( samples, TNatural, 100 );
+
+public:
+  Training( );
+  virtual ~Training( ) override = default;
+
+  static bool debug(
+    const _R& J, const _R& G, const _M* m, const _M::TNatural& i, bool d
+    );
+
+  virtual void fit( ) override;
+
+protected:
+  _M m_FittedModel;
+  _M::TMatrix m_dX;
+  _M::TMatrix m_dY;
+  static bool s_ManualStop;
+};
+bool Training::s_ManualStop = false;
 
 int main( int argc, char** argv )
 {
-  if( argc < 4 )
-  {
-    std::cerr << "Usage: " << argv[ 0 ] << " input output n" << std::endl;
-    return( EXIT_FAILURE );
-  } // end if
+  Training tr_exp;
 
-  // Get input data
-  auto reader = ivq::ITK::ImageFileReader< _I >::New( );
-  reader->SetFileName( argv[ 1 ] );
-  reader->NormalizeOn( );
-  reader->Update( );
-
-  auto D =
-    ivqML::Helpers::extract_discrete_samples_from_image< _I, _M::TMatrix >(
-      reader->GetOutput( ), std::atoi( argv[ 3 ] ), 2
-      );
-  _M::TMatrix X = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
-  _M::TMatrix Y = D.block( 0, D.cols( ) - 1, D.rows( ), 1 );
-
-  // Model to be fitted
-  _M fitted_model( 2 );
-  fitted_model.random_fill( );
-  std::cout << "Initial model : " << fitted_model << std::endl;
-
-  // Optimization algorithm
-  _O opt( fitted_model, X, Y );
-
-  signal( SIGINT, sigint_handler );
-  opt.set_debug(
-    []( const _R& J, const _R& G, const _M* m, const _M::TNatural& i )
-    -> bool
-    {
-      std::cerr << "J=" << J << ", Gn=" << G << ", i=" << i << std::endl;
-      return( general_stop );
-    }
-    );
-
-  std::string ret = opt.parse_options( argc, argv );
+  std::string ret = tr_exp.parse_options( argc, argv );
   if( ret != "" )
   {
     std::cerr << ret << std::endl;
     return( EXIT_FAILURE );
   } // end if
-  opt.fit( );
-  std::cout << "Fitted model  : " << fitted_model << std::endl;
 
+  tr_exp.fit( );
+
+  return( EXIT_SUCCESS );
+}
+
+// -------------------------------------------------------------------------
+Training::
+Training( )
+  : Superclass( )
+{
+  this->m_P.add_options( )
+    ivqML_Optimizer_OptionMacro( samples, "samples" )
+    ivqML_Optimizer_OptionMacro( input, "input" )
+    ivqML_Optimizer_OptionMacro( output, "output" );
+
+  // Detect ctrl-c event to stop optimization and finish training
+  signal( SIGINT, []( int s ) -> void { Self::s_ManualStop = true; } );
+
+  // Some basic configuration
+  this->set_debug( Self::debug );
+}
+
+// -------------------------------------------------------------------------
+bool Training::
+debug( const _R& J, const _R& G, const _M* m, const _M::TNatural& i, bool d )
+{
+  if( d )
+    std::cout << "J=" << J << ", Gn=" << G << ", i=" << i << std::endl;
+  return( Self::s_ManualStop );
+}
+
+// -------------------------------------------------------------------------
+void Training::
+fit( )
+{
+  // Get input data
+  auto reader = ivq::ITK::ImageFileReader< _I >::New( );
+  reader->SetFileName( this->m_input );
+  reader->NormalizeOn( );
+  reader->Update( );
+
+  auto D =
+    ivqML::Helpers::extract_discrete_samples_from_image< _I, _M::TMatrix >(
+      reader->GetOutput( ), this->m_samples, 2
+      );
+  this->m_dX = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
+  this->m_dY = D.block( 0, D.cols( ) - 1, D.rows( ), 1 );
+
+  // Model to be fitted
+  this->m_FittedModel.set_number_of_inputs( _I::ImageDimension );
+  this->m_FittedModel.random_fill( );
+  std::cout << "Initial model : " << this->m_FittedModel << std::endl;
+
+  // Go!
+  this->init( this->m_FittedModel, this->m_dX, this->m_dY );
+  this->Superclass::fit( );
+  std::cout << "Fitted model  : " << this->m_FittedModel << std::endl;
+
+  // Save result image
   using _A = ivqML::ITK::ApplyModelToImageMeshFilter< _I, _M >;
   auto apply_model = _A::New( );
   apply_model->SetInput( reader->GetOutput( ) );
-  apply_model->SetModel( fitted_model );
+  apply_model->SetModel( this->m_FittedModel );
 
   auto writer = itk::ImageFileWriter< _A::TOutput >::New( );
   writer->SetInput( apply_model->GetOutput( ) );
-  writer->SetFileName( argv[ 2 ] );
+  writer->SetFileName( this->m_output );
   writer->Update( );
-
-  return( EXIT_SUCCESS );
 }
 
 // eof - $RCSfile$
