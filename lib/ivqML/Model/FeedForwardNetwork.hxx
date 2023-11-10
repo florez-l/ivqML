@@ -30,7 +30,12 @@ operator()(
     this->m_F[ l ].second( A[ l + 1 ], Z[ l ], false );
   } // end for
 
-  iY.derived( ) = A[ L ].template cast< typename _Y::Scalar >( );
+  if( derivative )
+  {
+    // TODO: backprop
+  }
+  else
+    iY.derived( ) = A[ L ].template cast< typename _Y::Scalar >( );
 }
 
 #endif // __ivqML__Model__FeedForwardNetwork__hxx__

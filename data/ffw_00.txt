@@ -1,0 +1,5 @@
+3 8
+4 ReLU
+2 ReLU
+1 Sigmoid
+random

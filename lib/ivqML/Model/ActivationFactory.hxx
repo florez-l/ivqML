@@ -86,21 +86,8 @@ New( const std::string& n )
     return(
       []( TMatrix& A, const TMatrix& Z, bool d ) -> void
       {
-        /* TODO
-           A = Z.unaryExpr(
-           [&d]( const TScalar& z ) -> TScalar
-           {
-           TScalar a;
-           if( z <= -s_SigmoidLimit )
-           a = s_0;
-           else if( z >= s_SigmoidLimit )
-           a = s_1;
-           else
-           a = s_1 / ( s_1 + std::exp( -z ) );
-           return( d? ( a * ( s_1 - a ) ): a );
-           }
-           );
-        */
+        A = ( Z.colwise( ) - Z.rowwise( ).maxCoeff( ) ).array( ).exp( );
+        A.array( ).colwise( ) /= A.array( ).rowwise( ).sum( );
       }
       );
   else // if( "linear" )

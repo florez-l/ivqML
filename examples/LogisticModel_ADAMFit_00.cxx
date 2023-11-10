@@ -12,13 +12,13 @@
 #include <ivq/ITK/ImageFileReader.h>
 
 #include <ivqML/Model/Logistic.h>
-#include <ivqML/Cost/CrossEntropy.h>
+#include <ivqML/Cost/BinaryCrossEntropy.h>
 #include <ivqML/Optimizer/ADAM.h>
 #include <ivqML/ITK/ApplyModelToImageMeshFilter.h>
 
 using _R = double;
 using _M = ivqML::Model::Logistic< _R >;
-using _C = ivqML::Cost::CrossEntropy< _M >;
+using _C = ivqML::Cost::BinaryCrossEntropy< _M >;
 using _I = itk::Image< _R, 2 >;
 
 /**

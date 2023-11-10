@@ -1,8 +1,8 @@
 // =========================================================================
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
-#ifndef __ivqML__Cost__CrossEntropy__h__
-#define __ivqML__Cost__CrossEntropy__h__
+#ifndef __ivqML__Cost__BinaryCrossEntropy__h__
+#define __ivqML__Cost__BinaryCrossEntropy__h__
 
 #include <ivqML/Cost/Base.h>
    
@@ -13,18 +13,18 @@ namespace ivqML
     /**
      */
     template< class _M, class _X = typename _M::TMatrix, class _Y = typename _M::TMatrix >
-    class CrossEntropy
+    class BinaryCrossEntropy
       : public ivqML::Cost::Base< _M, _X, _Y >
     {
     public:
-      using Self = CrossEntropy;
+      using Self = BinaryCrossEntropy;
       using Superclass = ivqML::Cost::Base< _M, _X, _Y >;
 
       ivqML_Cost_Typedefs;
 
     public:
-      CrossEntropy( const _M& m, const TX& iX, const TY& iY );
-      virtual ~CrossEntropy( ) override = default;
+      BinaryCrossEntropy( const _M& m, const TX& iX, const TY& iY );
+      virtual ~BinaryCrossEntropy( ) override = default;
 
       virtual TResult operator()( const TNatural& b = 0 ) override;
 
@@ -35,8 +35,8 @@ namespace ivqML
   } // end namespace
 } // end namespace
 
-#include <ivqML/Cost/CrossEntropy.hxx>
+#include <ivqML/Cost/BinaryCrossEntropy.hxx>
 
-#endif // __ivqML__Cost__CrossEntropy__h__
+#endif // __ivqML__Cost__BinaryCrossEntropy__h__
 
 // eof - $RCSfile$

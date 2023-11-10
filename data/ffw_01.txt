@@ -1,0 +1,5 @@
+3 16
+8 ReLU
+4 tanh
+2 SoftMax
+random

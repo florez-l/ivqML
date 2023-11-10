@@ -1,15 +1,15 @@
 // =========================================================================
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
-#ifndef __ivqML__Cost__CrossEntropy__hxx__
-#define __ivqML__Cost__CrossEntropy__hxx__
+#ifndef __ivqML__Cost__BinaryCrossEntropy__hxx__
+#define __ivqML__Cost__BinaryCrossEntropy__hxx__
 
 #include <atomic>
 
 // -------------------------------------------------------------------------
 template< class _M, class _X, class _Y >
-ivqML::Cost::CrossEntropy< _M, _X, _Y >::
-CrossEntropy( const _M& m, const TX& iX, const TY& iY )
+ivqML::Cost::BinaryCrossEntropy< _M, _X, _Y >::
+BinaryCrossEntropy( const _M& m, const TX& iX, const TY& iY )
   : Superclass( m, iX, iY )
 {
   this->m_Ym = iY.derived( ).template cast< TScalar >( ).mean( );
@@ -23,8 +23,8 @@ CrossEntropy( const _M& m, const TX& iX, const TY& iY )
 
 // -------------------------------------------------------------------------
 template< class _M, class _X, class _Y >
-typename ivqML::Cost::CrossEntropy< _M, _X, _Y >::
-TResult ivqML::Cost::CrossEntropy< _M, _X, _Y >::
+typename ivqML::Cost::BinaryCrossEntropy< _M, _X, _Y >::
+TResult ivqML::Cost::BinaryCrossEntropy< _M, _X, _Y >::
 operator()( const TNatural& b )
 {
   static const TScalar _e = std::numeric_limits< TScalar >::epsilon( );
@@ -68,6 +68,6 @@ operator()( const TNatural& b )
   return( std::make_pair( TScalar( J ), this->m_G.data( ) ) );
 }
 
-#endif // __ivqML__Cost__CrossEntropy__hxx__
+#endif // __ivqML__Cost__BinaryCrossEntropy__hxx__
 
 // eof - $RCSfile$

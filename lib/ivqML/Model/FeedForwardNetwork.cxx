@@ -2,6 +2,10 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+#include <algorithm>
+#include <cctype>
+#include <stdexcept>
+
 #include <ivqML/Model/FeedForwardNetwork.h>
 
 // -------------------------------------------------------------------------
@@ -58,6 +62,9 @@ void ivqML::Model::FeedForwardNetwork< _S >::
 add_layer( const TNatural& i, const TNatural& o, const std::string& a )
 {
   this->m_S.clear( );
+  this->m_F.clear( );
+  this->m_W.clear( );
+  this->m_B.clear( );
   this->m_F.clear( );
 
   this->m_S.push_back( i );
@@ -125,15 +132,52 @@ template< class _S >
 void ivqML::Model::FeedForwardNetwork< _S >::
 _from_stream( std::istream& i )
 {
-  /* TODO
-     TNatural L = this->number_of_layers( );
-     o << L << " " << this->m_S[ 0 ] << std::endl;
-     for( TNatural l = 0; l < L; ++l )
-     o
-     << this->m_S[ l + 1 ] << " "
-     << this->m_F[ l ].first << std::endl;
-     this->Superclass::_to_stream( o );
-  */
+  TNatural L, in, out;
+  std::string a;
+
+  i >> L >> in >> out >> a;
+  this->add_layer( in, out, a );
+
+  for( TNatural l = 1; l < L; ++l )
+  {
+    i >> out >> a;
+    this->add_layer( out, a );
+  } // end for
+
+  this->init( );
+
+  i >> a;
+  std::transform(
+    a.begin( ), a.end( ), a.begin( ),
+    []( unsigned char c ){ return( std::tolower( c ) ); }
+    );
+
+  if( a == "random" )
+  {
+    // Do nothing since init() randomly fills
+  }
+  else if( a == "zeros" )
+  {
+    std::transform(
+      this->begin( ), this->end( ), this->begin( ),
+      []( const TScalar& v ){ return( TScalar( 0 ) ); }
+      );
+  }
+  else if( a == "ones" )
+  {
+    std::transform(
+      this->begin( ), this->end( ), this->begin( ),
+      []( const TScalar& v ){ return( TScalar( 1 ) ); }
+      );
+  }
+  else
+  {
+    TNatural P = std::atoi( a.c_str( ) );
+    if( P != this->m_P )
+      throw std::length_error( "Length mismatch while reading model." );
+    for( TNatural p = 0; p < P; ++p )
+      i >> *( this->begin( ) + p );
+  } // end if
 }
 
 // -------------------------------------------------------------------------
