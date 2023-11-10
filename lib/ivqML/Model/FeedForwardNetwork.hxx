@@ -4,6 +4,13 @@
 #ifndef __ivqML__Model__FeedForwardNetwork__hxx__
 #define __ivqML__Model__FeedForwardNetwork__hxx__
 
+
+#include <iostream>
+
+
+
+
+
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _Y, class _X >
@@ -32,7 +39,48 @@ operator()(
 
   if( derivative )
   {
-    // TODO: backprop
+    // Backpropagation
+    std::vector< TMatrix > D( L );
+    D.shrink_to_fit( );
+
+    if( this->m_IsLabeling )
+      D[ L - 1 ] = A[ L ] - iY.derived( ).template cast< TScalar >( );
+    /* TODO
+       else // regression
+    */
+    for( TNatural j = 1; j < L; ++j )
+    {
+      TNatural l = L - j - 1;
+
+      D[ l ] = TMatrix( Z[ l ].rows( ), Z[ l ].cols( ) );
+      this->m_F[ l ].second( D[ l ], Z[ l ], true );
+      auto B = this->m_W[ l + 1 ].transpose( ) * D[ l + 1 ];
+
+      std::cout << "********************" << std::endl;
+      std::cout << l << std::endl;
+      std::cout << D[ l ].rows( ) << " " << D[ l ].cols( ) << std::endl;
+      std::cout << B.rows( ) << " " << B.cols( ) << std::endl;
+      std::cout << "********************" << std::endl;
+
+    } // end for
+
+    /* TODO:
+       {
+       D[ l ] = TMatrix( Z[ L - l - 1 ].rows( ), Z[ L - l - 1 ].cols( ) );
+       this->m_F[ L - l - 1 ].second( D[ l ], Z[ L - l - 1 ], true );
+
+
+       std::cout << "-----***-------" << std::endl << B << std::endl;
+
+
+       D[ l ].array( ) *= B.array( );
+       } // end for
+    */
+
+    for( const auto& d: D )
+      std::cout << "------------" << std::endl << d << std::endl;
+    std::exit( 1 );
+
   }
   else
     iY.derived( ) = A[ L ].template cast< typename _Y::Scalar >( );

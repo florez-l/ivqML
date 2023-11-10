@@ -60,11 +60,18 @@ namespace ivqML
         bool derivative = false
         ) const;
 
+      template< class _Y, class _X >
+      void backpropagate(
+        const Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX
+        ) const;
+
     protected:
       virtual void _from_stream( std::istream& i ) override;
       virtual void _to_stream( std::ostream& o ) const override;
 
     protected:
+      bool m_IsLabeling { true }; // TODO: detect this
+
       std::vector< TNatural > m_S;
       std::vector< TMap > m_W;
       std::vector< TMap > m_B;

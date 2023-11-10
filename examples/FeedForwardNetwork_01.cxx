@@ -38,6 +38,8 @@ int main( int argc, char** argv )
   _M::TMatrix Y( m, model.number_of_outputs( ) );
   model( Y, X );
   std::cout << Y << std::endl;
+  std::cout << "---------- BACKPROPAGATION ----------" << std::endl;
+  model( Y, X, true );
 
   return( EXIT_SUCCESS );
 }
