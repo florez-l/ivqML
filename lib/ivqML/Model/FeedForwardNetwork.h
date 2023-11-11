@@ -62,10 +62,18 @@ namespace ivqML
 
       template< class _Y, class _X >
       void backpropagate(
-        const Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX
+        const Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX,
+        std::vector< TMatrix >& A, std::vector< TMatrix >& Z
         ) const;
 
     protected:
+
+      template< class _X >
+      void _eval(
+        const Eigen::EigenBase< _X >& iX,
+        std::vector< TMatrix >& A, std::vector< TMatrix >& Z
+        ) const;
+
       virtual void _from_stream( std::istream& i ) override;
       virtual void _to_stream( std::ostream& o ) const override;
 
