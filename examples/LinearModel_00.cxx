@@ -25,8 +25,7 @@ int main( int argc, char** argv )
   std::cout << X << std::endl;
 
   std::cout << "-------------- OUTPUTS --------------" << std::endl;
-  _L::TMatrix Y( m, 1 );
-  model( Y, X );
+  _L::TMatrix Y = model( X );
   std::cout << Y << std::endl;
 
   return( EXIT_SUCCESS );

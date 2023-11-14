@@ -8,23 +8,26 @@
 
 // -------------------------------------------------------------------------
 template< class _S >
-template< class _Y, class _X >
-void ivqML::Model::Linear< _S >::
-operator()(
-  Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX,
-  bool derivative
-  ) const
+template< class _X >
+auto ivqML::Model::Linear< _S >::
+operator()( const Eigen::EigenBase< _X >& iX, bool d ) const
 {
-  using _YS = typename _Y::Scalar;
-  using _YM = Eigen::Matrix< _YS, Eigen::Dynamic, Eigen::Dynamic >;
+  /* TODO
+     using _YS = typename _Y::Scalar;
+     using _YM = Eigen::Matrix< _YS, Eigen::Dynamic, Eigen::Dynamic >;
+  */
 
   auto X = iX.derived( ).template cast< _S >( );
-  if( derivative )
-    iY.derived( ) << _YM::Ones( X.rows( ), 1 ), X.template cast< _YS >( );
-  else
-    iY.derived( ) =
-      ( ( X * this->m_cT ).array( ) + this->m_T.get( )[ 0 ] )
-      .template cast< _YS >( );
+  return( ( X * this->m_nT ).array( ) + this->m_T.get( )[ 0 ] );
+
+  /* TODO
+     if( derivative )
+     iY.derived( ) << _YM::Ones( X.rows( ), 1 ), X.template cast< _YS >( );
+     else
+     iY.derived( ) =
+     ( ( X * this->m_cT ).array( ) + this->m_T.get( )[ 0 ] )
+     .template cast< _YS >( );
+  */
 }
 
 // -------------------------------------------------------------------------

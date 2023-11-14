@@ -34,11 +34,8 @@ namespace ivqML
       TNatural number_of_inputs( ) const;
       void set_number_of_inputs( const TNatural& i );
 
-      template< class _Y, class _X >
-      void operator()(
-        Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX,
-        bool derivative = false
-        ) const;
+      template< class _X >
+      auto operator()( const Eigen::EigenBase< _X >& iX, bool d = false ) const;
 
       template< class _Y, class _X >
       void fit(
