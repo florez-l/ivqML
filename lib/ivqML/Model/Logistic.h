@@ -30,15 +30,17 @@ namespace ivqML
       Logistic( const TNatural& n = 0 );
       virtual ~Logistic( ) = default;
 
-      template< class _Y, class _X >
-      void operator()(
-        Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX,
-        bool derivative = false
-        ) const;
+      template< class _X >
+      auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
 
-      template< class _Y, class _X >
-      void threshold(
-        Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX
+      template< class _X >
+      auto threshold( const Eigen::EigenBase< _X >& iX ) const;
+
+      template< class _G, class _X, class _Y >
+      TScalar cost(
+        Eigen::EigenBase< _G >& iG,
+        const Eigen::EigenBase< _X >& iX,
+        const Eigen::EigenBase< _Y >& iY
         ) const;
     };
   } // end namespace

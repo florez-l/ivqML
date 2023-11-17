@@ -12,23 +12,21 @@
 #include <ivq/ITK/ImageFileReader.h>
 
 #include <ivqML/Model/Logistic.h>
-#include <ivqML/Cost/BinaryCrossEntropy.h>
 #include <ivqML/Optimizer/ADAM.h>
 #include <ivqML/ITK/ApplyModelToImageMeshFilter.h>
 
 using _R = double;
 using _M = ivqML::Model::Logistic< _R >;
-using _C = ivqML::Cost::BinaryCrossEntropy< _M >;
 using _I = itk::Image< _R, 2 >;
 
 /**
  */
 class Training
-  : public ivqML::Optimizer::ADAM< _C >
+  : public ivqML::Optimizer::ADAM< _M >
 {
 public:
   using Self = Training;
-  using Superclass = ivqML::Optimizer::ADAM< _C >;
+  using Superclass = ivqML::Optimizer::ADAM< _M >;
   ivqML_Optimizer_Typedefs;
 
 public:

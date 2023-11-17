@@ -25,13 +25,11 @@ int main( int argc, char** argv )
   std::cout << X << std::endl;
 
   std::cout << "-------------- OUTPUTS --------------" << std::endl;
-  _L::TMatrix Y( m, 1 );
-  model( Y, X );
+  _L::TMatrix Y = model.evaluate( X );
   std::cout << Y << std::endl;
 
   std::cout << "-------------- THRESHOLDS --------------" << std::endl;
-  _L::TMatrix Z( m, 1 );
-  model.threshold( Z, X );
+  _L::TMatrix Z = model.threshold( X );
   std::cout << Z << std::endl;
 
   return( EXIT_SUCCESS );

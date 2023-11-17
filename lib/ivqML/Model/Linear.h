@@ -35,7 +35,14 @@ namespace ivqML
       void set_number_of_inputs( const TNatural& i );
 
       template< class _X >
-      auto operator()( const Eigen::EigenBase< _X >& iX, bool d = false ) const;
+      auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
+
+      template< class _G, class _X, class _Y >
+      TScalar cost(
+        Eigen::EigenBase< _G >& iG,
+        const Eigen::EigenBase< _X >& iX,
+        const Eigen::EigenBase< _Y >& iY
+        ) const;
 
       template< class _Y, class _X >
       void fit(

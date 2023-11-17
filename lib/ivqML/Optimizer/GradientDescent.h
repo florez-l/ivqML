@@ -12,13 +12,13 @@ namespace ivqML
   {
     /**
      */
-    template< class _C >
+    template< class _M, class _X = typename _M::TMatrix, class _Y = typename _M::TMatrix >
     class GradientDescent
-      : public ivqML::Optimizer::Base< _C >
+      : public ivqML::Optimizer::Base< _M, _X, _Y >
     {
     public:
       using Self = GradientDescent;
-      using Superclass = ivqML::Optimizer::Base< _C >;
+      using Superclass = ivqML::Optimizer::Base< _M, _X, _Y >;
       ivqML_Optimizer_Typedefs;
 
     public:

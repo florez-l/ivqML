@@ -6,21 +6,19 @@
 #include <iostream>
 
 #include <ivqML/Model/Linear.h>
-#include <ivqML/Cost/MSE.h>
 #include <ivqML/Optimizer/ADAM.h>
 
 using _R = long double;
 using _M = ivqML::Model::Linear< _R >;
-using _C = ivqML::Cost::MSE< _M >;
 
 /**
  */
 class Training
-  : public ivqML::Optimizer::ADAM< _C >
+  : public ivqML::Optimizer::ADAM< _M >
 {
 public:
   using Self = Training;
-  using Superclass = ivqML::Optimizer::ADAM< _C >;
+  using Superclass = ivqML::Optimizer::ADAM< _M >;
   ivqML_Optimizer_Typedefs;
 
 public:
@@ -102,8 +100,7 @@ fit( )
   this->m_dX.array( ) *= 10;
   this->m_dX.array( ) -= 5;
 
-  this->m_dY = _M::TMatrix::Zero( this->m_dX.rows( ), 1 );
-  real_model( this->m_dY, this->m_dX );
+  this->m_dY = real_model.evaluate( this->m_dX );
 
   // Model to be fitted
   this->m_FittedModel

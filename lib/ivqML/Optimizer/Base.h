@@ -20,7 +20,6 @@
 
 // -------------------------------------------------------------------------
 #define ivqML_Optimizer_Typedefs                        \
-  using TCost = typename Superclass::TCost;             \
   using TModel = typename Superclass::TModel;           \
   using TDX = typename Superclass::TDX;                 \
   using TDY = typename Superclass::TDY;                 \
@@ -31,7 +30,8 @@
   using TMatrix = typename Superclass::TMatrix;         \
   using TMap = typename Superclass::TMap;               \
   using TConstMap = typename Superclass::TConstMap;     \
-  using TResult = typename Superclass::TResult 
+  using TSignature = typename Superclass::TSignature;   \
+  using TDebug = typename Superclass::TDebug
 
 namespace ivqML
 {
@@ -39,23 +39,21 @@ namespace ivqML
   {
     /**
      */
-    template< class _C >
+    template< class _M, class _X, class _Y >
     class Base
     {
     public:
       using Self = Base;
-      using TCost = _C;
-      using TModel = typename _C::TModel;
-      using TDX = typename _C::TDX;
-      using TDY = typename _C::TDY;
-      using TX = typename _C::TX;
-      using TY = typename _C::TY;
-      using TScalar = typename _C::TScalar;
-      using TNatural = typename _C::TNatural;
-      using TMatrix = typename _C::TMatrix;
-      using TMap = typename _C::TMap;
-      using TConstMap = typename _C::TConstMap;
-      using TResult = typename _C::TResult;
+      using TModel = _M;
+      using TDX = _X;
+      using TDY = _Y;
+      using TX = Eigen::EigenBase< _X >;
+      using TY = Eigen::EigenBase< _Y >;
+      using TScalar = typename _M::TScalar;
+      using TNatural = typename _M::TNatural;
+      using TMatrix = typename _M::TMatrix;
+      using TMap = typename _M::TMap;
+      using TConstMap = typename _M::TConstMap;
 
       using TSignature =
         bool(
@@ -70,7 +68,7 @@ namespace ivqML
     public:
       ivqMLAttributeMacro( batch_size, TNatural, 0 );
       ivqMLAttributeMacro( lambda, TScalar, 0 );
-      ivqMLAttributeMacro( debug_iterations, TNatural, 100 );
+      ivqMLAttributeMacro( debug_iterations, TNatural, 1000 );
       ivqMLAttributeMacro(
         max_iterations, TNatural, std::numeric_limits< TNatural >::max( )
         );
@@ -91,6 +89,8 @@ namespace ivqML
       TModel*   m_M { nullptr };
       const TX* m_X { nullptr };
       const TY* m_Y { nullptr };
+
+      std::vector< TNatural > m_Sizes;
 
       TDebug m_D
         {
