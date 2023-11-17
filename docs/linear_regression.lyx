@@ -82,7 +82,7 @@ Base model
 \begin_layout Standard
 \begin_inset Formula 
 \[
-f\left(\mathbf{x}\right)=b+\mathbf{w}\cdot\mathbf{x}=b+\mathbf{w}^{\top}\mathbf{x}=\boldsymbol{\theta}\cdot\boldsymbol{\xi}=\boldsymbol{\theta}^{\top}\boldsymbol{\xi}
+f\left(\mathbf{x}\right)=b+\mathbf{w}\cdot\mathbf{x}=b+\mathbf{x}\mathbf{w}^{\top}=\boldsymbol{\theta}\cdot\boldsymbol{\xi}=\boldsymbol{\xi}\boldsymbol{\theta}^{\top}
 \]
 
 \end_inset
@@ -91,35 +91,35 @@ where:
 \end_layout
 
 \begin_layout Enumerate
-\begin_inset Formula $\mathbf{x}\in\mathbb{R}^{n\times1}$
+\begin_inset Formula $\mathbf{x}\in\mathbb{R}^{1\times n}$
 \end_inset
 
 , model inputs.
 \end_layout
 
 \begin_layout Enumerate
-\begin_inset Formula $\mathbf{w}\in\mathbb{R}^{n\times1}$
+\begin_inset Formula $\mathbf{w}\in\mathbb{R}^{1\times n}$
 \end_inset
 
 , model weights.
 \end_layout
 
 \begin_layout Enumerate
-\begin_inset Formula $b\in\mathbb{R}^{1\times1}$
+\begin_inset Formula $b\in\mathbb{R}$
 \end_inset
 
 , model bias.
 \end_layout
 
 \begin_layout Enumerate
-\begin_inset Formula $\boldsymbol{\theta}\in\mathbb{R}^{\left(1+n\right)\times1}=\left\langle b^{\frown}\mathbf{w}\right\rangle $
+\begin_inset Formula $\boldsymbol{\theta}\in\mathbb{R}^{1\times\left(1+n\right)}=\left\langle b^{\frown}\mathbf{w}\right\rangle =\left\langle b,w_{1},w_{2},\cdots,w_{n}\right\rangle $
 \end_inset
 
 , model parameters.
 \end_layout
 
 \begin_layout Enumerate
-\begin_inset Formula $\boldsymbol{\xi}\in\mathbb{R}^{\left(1+n\right)\times1}=\left\langle 1^{\frown}\mathbf{x}\right\rangle $
+\begin_inset Formula $\boldsymbol{\xi}\in\mathbb{R}^{1\times\left(1+n\right)}=\left\langle 1^{\frown}\mathbf{x}\right\rangle =\left\langle 1,x_{1},x_{2},\cdots,x_{n}\right\rangle $
 \end_inset
 
 , homogeinized model inputs.
@@ -132,7 +132,7 @@ Loss function from a particular sample
 \begin_layout Standard
 \begin_inset Formula 
 \[
-l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\left(\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}-y_{i}\right)^{2}
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)^{2}
 \]
 
 \end_inset
@@ -140,7 +140,7 @@ l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\left(\boldsymbol{\
 
 \begin_inset Formula 
 \[
-l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}-2\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}y_{i}+y_{i}^{2}
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-2\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}y_{i}+y_{i}^{2}
 \]
 
 \end_inset
@@ -148,12 +148,12 @@ l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\boldsymbol{\theta}
 
 \begin_inset Formula 
 \[
-l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\boldsymbol{\theta}^{\top}\boldsymbol{\xi}_{i}\boldsymbol{\xi}_{i}^{\top}\boldsymbol{\theta}-2y_{i}\boldsymbol{\xi}_{i}^{\top}\boldsymbol{\theta}+y_{i}^{2}
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\boldsymbol{\theta}\boldsymbol{\xi}_{i}^{\top}\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-2\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}y_{i}+y_{i}^{2}
 \]
 
 \end_inset
 
-`
+
 \end_layout
 
 \begin_layout Section
@@ -163,7 +163,7 @@ Cost function
 \begin_layout Standard
 \begin_inset Formula 
 \[
-J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i=1}^{m}l\left(y_{i},\boldsymbol{\Xi}_{i}^{\top},\boldsymbol{\theta}\right)
+J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i=1}^{m}l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)
 \]
 
 \end_inset
@@ -186,7 +186,7 @@ where:
 \end_layout
 
 \begin_layout Enumerate
-\begin_inset Formula $\boldsymbol{\Xi}_{i}\equiv\boldsymbol{\xi}_{i}^{\top}$
+\begin_inset Formula $\boldsymbol{\xi}_{i}$
 \end_inset
 
 , the i-th row of the input matrix is the i-th example.
@@ -195,7 +195,7 @@ where:
 \begin_layout Standard
 \begin_inset Formula 
 \[
-J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)^{2}
+J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)^{2}
 \]
 
 \end_inset
@@ -210,7 +210,7 @@ Gradient
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{\partial}{\partial\theta_{j}}\left(\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)^{2}\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{\partial}{\partial\theta_{j}}\left(\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)^{2}\right)
 \]
 
 \end_inset
@@ -218,7 +218,7 @@ Gradient
 
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)^{2}\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)^{2}\right)
 \]
 
 \end_inset
@@ -226,7 +226,7 @@ Gradient
 
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(2\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(2\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\right)
 \]
 
 \end_inset
@@ -234,7 +234,7 @@ Gradient
 
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\Xi}_{i}\boldsymbol{\theta}\right)\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)
 \]
 
 \end_inset
