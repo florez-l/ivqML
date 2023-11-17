@@ -61,7 +61,7 @@ GenerateData( )
 
   _M I = ivqML::Common::ImageHelpers::meshgrid< TInput, _M >( input );
   auto O = ivq::ITK::ImageToMatrix( output ).transpose( );
-  this->m_Model->operator()( O, I );
+  O = this->m_Model->evaluate( I );
 }
 
 #endif // __ivqML__ITK__ApplyModelToImageMeshFilter__hxx__
