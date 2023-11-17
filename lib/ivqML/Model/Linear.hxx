@@ -10,24 +10,40 @@
 template< class _S >
 template< class _X >
 auto ivqML::Model::Linear< _S >::
-operator()( const Eigen::EigenBase< _X >& iX, bool d ) const
+evaluate( const Eigen::EigenBase< _X >& iX ) const
 {
-  /* TODO
-     using _YS = typename _Y::Scalar;
-     using _YM = Eigen::Matrix< _YS, Eigen::Dynamic, Eigen::Dynamic >;
-  */
+  return(
+    ( iX.derived( ).template cast< TScalar >( ) * this->m_nT ).array( )
+    +
+    this->m_T.get( )[ 0 ]
+    );
+}
 
-  auto X = iX.derived( ).template cast< _S >( );
-  return( ( X * this->m_nT ).array( ) + this->m_T.get( )[ 0 ] );
+// -------------------------------------------------------------------------
+template< class _S >
+template< class _G, class _X, class _Y >
+typename ivqML::Model::Linear< _S >::
+TScalar ivqML::Model::Linear< _S >::
+cost(
+  Eigen::EigenBase< _G >& iG,
+  const Eigen::EigenBase< _X >& iX,
+  const Eigen::EigenBase< _Y >& iY
+  ) const
+{
+  auto X = iX.derived( ).template cast< TScalar >( );
+  auto Y = iY.derived( ).template cast< TScalar >( );
 
-  /* TODO
-     if( derivative )
-     iY.derived( ) << _YM::Ones( X.rows( ), 1 ), X.template cast< _YS >( );
-     else
-     iY.derived( ) =
-     ( ( X * this->m_cT ).array( ) + this->m_T.get( )[ 0 ] )
-     .template cast< _YS >( );
-  */
+  auto J = this->evaluate( X ) - Y.array( );
+  TMatrix D( X.rows( ), X.cols( ) + 1 );
+  D << TMatrix::Ones( X.rows( ), 1 ), X;
+
+  iG.derived( ) =
+    (
+      ( D.array( ).colwise( ) * J.col( 0 ).array( ) )
+      .colwise( ).mean( ) * TScalar( 2 )
+      ).template cast< typename _G::Scalar >( );
+
+  return( J.array( ).pow( 2 ).mean( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -39,8 +55,8 @@ fit(
   const _S& l
   )
 {
-  auto X = iX.derived( ).template cast< _S >( );
-  auto Y = iY.derived( ).template cast< _S >( );
+  auto X = iX.derived( ).template cast< TScalar >( );
+  auto Y = iY.derived( ).template cast< TScalar >( );
 
   TNatural m = X.rows( );
   TNatural n = X.cols( );

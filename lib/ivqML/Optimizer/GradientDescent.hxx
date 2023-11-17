@@ -5,8 +5,8 @@
 #define __ivqML__Optimizer__GradientDescent__hxx__
 
 // -------------------------------------------------------------------------
-template< class _C >
-ivqML::Optimizer::GradientDescent< _C >::
+template< class _M, class _X, class _Y >
+ivqML::Optimizer::GradientDescent< _M, _X, _Y >::
 GradientDescent( )
   : Superclass( )
 {
@@ -15,35 +15,40 @@ GradientDescent( )
 }
 
 // -------------------------------------------------------------------------
-template< class _C >
-void ivqML::Optimizer::GradientDescent< _C >::
+template< class _M, class _X, class _Y >
+void ivqML::Optimizer::GradientDescent< _M, _X, _Y >::
 fit( )
 {
   static const TScalar _2 = TScalar( 2 );
   static const TScalar _10 = TScalar( 10 );
   TScalar e = std::pow( _10, std::log10( this->m_alpha ) * _2 );
 
-  // Cost function
-  _C cost( *( this->m_M ), *( this->m_X ), *( this->m_Y ) );
-  cost.set_batch_size( this->m_batch_size );
-  auto J = cost( );
-  auto G = TConstMap( J.second, 1, this->m_M->number_of_parameters( ) );
-  TNatural B = cost.number_of_batches( );
+  // Prepare loop
+  TScalar J = std::numeric_limits< TScalar >::max( );
+  TMatrix G( 1, this->m_M->number_of_parameters( ) );
+  TNatural B = this->m_Sizes.size( );
 
   // Main loop
   bool stop = false, debug_stop = false;
   TNatural i = 0;
   while( !stop )
   {
-    for( TNatural b = 0; b < B; ++b )
+    TNatural j = 0;
+    for( const TNatural& s: this->m_Sizes )
     {
-      J = cost( b );
+      J =
+        this->m_M->cost(
+          G,
+          this->m_X->derived( ).block( j, 0, s, this->m_X->cols( ) ),
+          this->m_Y->derived( ).block( j, 0, s, this->m_Y->cols( ) )
+          );
+      j += s;
       *( this->m_M ) -= G * this->m_alpha;
     } // end for
 
     debug_stop =
       this->m_D(
-        J.first, G.norm( ), this->m_M, i,
+        J, G.norm( ), this->m_M, i,
         ( i % this->m_debug_iterations == 0 )
         );
     i++;
@@ -54,7 +59,7 @@ fit( )
       ||
       debug_stop;
   } // end while
-  this->m_D( J.first, G.norm( ), this->m_M, i, true );
+  this->m_D( J, G.norm( ), this->m_M, i, true );
 }
 
 #endif // __ivqML__Optimizer__GradientDescent__hxx__

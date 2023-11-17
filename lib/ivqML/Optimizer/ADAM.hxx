@@ -5,8 +5,8 @@
 #define __ivqML__Optimizer__ADAM__hxx__
 
 // -------------------------------------------------------------------------
-template< class _C >
-ivqML::Optimizer::ADAM< _C >::
+template< class _M, class _X, class _Y >
+ivqML::Optimizer::ADAM< _M, _X, _Y >::
 ADAM( )
   : Superclass( )
 {
@@ -17,8 +17,8 @@ ADAM( )
 }
 
 // -------------------------------------------------------------------------
-template< class _C >
-void ivqML::Optimizer::ADAM< _C >::
+template< class _M, class _X, class _Y >
+void ivqML::Optimizer::ADAM< _M, _X, _Y >::
 fit( )
 {
   static const TScalar _1 = TScalar( 1 );
@@ -30,11 +30,10 @@ fit( )
   TScalar b1 = _1 - this->m_beta1;
   TScalar b2 = _1 - this->m_beta2;
 
-  // Cost function
-  _C cost( *( this->m_M ), *( this->m_X ), *( this->m_Y ) );
-  auto J = cost( );
-  auto G = TConstMap( J.second, 1, this->m_M->number_of_parameters( ) );
-  TNatural B = cost.number_of_batches( );
+  // Prepare loop
+  TScalar J = std::numeric_limits< TScalar >::max( );
+  TMatrix G( 1, this->m_M->number_of_parameters( ) );
+  TNatural B = this->m_Sizes.size( );
   TMatrix M = TMatrix::Zero( G.rows( ), G.cols( ) );
   TMatrix V = TMatrix::Zero( G.rows( ), G.cols( ) );
   TMatrix M2 = M;
@@ -45,11 +44,19 @@ fit( )
   TNatural i = 0;
   while( !stop )
   {
+    // Compute gradient
     M *= this->m_beta1;
     V *= this->m_beta2;
-    for( TNatural b = 0; b < B; ++b )
+    TNatural j = 0;
+    for( const TNatural& s: this->m_Sizes )
     {
-      J = cost( b );
+      J =
+        this->m_M->cost(
+          G,
+          this->m_X->derived( ).block( j, 0, s, this->m_X->cols( ) ),
+          this->m_Y->derived( ).block( j, 0, s, this->m_Y->cols( ) )
+          );
+      j += s;
       M2 = ( M + ( G * b1 ) ) / ( _1 - b1t );
       V2 =
         ( ( V.array( ) + ( G.array( ).pow( 2 ) * b2 ) ) / ( _1 - b2t ) )
@@ -60,9 +67,10 @@ fit( )
     M = M2;
     V = V2;
 
+    // Prepare next step
     debug_stop =
       this->m_D(
-        J.first, G.norm( ), this->m_M, i,
+        J, G.norm( ), this->m_M, i,
         ( i % this->m_debug_iterations == 0 )
         );
     i++;
@@ -75,7 +83,7 @@ fit( )
       ||
       debug_stop;
   } // end while
-  this->m_D( J.first, G.norm( ), this->m_M, i, true );
+  this->m_D( J, G.norm( ), this->m_M, i, true );
 }
 
 #endif // __ivqML__Optimizer__ADAM__hxx__

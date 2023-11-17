@@ -4,9 +4,11 @@
 #ifndef __ivqML__Optimizer__Base__hxx__
 #define __ivqML__Optimizer__Base__hxx__
 
+#include <algorithm>
+
 // -------------------------------------------------------------------------
-template< class _C >
-ivqML::Optimizer::Base< _C >::
+template< class _M, class _X, class _Y >
+ivqML::Optimizer::Base< _M, _X, _Y >::
 Base( )
 {
   this->m_P.add_options( )( "help,h", "help message" )
@@ -19,8 +21,8 @@ Base( )
 }
 
 // -------------------------------------------------------------------------
-template< class _C >
-std::string ivqML::Optimizer::Base< _C >::
+template< class _M, class _X, class _Y >
+std::string ivqML::Optimizer::Base< _M, _X, _Y >::
 parse_options( int argc, char** argv )
 {
   boost::program_options::variables_map m;
@@ -39,18 +41,30 @@ parse_options( int argc, char** argv )
 }
 
 // -------------------------------------------------------------------------
-template< class _C >
-void ivqML::Optimizer::Base< _C >::
+template< class _M, class _X, class _Y >
+void ivqML::Optimizer::Base< _M, _X, _Y >::
 init( TModel& m, const TX& iX, const TY& iY )
 {
   this->m_M = &m;
   this->m_X = &iX;
   this->m_Y = &iY;
+
+  TNatural M = iX.rows( );
+  TNatural B = this->m_batch_size;
+  B = ( B == 0 || B > M )? M: B;
+  TNatural N = std::ceil( double( M ) / double( B ) );
+
+  this->m_Sizes.resize( N );
+  this->m_Sizes.shrink_to_fit( );
+
+  std::fill( this->m_Sizes.begin( ), this->m_Sizes.end( ), B );
+  if( ( M % B ) > 0 )
+    this->m_Sizes.back( ) = M % B;
 }
 
 // -------------------------------------------------------------------------
-template< class _C >
-void ivqML::Optimizer::Base< _C >::
+template< class _M, class _X, class _Y >
+void ivqML::Optimizer::Base< _M, _X, _Y >::
 set_debug( TDebug d )
 {
   this->m_D = d;
