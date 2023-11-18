@@ -82,7 +82,18 @@ Base model
 \begin_layout Standard
 \begin_inset Formula 
 \[
-f\left(\mathbf{x}\right)=b+\mathbf{w}\cdot\mathbf{x}=b+\mathbf{x}\mathbf{w}^{\top}=\boldsymbol{\theta}\cdot\boldsymbol{\xi}=\boldsymbol{\xi}\boldsymbol{\theta}^{\top}
+a\left(\mathbf{x}\right)=\sigma\left(b+\mathbf{w}\cdot\mathbf{x}\right)=\sigma\left(b+\mathbf{x}\mathbf{w}^{\top}\right)=\sigma\left(\boldsymbol{\theta}\cdot\boldsymbol{\xi}\right)=\sigma\left(\boldsymbol{\xi}\boldsymbol{\theta}^{\top}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+f\left(\mathbf{x}\right)=\left\{ \begin{array}{rcl}
+0 & ; & a\left(\mathbf{x}\right)<0.5\\
+1 & ; & a\left(\mathbf{x}\right)\ge0.5
+\end{array}\right.
 \]
 
 \end_inset
@@ -125,6 +136,13 @@ where:
 , homogeinized model inputs.
 \end_layout
 
+\begin_layout Enumerate
+\begin_inset Formula $\sigma\left(z\right)=\left(1+e^{-z}\right)^{-1}$
+\end_inset
+
+, the logistic sigmoid function.
+\end_layout
+
 \begin_layout Section
 Loss function from a particular sample
 \end_layout
@@ -132,7 +150,7 @@ Loss function from a particular sample
 \begin_layout Standard
 \begin_inset Formula 
 \[
-l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)^{2}
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=
 \]
 
 \end_inset
@@ -179,7 +197,7 @@ where:
 \begin_layout Standard
 \begin_inset Formula 
 \[
-J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)^{2}
+J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=
 \]
 
 \end_inset
