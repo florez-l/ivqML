@@ -79,10 +79,62 @@
 Base model
 \end_layout
 
+\begin_layout Subsection
+Line model
+\end_layout
+
 \begin_layout Standard
 \begin_inset Formula 
 \[
-a\left(\mathbf{x}\right)=\sigma\left(b+\mathbf{w}\cdot\mathbf{x}\right)=\sigma\left(b+\mathbf{x}\mathbf{w}^{\top}\right)=\sigma\left(\boldsymbol{\theta}\cdot\boldsymbol{\xi}\right)=\sigma\left(\boldsymbol{\xi}\boldsymbol{\theta}^{\top}\right)
+\mathbf{l}\left(s\right)=\left(\mathbf{q}-\mathbf{p}\right)s+\mathbf{p}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename logistic_regression_line_model.dia
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Linear model
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left|\left(\mathbf{q}-\mathbf{p}\right)\times\left(\mathbf{x}-\mathbf{p}\right)\right|=\left|\mathbf{q}-\mathbf{p}\right|\left|\mathbf{x}-\mathbf{p}\right|\sin\left(\theta\right)
 \]
 
 \end_inset
@@ -90,9 +142,144 @@ a\left(\mathbf{x}\right)=\sigma\left(b+\mathbf{w}\cdot\mathbf{x}\right)=\sigma\l
 
 \begin_inset Formula 
 \[
-f\left(\mathbf{x}\right)=\left\{ \begin{array}{rcl}
-0 & ; & a\left(\mathbf{x}\right)<0.5\\
-1 & ; & a\left(\mathbf{x}\right)\ge0.5
+\sin\left(\theta\right)=\frac{\left|\mathbf{x}_{\perp}-\mathbf{p}\right|}{\left|\mathbf{x}-\mathbf{p}\right|}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+d\left(\mathbf{x},\mathbf{l}\left(s\right)\right)=\left|\mathbf{x}_{\perp}-\mathbf{p}\right|=\left|\mathbf{x}-\mathbf{p}\right|\sin\left(\theta\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+d\left(\mathbf{x},\mathbf{l}\left(s\right)\right)=\frac{\left|\left(\mathbf{q}-\mathbf{p}\right)\times\left(\mathbf{x}-\mathbf{p}\right)\right|}{\left|\mathbf{q}-\mathbf{p}\right|}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+d\left(\mathbf{x},\mathbf{l}\left(s\right)\right)=\frac{\left|\left(\mathbf{q}-\mathbf{p}\right)\times\mathbf{x}-\left(\mathbf{q}-\mathbf{p}\right)\times\mathbf{p}\right|}{\left|\mathbf{q}-\mathbf{p}\right|}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+d\left(\mathbf{x},\mathbf{l}\left(s\right)\right)=\frac{\left|\mathbf{q}\times\mathbf{x}-\mathbf{p}\times\mathbf{x}-\mathbf{q}\times\mathbf{p}+\mathbf{p}\times\mathbf{p}\right|}{\left|\mathbf{q}-\mathbf{p}\right|}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+d\left(\mathbf{x},\mathbf{l}\left(s\right)\right)=\frac{\left|\mathbf{q}\times\mathbf{x}+\mathbf{x}\times\mathbf{p}+\mathbf{p}\times\mathbf{q}\right|}{\left|\mathbf{q}-\mathbf{p}\right|}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Hyperplane model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathbf{n}=\left[\begin{array}{cc}
+\cos\left(90\right) & -\sin\left(90\right)\\
+\sin\left(90\right) & \cos\left(90\right)
+\end{array}\right]\frac{\mathbf{q}-\mathbf{p}}{\left|\mathbf{q}-\mathbf{p}\right|}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{n}=\left[\begin{array}{cc}
+0 & -1\\
+1 & 0
+\end{array}\right]\frac{\mathbf{q}-\mathbf{p}}{\left|\mathbf{q}-\mathbf{p}\right|}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{n}=\frac{1}{\sqrt{\left(q_{x}-p_{x}\right)^{2}+\left(q_{y}-p_{y}\right)^{2}}}\left[\begin{array}{c}
+p_{y}-q_{y}\\
+q_{x}-p_{x}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+a\left(\mathbf{x}\right)=\mathbf{n}\cdot\left(\mathbf{x}-\mathbf{p}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+a\left(\mathbf{x}\right)=\mathbf{n}\cdot\mathbf{x}\underbrace{-\mathbf{n}\cdot\mathbf{p}}_{b}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+a\left(\mathbf{x}\right)=\mathbf{x}\cdot\mathbf{n}+b
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+a\left(\mathbf{x}\right)=b+\mathbf{x}\mathbf{n}^{\top}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Final model
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(\mathbf{x}\right)=\sigma\left(b+\mathbf{w}\cdot\mathbf{x}\right)=\sigma\left(b+\mathbf{x}\mathbf{w}^{\top}\right)=\sigma\left(\boldsymbol{\theta}\cdot\boldsymbol{\xi}\right)=\sigma\left(\boldsymbol{\xi}\boldsymbol{\theta}^{\top}\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+t\left(\mathbf{x}\right)=\left\{ \begin{array}{rcl}
+0 & ; & f\left(\mathbf{x}\right)<0.5\\
+1 & ; & f\left(\mathbf{x}\right)\ge0.5
 \end{array}\right.
 \]
 
@@ -150,7 +337,26 @@ Loss function from a particular sample
 \begin_layout Standard
 \begin_inset Formula 
 \[
-l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=-y_{i}\ln\left(f\left(\boldsymbol{\xi}_{i}\right)\right)-\left(1-y_{i}\right)\ln\left(1-f\left(\boldsymbol{\xi}_{i}\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=-y_{i}\ln\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)-\left(1-y_{i}\right)\ln\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+l\left(y_{i},\boldsymbol{\xi}_{i},\boldsymbol{\theta}\right)=-\left\{ \begin{array}{rcl}
+\ln\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right) & ; & y_{i}=0\\
+\ln\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right) & ; & y_{i}=1
+\end{array}\right.
 \]
 
 \end_inset
@@ -197,7 +403,7 @@ where:
 \begin_layout Standard
 \begin_inset Formula 
 \[
-J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=
+J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=-\frac{1}{m}\left[\sum_{i=1}^{m}y_{i}\ln\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)+\sum_{i=1}^{m}\left(1-y_{i}\right)\ln\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)\right]
 \]
 
 \end_inset
@@ -212,7 +418,7 @@ Gradient
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{\partial}{\partial\theta_{j}}\left(\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)^{2}\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{\partial}{\partial\theta_{j}}\left(-\frac{1}{m}\left[\sum_{i=1}^{m}y_{i}\ln\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)+\sum_{i=1}^{m}\left(1-y_{i}\right)\ln\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)\right]\right)
 \]
 
 \end_inset
@@ -220,7 +426,7 @@ Gradient
 
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)^{2}\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=-\frac{1}{m}\left[\sum_{i=1}^{m}y_{i}\frac{\partial}{\partial\theta_{j}}\ln\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)+\sum_{i=1}^{m}\left(1-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\ln\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)\right]
 \]
 
 \end_inset
@@ -228,7 +434,7 @@ Gradient
 
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(2\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=-\frac{1}{m}\sum_{i=1}^{m}\left[y_{i}\frac{1}{\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}\frac{\partial\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}{\partial\theta_{j}}+\left(1-y_{i}\right)\frac{1}{1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}\left(\frac{\partial1}{\partial\theta_{j}}-\frac{\partial\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}{\partial\theta_{j}}\right)\right]
 \]
 
 \end_inset
@@ -236,7 +442,7 @@ Gradient
 
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=-\frac{1}{m}\sum_{i=1}^{m}\left[y_{i}\frac{\sigma'\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\xi_{i}^{j}}{\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}-\left(1-y_{i}\right)\frac{\sigma'\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\xi_{i}^{j}}{1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}\right]
 \]
 
 \end_inset
@@ -244,7 +450,7 @@ Gradient
 
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\xi_{i}^{1}\theta^{1}+\xi_{i}^{2}\theta^{2}+\cdots+\xi_{i}^{j}\theta^{j}+\cdots+\xi_{i}^{n+1}\theta^{n+1}\right)\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=-\frac{1}{m}\sum_{i=1}^{m}\left[\sigma'\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\xi_{i}^{j}\left(\frac{y_{i}}{\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}-\frac{1-y_{i}}{1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}\right)\right]
 \]
 
 \end_inset
@@ -252,7 +458,7 @@ Gradient
 
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\frac{\partial}{\partial\theta_{j}}\left(\xi_{i}^{j}\theta^{j}\right)\right)
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=-\frac{1}{m}\sum_{i=1}^{m}\left[\sigma'\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\xi_{i}^{j}\left(\frac{y_{i}\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)-\left(1-y_{i}\right)\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}{\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)}\right)\right]
 \]
 
 \end_inset
@@ -260,7 +466,23 @@ Gradient
 
 \begin_inset Formula 
 \[
-\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=2\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\xi_{i}^{j}
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=-\frac{1}{m}\sum_{i=1}^{m}\left[\sigma'\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\xi_{i}^{j}\left(\frac{y_{i}-y_{i}\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)+y_{i}\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}{\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)}\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=-\frac{1}{m}\sum_{i=1}^{m}\left[\sigma'\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\xi_{i}^{j}\left(\frac{y_{i}-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)}{\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)}\right)\right]
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\sigma'\left(z\right)=\sigma\left(z\right)\left(1-\sigma\left(z\right)\right)
 \]
 
 \end_inset
@@ -271,8 +493,24 @@ Gradient
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=2\frac{1}{m}\left[\begin{array}{ccccccc}
-{\displaystyle \sum_{i=1}^{m}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\xi_{i}^{1}} &  & {\displaystyle \sum_{i=1}^{m}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\xi_{i}^{2}} &  & \cdots &  & {\displaystyle \sum_{i=1}^{m}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)\xi_{i}^{n+1}}\end{array}\right]
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=-\frac{1}{m}\sum_{i=1}^{m}\left(y_{i}-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)\xi_{i}^{j}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)}{\partial\theta_{j}}=\frac{1}{m}\sum_{i=1}^{m}\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)-y_{i}\right)\xi_{i}^{j}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\left[\begin{array}{ccccccc}
+{\displaystyle \sum_{i=1}^{m}\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)-y_{i}\right)\xi_{i}^{1}} &  & {\displaystyle \sum_{i=1}^{m}\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)-y_{i}\right)\xi_{i}^{2}} &  & \cdots &  & {\displaystyle \sum_{i=1}^{m}\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)-y_{i}\right)\xi_{i}^{n+1}}\end{array}\right]
 \]
 
 \end_inset
@@ -281,23 +519,26 @@ Gradient
 \begin_inset Formula 
 \[
 \nabla^{*}=\left[\begin{array}{ccccccc}
-\left(\boldsymbol{\xi}_{1}\boldsymbol{\theta}^{\top}-y_{1}\right)\xi_{1}^{1} &  & \left(\boldsymbol{\xi}_{1}\boldsymbol{\theta}^{\top}-y_{1}\right)\xi_{1}^{2} &  & \cdots &  & \left(\boldsymbol{\xi}_{1}\boldsymbol{\theta}^{\top}-y_{1}\right)\xi_{1}^{n+1}\\
+\left(\sigma\left(\boldsymbol{\xi}_{1}\boldsymbol{\theta}^{\top}\right)-y_{1}\right)\xi_{1}^{1} &  & \left(\sigma\left(\boldsymbol{\xi}_{1}\boldsymbol{\theta}^{\top}\right)-y_{1}\right)\xi_{1}^{2} &  & \cdots &  & \left(\sigma\left(\boldsymbol{\xi}_{1}\boldsymbol{\theta}^{\top}\right)-y_{1}\right)\xi_{1}^{n+1}\\
 \\
-\left(\boldsymbol{\xi}_{2}\boldsymbol{\theta}^{\top}-y_{2}\right)\xi_{2}^{1} &  & \left(\boldsymbol{\xi}_{2}\boldsymbol{\theta}^{\top}-y_{2}\right)\xi_{2}^{2} &  & \cdots &  & \left(\boldsymbol{\xi}_{2}\boldsymbol{\theta}^{\top}-y_{2}\right)\xi_{2}^{n+1}\\
+\left(\sigma\left(\boldsymbol{\xi}_{2}\boldsymbol{\theta}^{\top}\right)-y_{2}\right)\xi_{2}^{1} &  & \left(\sigma\left(\boldsymbol{\xi}_{2}\boldsymbol{\theta}^{\top}\right)-y_{2}\right)\xi_{2}^{2} &  & \cdots &  & \left(\sigma\left(\boldsymbol{\xi}_{2}\boldsymbol{\theta}^{\top}\right)-y_{2}\right)\xi_{2}^{n+1}\\
 \\
-\vdots &  & \vdots &  & \vdots &  & \vdots\\
+\vdots &  & \vdots &  &  &  & \vdots\\
 \\
-\left(\boldsymbol{\xi}_{m}\boldsymbol{\theta}^{\top}-y_{m}\right)\xi_{m}^{1} &  & \left(\boldsymbol{\xi}_{m}\boldsymbol{\theta}^{\top}-y_{m}\right)\xi_{m}^{2} &  & \cdots &  & \left(\boldsymbol{\xi}_{m}\boldsymbol{\theta}^{\top}-y_{m}\right)\xi_{m}^{n+1}
+\left(\sigma\left(\boldsymbol{\xi}_{m}\boldsymbol{\theta}^{\top}\right)-y_{m}\right)\xi_{m}^{1} &  & \left(\sigma\left(\boldsymbol{\xi}_{m}\boldsymbol{\theta}^{\top}\right)-y_{m}\right)\xi_{m}^{2} &  & \cdots &  & \left(\sigma\left(\boldsymbol{\xi}_{m}\boldsymbol{\theta}^{\top}\right)-y_{m}\right)\xi_{m}^{n+1}
 \end{array}\right]
 \]
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{2}{m}\left[\begin{array}{ccccccc}
-\left(\boldsymbol{\xi}_{1}\boldsymbol{\theta}^{\top}-y_{1}\right) &  & \left(\boldsymbol{\xi}_{2}\boldsymbol{\theta}^{\top}-y_{2}\right) &  & \cdots &  & \left(\boldsymbol{\xi}_{m}\boldsymbol{\theta}^{\top}-y_{m}\right)\end{array}\right]\left[\begin{array}{ccccccc}
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\left[\begin{array}{ccccccc}
+\left(\sigma\left(\boldsymbol{\xi}_{1}\boldsymbol{\theta}^{\top}\right)-y_{1}\right) &  & \left(\sigma\left(\boldsymbol{\xi}_{2}\boldsymbol{\theta}^{\top}\right)-y_{2}\right) &  & \cdots &  & \left(\sigma\left(\boldsymbol{\xi}_{m}\boldsymbol{\theta}^{\top}\right)-y_{m}\right)\end{array}\right]\left[\begin{array}{ccccccc}
 \xi_{1}^{1} &  & \xi_{1}^{2} &  & \cdots &  & \xi_{1}^{n+1}\\
 \\
 \xi_{2}^{1} &  & \xi_{2}^{2} &  & \cdots &  & \xi_{2}^{n+1}\\
@@ -311,85 +552,12 @@ Gradient
 \end_inset
 
 
-\begin_inset Formula 
-\[
-\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{2}{m}\left(\boldsymbol{\Xi}\boldsymbol{\theta}^{\top}-\mathbf{Y}\right)^{\top}\boldsymbol{\Xi}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\nabla_{b,\mathbf{w}}J\left(\mathbf{Y},\mathbf{X},\mathbf{w},b\right)=\frac{2}{m}\left[\begin{array}{ccccccc}
-\left(\mathbf{x}_{1}\mathbf{w}^{\top}+b-y_{1}\right) &  & \left(\mathbf{x}_{2}\mathbf{w}^{\top}+b-y_{2}\right) &  & \cdots &  & \left(\mathbf{x}_{m}\mathbf{w}^{\top}+b-y_{m}\right)\end{array}\right]\left[\begin{array}{ccccccc}
-1 &  & x_{1}^{1} &  & \cdots &  & x_{1}^{n}\\
-\\
-1 &  & x_{2}^{1} &  & \cdots &  & x_{2}^{n}\\
-\\
-\vdots &  & \vdots &  & \vdots &  & \vdots\\
-\\
-1 &  & x_{m}^{1} &  & \cdots &  & x_{m}^{n}
-\end{array}\right]
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\nabla_{b}J\left(\mathbf{Y},\mathbf{X},\mathbf{w},b\right)=\frac{2}{m}\left[\begin{array}{ccccccc}
-\left(\mathbf{x}_{1}\mathbf{w}^{\top}+b-y_{1}\right) &  & \left(\mathbf{x}_{2}\mathbf{w}^{\top}+b-y_{2}\right) &  & \cdots &  & \left(\mathbf{x}_{m}\mathbf{w}^{\top}+b-y_{m}\right)\end{array}\right]\left[\begin{array}{c}
-1\\
-\\
-1\\
-\\
-\vdots\\
-\\
-1
-\end{array}\right]
-\]
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\nabla_{\mathbf{w}}J\left(\mathbf{Y},\mathbf{X},\mathbf{w},b\right)=\frac{2}{m}\left[\begin{array}{ccccccc}
-\left(\mathbf{x}_{1}\mathbf{w}^{\top}+b-y_{1}\right) &  & \left(\mathbf{x}_{2}\mathbf{w}^{\top}+b-y_{2}\right) &  & \cdots &  & \left(\mathbf{x}_{m}\mathbf{w}^{\top}+b-y_{m}\right)\end{array}\right]\left[\begin{array}{ccccc}
-x_{1}^{1} &  & \cdots &  & x_{1}^{n}\\
-\\
-x_{2}^{1} &  & \cdots &  & x_{2}^{n}\\
-\\
-\vdots &  & \vdots &  & \vdots\\
-\\
-x_{m}^{1} &  & \cdots &  & x_{m}^{n}
-\end{array}\right]
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\nabla_{b}J\left(\mathbf{Y},\mathbf{X},\mathbf{w},b\right)=\frac{2}{m}\left(\mathbf{X}\mathbf{w}^{\top}+b\mathbf{1}_{\left[m\times1\right]}-\mathbf{Y}\right)^{\top}\mathbf{1}_{\left[m\times1\right]}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\nabla_{\mathbf{w}}J\left(\mathbf{Y},\mathbf{X},\mathbf{w},b\right)=\frac{2}{m}\left(\mathbf{X}\mathbf{w}^{\top}+b\mathbf{1}_{\left[m\times1\right]}-\mathbf{Y}\right)^{\top}\mathbf{X}
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\left(\sigma\left(\boldsymbol{\Xi}\boldsymbol{\theta}^{\top}\right)-\mathbf{Y}\right)^{\top}\boldsymbol{\Xi}
 \]
 
 \end_inset
@@ -404,7 +572,7 @@ Gradient with regularization
 \begin_layout Standard
 \begin_inset Formula 
 \[
-J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i=1}^{m}\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}-y_{i}\right)^{2}+\lambda R\left(\boldsymbol{\theta}\right)
+J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=-\frac{1}{m}\left[\sum_{i=1}^{m}y_{i}\ln\left(\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)+\sum_{i=1}^{m}\left(1-y_{i}\right)\ln\left(1-\sigma\left(\boldsymbol{\xi}_{i}\boldsymbol{\theta}^{\top}\right)\right)\right]+\lambda R\left(\boldsymbol{\theta}\right)
 \]
 
 \end_inset
@@ -412,7 +580,7 @@ J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\sum_{i
 
 \begin_inset Formula 
 \[
-\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{2}{m}\left(\boldsymbol{\Xi}\boldsymbol{\theta}^{\top}-\mathbf{Y}\right)^{\top}\boldsymbol{\Xi}+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\left(\sigma\left(\boldsymbol{\Xi}\boldsymbol{\theta}^{\top}\right)-\mathbf{Y}\right)^{\top}\boldsymbol{\Xi}+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)
 \]
 
 \end_inset
@@ -477,7 +645,7 @@ Analytical regression
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{2}{m}\left[\boldsymbol{\Xi}\boldsymbol{\theta}^{\top}-\mathbf{Y}\right]^{\top}\boldsymbol{\Xi}+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=\mathbf{0}
+\nabla_{\boldsymbol{\theta}}J\left(\mathbf{Y},\boldsymbol{\Xi},\boldsymbol{\theta}\right)=\frac{1}{m}\left(\sigma\left(\boldsymbol{\Xi}\boldsymbol{\theta}^{\top}\right)-\mathbf{Y}\right)^{\top}\boldsymbol{\Xi}+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=\mathbf{0}
 \]
 
 \end_inset
@@ -485,7 +653,7 @@ Analytical regression
 
 \begin_inset Formula 
 \[
-\frac{2}{m}\left(\boldsymbol{\theta}\boldsymbol{\Xi}^{\top}-\mathbf{Y}^{\top}\right)\boldsymbol{\Xi}+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=\mathbf{0}
+\frac{1}{m}\left(\sigma\left(\boldsymbol{\Xi}\boldsymbol{\theta}^{\top}\right)-\mathbf{Y}\right)^{\top}\boldsymbol{\Xi}+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=\mathbf{0}
 \]
 
 \end_inset
@@ -493,46 +661,7 @@ Analytical regression
 
 \begin_inset Formula 
 \[
-\frac{2}{m}\boldsymbol{\theta}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=\frac{2}{m}\mathbf{Y}^{\top}\boldsymbol{\Xi}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-Analytical regression without regularization
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\frac{2}{m}\boldsymbol{\theta}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}=\frac{2}{m}\mathbf{Y}^{\top}\boldsymbol{\Xi}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\boldsymbol{\theta}\left[\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]=\mathbf{Y}^{\top}\boldsymbol{\Xi}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\boldsymbol{\theta}\left[\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]\left[\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]^{-1}=\mathbf{Y}^{\top}\boldsymbol{\Xi}\left[\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right]^{-1}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\boldsymbol{\theta}=\mathbf{Y}^{\top}\boldsymbol{\Xi}\left(\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right)^{-1}
+\frac{1}{m}\left[\sigma\left(\boldsymbol{\Xi}\boldsymbol{\theta}^{\top}\right)\right]^{\top}\boldsymbol{\Xi}+\lambda\nabla_{\boldsymbol{\theta}}R\left(\boldsymbol{\theta}\right)=\frac{1}{m}\mathbf{Y}^{\top}\boldsymbol{\Xi}
 \]
 
 \end_inset
@@ -547,31 +676,7 @@ Analytical regression with ridge regularization
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\frac{2}{m}\boldsymbol{\theta}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}+2\lambda\boldsymbol{\theta}=\frac{2}{m}\mathbf{Y}^{\top}\boldsymbol{\Xi}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\boldsymbol{\theta}\left(\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}\right)+\boldsymbol{\theta}\left(\mathbf{I}_{\left[n+1\times n+1\right]}\lambda\right)=\frac{1}{m}\mathbf{Y}^{\top}\boldsymbol{\Xi}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\boldsymbol{\theta}\left(\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}+\mathbf{I}_{\left[n+1\times n+1\right]}\lambda\right)=\frac{1}{m}\mathbf{Y}^{\top}\boldsymbol{\Xi}
-\]
-
-\end_inset
-
-
-\begin_inset Formula 
-\[
-\boldsymbol{\theta}=\frac{1}{m}\mathbf{Y}^{\top}\boldsymbol{\Xi}\left(\frac{1}{m}\boldsymbol{\Xi}^{\top}\boldsymbol{\Xi}+\mathbf{I}_{\left[n+1\times n+1\right]}\lambda\right)^{-1}
+\frac{1}{m}\left[\sigma\left(\boldsymbol{\Xi}\boldsymbol{\theta}^{\top}\right)\right]^{\top}\boldsymbol{\Xi}+2\lambda\boldsymbol{\theta}=\frac{1}{m}\mathbf{Y}^{\top}\boldsymbol{\Xi}
 \]
 
 \end_inset
