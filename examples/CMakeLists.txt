@@ -14,7 +14,9 @@ set(
   LinearModel_00
   LinearModel_AnalyticalFit_CSV
   LinearModel_ADAMFit_00
+  LinearModel_ADAMFit_CSV
   LinearModel_GradientDescentFit_00
+  LinearModel_GradientDescentFit_CSV
   LogisticModel_00
   LogisticModel_ADAMFit_00
   LogisticModel_GradientDescentFit_00

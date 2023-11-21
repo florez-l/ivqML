@@ -4,8 +4,11 @@
 
 #include <iostream>
 #include <boost/program_options.hpp>
+#include <ivqML/IO/CSV.h>
+#include <ivqML/Model/Linear.h>
 
 using TScalar = long double;
+using TModel = ivqML::Model::Linear< TScalar >;
 
 // -------------------------------------------------------------------------
 #define _Arg( _I, _V, _H )                                              \
@@ -13,6 +16,7 @@ using TScalar = long double;
     boost::program_options::value< decltype( _V ) >( &_V )              \
     ->default_value( _V ), _H )
 
+// -------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
   std::string input = "";
@@ -35,7 +39,15 @@ int main( int argc, char** argv )
     return( EXIT_FAILURE );
   } // end if
 
+  TModel::TMatrix D;
+  ivqML::IO::CSV::Read( D, input );
 
+  TModel model;
+  model.fit(
+    D.block( 0, 0, D.rows( ), D.cols( ) - 1 ), D.col( D.cols( ) - 1 ), lambda
+    );
+
+  std::cout << "Fitted model: " << model << std::endl;
 
   return( EXIT_SUCCESS );
 }

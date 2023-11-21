@@ -13,14 +13,16 @@
 
 // -------------------------------------------------------------------------
 template< class _M >
-bool ivqML::IO::CSV::Read< _M >::
-Read(
+bool ivqML::IO::CSV::Read(
   Eigen::EigenBase< _M >& M,
   const std::string& fname,
   unsigned long long ignore_first_rows,
   const char& separator
   )
 {
+  std::stringstream seps;
+  seps << separator;
+
   // Load buffer
   std::ifstream ifs( fname.c_str( ) );
   ifs.seekg( 0, std::ios::end );
@@ -42,7 +44,7 @@ Read(
       if( int( line[ 0 ] ) != 0 )
       {
         std::deque< std::string > tokens;
-        boost::split( tokens, line, boost::is_any_of( separator ) );
+        boost::split( tokens, line, boost::is_any_of( seps.str( ) ) );
         unsigned int i = 0;
         lines.push_back( std::stringstream( ) );
         for( const std::string& t: tokens )
@@ -62,23 +64,18 @@ Read(
   } // end while
 
   // Pass to Eigen::Matrix
-  /* TODO
-     if( ignore_first_row )
-     lines.pop_front( );
-     unsigned long long m = lines.size( );
-     M.derived( ) = _TMatrix::Zero( m, n );
-     for( unsigned long long r = 0; r < m; ++r )
-     for( unsigned long long c = 0; c < n; ++c )
-     lines[ r ] >> M.derived( )( r, c );
-  */
+  unsigned long long m = lines.size( ) - ignore_first_rows;
+  M.derived( ) = _M::Zero( m, n );
+  for( unsigned long long r = 0; r < m; ++r )
+    for( unsigned long long c = 0; c < n; ++c )
+      lines[ r + ignore_first_rows ] >> M.derived( )( r, c );
 
   return( true );
 }
 
 // -------------------------------------------------------------------------
 template< class _M >
-bool ivqML::IO::CSV::Read< _M >::
-Write(
+bool ivqML::IO::CSV::Write(
   const Eigen::EigenBase< _M >& M,
   const std::string& fname,
   const char& separator
@@ -88,7 +85,7 @@ Write(
     Eigen::StreamPrecision, Eigen::DontAlignCols, ",", "\n", "", "", "", "\n"
     );
   std::ofstream ofs( fname.c_str( ) );
-  ofs << data.format( f );
+  ofs << M.format( f );
   ofs.close( );
 
   return( true );

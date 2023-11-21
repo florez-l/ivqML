@@ -4,6 +4,8 @@
 #ifndef __ivqML__IO__CSV__h__
 #define __ivqML__IO__CSV__h__
 
+#include <ivqML/Config.h>
+
 namespace ivqML
 {
   namespace IO
