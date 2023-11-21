@@ -50,49 +50,35 @@ cost(
   const Eigen::EigenBase< _Y >& iY
   ) const
 {
-  /* TODO
-     static const TScalar _e = std::numeric_limits< TScalar >::epsilon( );
-     const auto& i = this->m_B[ b ];
-     auto X =
-     this->m_X->derived( )
-     .block( i.first, 0, i.second, this->m_X->cols( ) )
-     .template cast< TScalar >( );
-     auto Y =
-     this->m_Y->derived( )
-     .block( i.first, 0, i.second, this->m_Y->cols( ) );
+  using _Gs = typename _G::Scalar;
 
-     this->m_M->operator()( this->m_Z, X );
+  static const TScalar _e = std::numeric_limits< TScalar >::epsilon( );
 
-     std::atomic< TScalar > J = 0;
-     this->m_G.fill( 0 );
-     auto g = this->m_G.block( 0, 1, 1, X.cols( ) );
+  auto X = iX.derived( ).template cast< TScalar >( );
+  auto Y = iY.derived( ).template cast< TScalar >( );
+  TMatrix Z = this->evaluate( X );
 
-     this->m_Z.noalias( ) =
-     this->m_Z.NullaryExpr(
-     this->m_Z.rows( ), this->m_Z.cols( ),
-     [&]( const Eigen::Index& r, const Eigen::Index& c ) -> TScalar
-     {
-     TScalar z = this->m_Z( r, c );
-     TScalar l = ( Y( r, 0 ) == 0 )? ( TScalar( 1 ) - z ): z;
+  std::atomic< TScalar > J = 0;
+  Z.noalias( )
+    =
+    Z.NullaryExpr(
+      Z.rows( ), Z.cols( ),
+      [&]( const Eigen::Index& r, const Eigen::Index& c ) -> TScalar
+      {
+        TScalar z = Z( r, c );
+        TScalar l = ( Y( r, c ) == 0 )? ( TScalar( 1 ) - z ): z;
+        J  = J - std::log( ( _e < l )? l: _e );
+        return( z - Y( r, c ) );
+      }
+      );
+  TScalar m = TScalar( X.rows( ) );
 
-     J  = J - std::log( ( _e < l )? l: _e );
-     this->m_G( 0, 0 ) += z;
-     g += X.row( r ) * z;
+  iG.derived( )( 0, 0 ) = _Gs( Z.mean( ) );
+  iG.derived( ).block( 0, 1, 1, iG.cols( ) - 1 )
+    =
+    ( ( Z.transpose( ) * X ) / m ).template cast< _Gs >( );
 
-     return( z );
-     }
-     );
-
-     J = J / TScalar( X.rows( ) );
-     this->m_G /= TScalar( X.rows( ) );
-
-     g -= this->m_Xy.row( 0 );
-     this->m_G( 0, 0 ) -= this->m_Ym;
-
-     return( std::make_pair( TScalar( J ), this->m_G.data( ) ) );
-  */
-
-  return( TScalar( 0 ) );
+  return( TScalar( J ) / m );
 }
 
 #endif // __ivqML__Model__Logistic__hxx__
