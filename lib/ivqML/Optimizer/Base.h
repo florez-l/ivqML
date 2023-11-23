@@ -29,7 +29,6 @@
   using TNatural = typename Superclass::TNatural;       \
   using TMatrix = typename Superclass::TMatrix;         \
   using TMap = typename Superclass::TMap;               \
-  using TConstMap = typename Superclass::TConstMap;     \
   using TSignature = typename Superclass::TSignature;   \
   using TDebug = typename Superclass::TDebug
 
@@ -53,7 +52,6 @@ namespace ivqML
       using TNatural = typename _M::TNatural;
       using TMatrix = typename _M::TMatrix;
       using TMap = typename _M::TMap;
-      using TConstMap = typename _M::TConstMap;
 
       using TSignature =
         bool(

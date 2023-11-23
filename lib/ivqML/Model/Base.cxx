@@ -80,18 +80,10 @@ set_number_of_parameters( const TNatural& p )
     if( p > 0 )
       this->m_T = std::shared_ptr< _S[ ] >( new _S[ p ] );
     this->m_P = p;
+    this->_synch( );
   } // end if
   if( p > 0 )
     std::memset( this->m_T.get( ), 0, p * sizeof( _S ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-typename ivqML::Model::Base< _S >::
-TNatural ivqML::Model::Base< _S >::
-number_of_outputs( ) const
-{
-  return( 1 );
 }
 
 // -------------------------------------------------------------------------

@@ -25,7 +25,6 @@ namespace ivqML
 
       using TMatrix = Eigen::Matrix< _S, Eigen::Dynamic, Eigen::Dynamic >;
       using TMap = Eigen::Map< TMatrix >;
-      using TConstMap = Eigen::Map< const TMatrix >;
 
     public:
       Base( const TNatural& n = 1 );
@@ -48,10 +47,13 @@ namespace ivqML
       template< class _D >
       Self& operator-=( const Eigen::EigenBase< _D >& d );
 
-      const TNatural& number_of_parameters( ) const;
+      virtual const TNatural& number_of_parameters( ) const;
       virtual void set_number_of_parameters( const TNatural& p );
 
-      TNatural number_of_outputs( ) const;
+      virtual TNatural number_of_inputs( ) const = 0;
+      virtual void set_number_of_inputs( const TNatural& p ) = 0;
+
+      virtual TNatural number_of_outputs( ) const = 0;
 
       _S* begin( );
       const _S* begin( ) const;
@@ -60,6 +62,7 @@ namespace ivqML
       const _S* end( ) const;
 
     protected:
+      virtual void _synch( ) = 0;
       virtual void _from_stream( std::istream& i );
       virtual void _to_stream( std::ostream& o ) const;
 

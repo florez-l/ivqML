@@ -15,16 +15,6 @@ Linear( const TNatural& n )
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::Linear< _S >::
-set_number_of_parameters( const TNatural& p )
-{
-  this->Superclass::set_number_of_parameters( p );
-  new( &this->m_nT ) TMap( this->m_T.get( ) + 1, p - 1, 1 );
-  new( &this->m_cT ) TConstMap( this->m_T.get( ) + 1, p - 1, 1 );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
 typename ivqML::Model::Linear< _S >::
 TNatural ivqML::Model::Linear< _S >::
 number_of_inputs( ) const
@@ -38,6 +28,26 @@ void ivqML::Model::Linear< _S >::
 set_number_of_inputs( const TNatural& i )
 {
   this->set_number_of_parameters( i + 1 );
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+typename ivqML::Model::Linear< _S >::
+TNatural ivqML::Model::Linear< _S >::
+number_of_outputs( ) const
+{
+  return( 1 );
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::Linear< _S >::
+_synch( )
+{
+  if( this->m_P > 0 )
+    new( &this->m_M ) TMap( this->m_T.get( ) + 1, this->m_P - 1, 1 );
+  else
+    new( &this->m_M ) TMap( nullptr, 0, 0 );
 }
 
 // -------------------------------------------------------------------------

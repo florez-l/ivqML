@@ -38,6 +38,14 @@ number_of_inputs( ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
+void ivqML::Model::FeedForwardNetwork< _S >::
+set_number_of_inputs( const TNatural& p )
+{
+  // WARNING: do nothing!
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
 typename ivqML::Model::FeedForwardNetwork< _S >::
 TNatural ivqML::Model::FeedForwardNetwork< _S >::
 number_of_outputs( ) const
@@ -106,7 +114,13 @@ init( )
     P += o * ( i + 1 );
   } // end for
   this->Superclass::set_number_of_parameters( P );
+}
 
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::FeedForwardNetwork< _S >::
+_synch( )
+{
   this->m_W.clear( );
   this->m_B.clear( );
   TNatural s = 0;

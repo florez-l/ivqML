@@ -30,7 +30,6 @@ namespace ivqML
       using TNatural = typename Superclass::TNatural;
       using TMatrix = typename Superclass::TMatrix;
       using TMap = typename Superclass::TMap;
-      using TConstMap = typename Superclass::TConstMap;
 
       using TSignature = void( TMatrix&, const TMatrix&, bool );
       using TActivation = std::function< TSignature >;
@@ -42,8 +41,9 @@ namespace ivqML
 
       virtual void random_fill( ) override;
 
-      TNatural number_of_inputs( ) const;
-      TNatural number_of_outputs( ) const;
+      virtual TNatural number_of_inputs( ) const override;
+      virtual void set_number_of_inputs( const TNatural& p ) override;
+      virtual TNatural number_of_outputs( ) const override;
 
       virtual void set_number_of_parameters( const TNatural& p ) final;
 
@@ -54,22 +54,22 @@ namespace ivqML
       TNatural number_of_layers( ) const;
       void init( );
 
-      template< class _Y, class _X >
-      void operator()(
-        Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX,
-        bool derivative = false
-        ) const;
+      template< class _X >
+      auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
 
-      template< class _Y, class _X >
-      void backpropagate(
-        const Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX,
-        std::vector< TMatrix >& A, std::vector< TMatrix >& Z
+      template< class _G, class _X, class _Y >
+      void cost(
+        Eigen::EigenBase< _G >& iG,
+        const Eigen::EigenBase< _X >& iX,
+        const Eigen::EigenBase< _Y >& iY,
+        TScalar* J = nullptr
         ) const;
 
     protected:
+      virtual void _synch( ) override;
 
       template< class _X >
-      void _eval(
+      void _evaluate(
         const Eigen::EigenBase< _X >& iX,
         std::vector< TMatrix >& A, std::vector< TMatrix >& Z
         ) const;

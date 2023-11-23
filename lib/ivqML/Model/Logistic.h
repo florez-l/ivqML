@@ -24,7 +24,6 @@ namespace ivqML
       using TNatural = typename Superclass::TNatural;
       using TMatrix = typename Superclass::TMatrix;
       using TMap = typename Superclass::TMap;
-      using TConstMap = typename Superclass::TConstMap;
 
     public:
       Logistic( const TNatural& n = 0 );
@@ -37,10 +36,11 @@ namespace ivqML
       auto threshold( const Eigen::EigenBase< _X >& iX ) const;
 
       template< class _G, class _X, class _Y >
-      TScalar cost(
+      void cost(
         Eigen::EigenBase< _G >& iG,
         const Eigen::EigenBase< _X >& iX,
-        const Eigen::EigenBase< _Y >& iY
+        const Eigen::EigenBase< _Y >& iY,
+        TScalar* J = nullptr
         ) const;
     };
   } // end namespace

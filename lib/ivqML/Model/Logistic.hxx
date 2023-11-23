@@ -42,12 +42,12 @@ threshold( const Eigen::EigenBase< _X >& iX ) const
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _G, class _X, class _Y >
-typename ivqML::Model::Logistic< _S >::
-TScalar ivqML::Model::Logistic< _S >::
+void ivqML::Model::Logistic< _S >::
 cost(
   Eigen::EigenBase< _G >& iG,
   const Eigen::EigenBase< _X >& iX,
-  const Eigen::EigenBase< _Y >& iY
+  const Eigen::EigenBase< _Y >& iY,
+  TScalar* J
   ) const
 {
   using _Gs = typename _G::Scalar;
@@ -56,9 +56,11 @@ cost(
 
   auto X = iX.derived( ).template cast< TScalar >( );
   auto Y = iY.derived( ).template cast< TScalar >( );
+  TScalar m = TScalar( X.rows( ) );
+
   TMatrix Z = this->evaluate( X );
 
-  std::atomic< TScalar > J = 0;
+  std::atomic< TScalar > S = 0;
   Z.noalias( )
     =
     Z.NullaryExpr(
@@ -66,19 +68,22 @@ cost(
       [&]( const Eigen::Index& r, const Eigen::Index& c ) -> TScalar
       {
         TScalar z = Z( r, c );
-        TScalar l = ( Y( r, c ) == 0 )? ( TScalar( 1 ) - z ): z;
-        J  = J - std::log( ( _e < l )? l: _e );
+        if( J != nullptr )
+        {
+          TScalar l = ( Y( r, c ) == 0 )? ( TScalar( 1 ) - z ): z;
+          S = S - ( std::log( ( _e < l )? l: _e ) / m );
+        } // end if
         return( z - Y( r, c ) );
       }
       );
-  TScalar m = TScalar( X.rows( ) );
 
   iG.derived( )( 0, 0 ) = _Gs( Z.mean( ) );
   iG.derived( ).block( 0, 1, 1, iG.cols( ) - 1 )
     =
     ( ( Z.transpose( ) * X ) / m ).template cast< _Gs >( );
 
-  return( TScalar( J ) / m );
+  if( J != nullptr )
+    *J = TScalar( S );
 }
 
 #endif // __ivqML__Model__Logistic__hxx__

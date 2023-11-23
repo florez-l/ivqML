@@ -35,11 +35,12 @@ int main( int argc, char** argv )
   std::cout << X << std::endl;
 
   std::cout << "-------------- OUTPUTS --------------" << std::endl;
-  _M::TMatrix Y( m, model.number_of_outputs( ) );
-  model( Y, X );
+  _M::TMatrix Y = model.evaluate( X );
   std::cout << Y << std::endl;
   std::cout << "---------- BACKPROPAGATION ----------" << std::endl;
-  model( Y, X, true );
+  _M::TMatrix G;
+  _M::TScalar J;
+  model.cost( G, Y, X, &J );
 
   return( EXIT_SUCCESS );
 }

@@ -24,7 +24,6 @@ fit( )
   TScalar e = std::pow( _10, std::log10( this->m_alpha ) * _2 );
 
   // Prepare loop
-  TScalar J = std::numeric_limits< TScalar >::max( );
   TMatrix G( 1, this->m_M->number_of_parameters( ) );
   TNatural B = this->m_Sizes.size( );
 
@@ -36,19 +35,18 @@ fit( )
     TNatural j = 0;
     for( const TNatural& s: this->m_Sizes )
     {
-      J =
-        this->m_M->cost(
-          G,
-          this->m_X->derived( ).block( j, 0, s, this->m_X->cols( ) ),
-          this->m_Y->derived( ).block( j, 0, s, this->m_Y->cols( ) )
-          );
+      this->m_M->cost(
+        G,
+        this->m_X->derived( ).block( j, 0, s, this->m_X->cols( ) ),
+        this->m_Y->derived( ).block( j, 0, s, this->m_Y->cols( ) )
+        );
       j += s;
       *( this->m_M ) -= G * this->m_alpha;
     } // end for
 
     debug_stop =
       this->m_D(
-        J, G.norm( ), this->m_M, i,
+        0, G.norm( ), this->m_M, i,
         ( i % this->m_debug_iterations == 0 )
         );
     i++;
@@ -59,7 +57,7 @@ fit( )
       ||
       debug_stop;
   } // end while
-  this->m_D( J, G.norm( ), this->m_M, i, true );
+  this->m_D( 0, G.norm( ), this->m_M, i, true );
 }
 
 #endif // __ivqML__Optimizer__GradientDescent__hxx__

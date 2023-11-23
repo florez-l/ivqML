@@ -24,24 +24,25 @@ namespace ivqML
       using TNatural = typename Superclass::TNatural;
       using TMatrix = typename Superclass::TMatrix;
       using TMap = typename Superclass::TMap;
-      using TConstMap = typename Superclass::TConstMap;
 
     public:
       Linear( const TNatural& n = 0 );
       virtual ~Linear( ) override = default;
 
-      virtual void set_number_of_parameters( const TNatural& p ) override;
-      TNatural number_of_inputs( ) const;
-      void set_number_of_inputs( const TNatural& i );
+      virtual TNatural number_of_inputs( ) const override;
+      virtual void set_number_of_inputs( const TNatural& i ) override;
+
+      virtual TNatural number_of_outputs( ) const override;
 
       template< class _X >
       auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
 
       template< class _G, class _X, class _Y >
-      TScalar cost(
+      void cost(
         Eigen::EigenBase< _G >& iG,
         const Eigen::EigenBase< _X >& iX,
-        const Eigen::EigenBase< _Y >& iY
+        const Eigen::EigenBase< _Y >& iY,
+        TScalar* J = nullptr
         ) const;
 
       template< class _Y, class _X >
@@ -51,8 +52,10 @@ namespace ivqML
         );
 
     protected:
-      TMap      m_nT { nullptr, 0, 0 };
-      TConstMap m_cT { nullptr, 0, 0 };
+      virtual void _synch( ) override;
+
+    protected:
+      TMap m_M { nullptr, 0, 0 };
     };
   } // end namespace
 } // end namespace

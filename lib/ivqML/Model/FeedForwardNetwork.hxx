@@ -7,11 +7,35 @@
 
 #include <iostream>
 
+// -------------------------------------------------------------------------
+template< class _S >
+template< class _X >
+auto ivqML::Model::FeedForwardNetwork< _S >::
+evaluate( const Eigen::EigenBase< _X >& iX ) const
+{
+  return( iX.derived( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+template< class _G, class _X, class _Y >
+void ivqML::Model::FeedForwardNetwork< _S >::
+cost(
+  Eigen::EigenBase< _G >& iG,
+  const Eigen::EigenBase< _X >& iX,
+  const Eigen::EigenBase< _Y >& iY,
+  TScalar* J
+  ) const
+{
+}
+
+
 
 
 
 
 // -------------------------------------------------------------------------
+/* TODO
 template< class _S >
 template< class _Y, class _X >
 void ivqML::Model::FeedForwardNetwork< _S >::
@@ -42,7 +66,7 @@ backpropagate(
 template< class _S >
 template< class _X >
 void ivqML::Model::FeedForwardNetwork< _S >::
-_eval(
+_evaluate(
   const Eigen::EigenBase< _X >& iX,
   std::vector< TMatrix >& A, std::vector< TMatrix >& Z
   ) const
@@ -71,6 +95,7 @@ _eval(
     this->m_F[ l ].second( A[ l + 1 ], Z[ l ], false );
   } // end for
 }
+*/
 
 #endif // __ivqML__Model__FeedForwardNetwork__hxx__
 
