@@ -12,7 +12,7 @@
 template< class _S >
 ivqML::Model::FeedForwardNetwork< _S >::
 FeedForwardNetwork( )
-  : Superclass( )
+  : Superclass( TNatural( 0 ) )
 {
 }
 
@@ -96,7 +96,10 @@ typename ivqML::Model::FeedForwardNetwork< _S >::
 TNatural ivqML::Model::FeedForwardNetwork< _S >::
 number_of_layers( ) const
 {
-  return( this->m_S.size( ) - 1 );
+  if( this->m_S.size( ) > 0 )
+    return( this->m_S.size( ) - 1 );
+  else
+    return( 0 );
 }
 
 // -------------------------------------------------------------------------
@@ -114,6 +117,7 @@ init( )
     P += o * ( i + 1 );
   } // end for
   this->Superclass::set_number_of_parameters( P );
+  this->random_fill( );
 }
 
 // -------------------------------------------------------------------------
@@ -137,8 +141,6 @@ _synch( )
   } // end for
   this->m_W.shrink_to_fit( );
   this->m_B.shrink_to_fit( );
-
-  this->random_fill( );
 }
 
 // -------------------------------------------------------------------------

@@ -15,7 +15,7 @@ int main( int argc, char** argv )
   _M model;
   model.add_layer( 8, 4, "ReLU" );
   model.add_layer( 2, "ReLU" );
-  model.add_layer( 1, "Sigmoid" );
+  model.add_layer( 1, "siGmoID" );
   model.init( );
 
   std::cout << model << std::endl;

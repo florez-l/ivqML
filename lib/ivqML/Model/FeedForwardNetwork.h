@@ -31,7 +31,7 @@ namespace ivqML
       using TMatrix = typename Superclass::TMatrix;
       using TMap = typename Superclass::TMap;
 
-      using TSignature = void( TMatrix&, const TMatrix&, bool );
+      using TSignature = void( TMap&, const TMap&, bool );
       using TActivation = std::function< TSignature >;
       using TActivationFactory = ivqML::Model::ActivationFactory< Self >;
 
@@ -55,7 +55,7 @@ namespace ivqML
       void init( );
 
       template< class _X >
-      auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
+      TMatrix evaluate( const Eigen::EigenBase< _X >& iX ) const;
 
       template< class _G, class _X, class _Y >
       void cost(
@@ -71,7 +71,7 @@ namespace ivqML
       template< class _X >
       void _evaluate(
         const Eigen::EigenBase< _X >& iX,
-        std::vector< TMatrix >& A, std::vector< TMatrix >& Z
+        std::vector< TMap >& A, std::vector< TMap >& Z
         ) const;
 
       virtual void _from_stream( std::istream& i ) override;

@@ -17,12 +17,13 @@ namespace ivqML
     class ActivationFactory
     {
     public:
-      using Self = ActivationFactory;
-      using TModel = _M;
-      using TScalar = typename TModel::TScalar;
-      using TMatrix = typename TModel::TMatrix;
+      using Self        = ActivationFactory;
+      using TModel      = _M;
+      using TScalar     = typename TModel::TScalar;
+      using TMap        = typename TModel::TMap;
+      using TMatrix     = typename TModel::TMatrix;
       using TActivation = typename TModel::TActivation;
-      using TTraits = std::numeric_limits< TScalar >;
+      using TTraits     = std::numeric_limits< TScalar >;
 
     public:
       static TActivation New( const std::string& n );
