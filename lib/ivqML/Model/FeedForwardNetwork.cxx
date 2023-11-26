@@ -121,6 +121,7 @@ init( )
 }
 
 // -------------------------------------------------------------------------
+/* TODO
 template< class _S >
 void ivqML::Model::FeedForwardNetwork< _S >::
 _synch( )
@@ -142,6 +143,7 @@ _synch( )
   this->m_W.shrink_to_fit( );
   this->m_B.shrink_to_fit( );
 }
+*/
 
 // -------------------------------------------------------------------------
 template< class _S >
@@ -189,7 +191,7 @@ _from_stream( std::istream& i )
   else
   {
     TNatural P = std::atoi( a.c_str( ) );
-    if( P != this->m_P )
+    if( P != this->m_Parameters.size( ) )
       throw std::length_error( "Length mismatch while reading model." );
     for( TNatural p = 0; p < P; ++p )
       i >> *( this->begin( ) + p );

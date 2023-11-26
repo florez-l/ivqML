@@ -18,7 +18,6 @@ template< class _S >
 ivqML::Model::Base< _S >::
 ~Base( )
 {
-  this->m_T.reset( );
 }
 
 // -------------------------------------------------------------------------
@@ -29,8 +28,8 @@ random_fill( )
   std::random_device r;
   std::mt19937 g( r( ) );
   std::uniform_real_distribution< _S > d( 0, 1 );
-  for( TNatural i = 0; i < this->m_P; ++i )
-    this->m_T[ i ] = d( g );
+  for( TNatural i = 0; i < this->m_Parameters.size( ); ++i )
+    this->m_Parameters[ i ] = d( g );
 }
 
 // -------------------------------------------------------------------------
@@ -39,8 +38,8 @@ _S& ivqML::Model::Base< _S >::
 operator[]( const TNatural& i )
 {
   static _S zero = 0;
-  if( i < this->m_P )
-    return( this->m_T[ i ] );
+  if( i < this->m_Parameters.size( ) )
+    return( this->m_Parameters[ i ] );
   else
   {
     zero = 0;
@@ -54,19 +53,19 @@ const _S& ivqML::Model::Base< _S >::
 operator[]( const TNatural& i ) const
 {
   static const _S zero = 0;
-  if( i < this->m_P )
-    return( this->m_T[ i ] );
+  if( i < this->m_Parameters.size( ) )
+    return( this->m_Parameters[ i ] );
   else
     return( zero );
 }
 
 // -------------------------------------------------------------------------
 template< class _S >
-const typename ivqML::Model::Base< _S >::
-TNatural& ivqML::Model::Base< _S >::
+typename ivqML::Model::Base< _S >::
+TNatural ivqML::Model::Base< _S >::
 number_of_parameters( ) const
 {
-  return( this->m_P );
+  return( this->m_Parameters.size( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -74,16 +73,15 @@ template< class _S >
 void ivqML::Model::Base< _S >::
 set_number_of_parameters( const TNatural& p )
 {
-  if( this->m_P != p )
+  if( this->m_Parameters.size( ) != p )
   {
-    this->m_T.reset( );
     if( p > 0 )
-      this->m_T = std::shared_ptr< _S[] >( new _S[ p ] );
-    this->m_P = p;
-    this->_synch( );
+      this->m_Parameters.resize( p );
+    else
+      this->m_Parameters.clear( );
+    this->m_Parameters.shrink_to_fit( );
   } // end if
-  if( p > 0 )
-    std::memset( this->m_T.get( ), 0, p * sizeof( _S ) );
+  std::fill( this->m_Parameters.begin( ), this->m_Parameters.end( ), TScalar( 0 ) );
 }
 
 // -------------------------------------------------------------------------
@@ -91,7 +89,7 @@ template< class _S >
 _S* ivqML::Model::Base< _S >::
 begin( )
 {
-  return( this->m_T.get( ) );
+  return( this->m_Parameters.data( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -99,7 +97,7 @@ template< class _S >
 const _S* ivqML::Model::Base< _S >::
 begin( ) const
 {
-  return( this->m_T.get( ) );
+  return( this->m_Parameters.data( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -107,7 +105,7 @@ template< class _S >
 _S* ivqML::Model::Base< _S >::
 end( )
 {
-  return( this->m_T.get( ) + this->m_P );
+  return( this->m_Parameters.data( ) + this->m_Parameters.size( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -115,7 +113,28 @@ template< class _S >
 const _S* ivqML::Model::Base< _S >::
 end( ) const
 {
-  return( this->m_T.get( ) + this->m_P );
+  return( this->m_Parameters.data( ) + this->m_Parameters.size( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+typename ivqML::Model::Base< _S >::
+TNatural ivqML::Model::Base< _S >::
+_cache_size( ) const
+{
+  return( this->m_Cache.size( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::Base< _S >::
+_resize_cache( const TNatural& s ) const
+{
+  if( s == 0 )
+    this->m_Cache.clear( );
+  if( s > this->m_Cache.size( ) )
+    this->m_Cache.resize( s );
+  this->m_Cache.shrink_to_fit( );
 }
 
 // -------------------------------------------------------------------------
@@ -131,9 +150,9 @@ template< class _S >
 void ivqML::Model::Base< _S >::
 _to_stream( std::ostream& o ) const
 {
-  o << this->m_P;
-  for( TNatural i = 0; i < this->m_P; ++i )
-    o << " " << this->m_T[ i ];
+  o << this->m_Parameters.size( );
+  for( TNatural i = 0; i < this->m_Parameters.size( ); ++i )
+    o << " " << this->m_Parameters[ i ];
 }
 
 // -------------------------------------------------------------------------

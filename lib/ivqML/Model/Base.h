@@ -5,9 +5,9 @@
 #define __ivqML__Model__Base__h__
 
 #include <ivqML/Config.h>
-#include <memory>
 #include <istream>
 #include <ostream>
+#include <vector>
 
 namespace ivqML
 {
@@ -47,7 +47,7 @@ namespace ivqML
       template< class _D >
       Self& operator-=( const Eigen::EigenBase< _D >& d );
 
-      virtual const TNatural& number_of_parameters( ) const;
+      virtual TNatural number_of_parameters( ) const;
       virtual void set_number_of_parameters( const TNatural& p );
 
       virtual TNatural number_of_inputs( ) const = 0;
@@ -60,15 +60,40 @@ namespace ivqML
 
       _S* end( );
       const _S* end( ) const;
+      
+      template< class _X >
+      auto evaluate( const Eigen::EigenBase< _X >& iX ) const
+      {
+        TNatural m = iX.rows( );
+        this->_resize_cache( m );
+        this->_input_cache( ) = iX.derived( ).template cast< TScalar >( );
+        this->_evaluate( m );
+        return( this->_output_cache( ).block( 0, 0, m, this->number_of_outputs( ) ) );
+      }
+
+      template< class _G, class _X, class _Y >
+      void cost(
+        Eigen::EigenBase< _G >& iG,
+        const Eigen::EigenBase< _X >& iX, const Eigen::EigenBase< _Y >& iY,
+        TScalar* J = nullptr
+        ) const
+        {
+        }
 
     protected:
-      virtual void _synch( ) = 0;
+      virtual TNatural _cache_size( ) const;
+      virtual void _resize_cache( const TNatural& s ) const;
+      virtual TMap& _input_cache( ) const = 0;
+      virtual const TMap& _output_cache( ) const = 0;
+    
+      virtual void _evaluate( const TNatural& m ) const = 0;
+      // TODO: virtual void _cost( TScalar* J ) = 0;
       virtual void _from_stream( std::istream& i );
       virtual void _to_stream( std::ostream& o ) const;
 
     protected:
-      std::shared_ptr< _S[] > m_T;
-      TNatural m_P { 0 };
+      std::vector< TScalar > m_Parameters;
+      mutable std::vector< TScalar > m_Cache;
 
     public:
       friend std::istream& operator>>( std::istream& i, Self& m )

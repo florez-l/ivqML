@@ -26,6 +26,7 @@
 #include <numeric>
 
 // -------------------------------------------------------------------------
+/* TODO
 template< class _S >
 template< class _X >
 typename ivqML::Model::FeedForwardNetwork< _S >::
@@ -88,7 +89,7 @@ _evaluate(
   } // end for
 }
 
-
+*/
 
 
 

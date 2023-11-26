@@ -32,8 +32,7 @@ namespace ivqML
       static constexpr TScalar s_0 { TScalar( 0 ) };
       static constexpr TScalar s_1 { TScalar( 1 ) };
       static constexpr TScalar s_E { TTraits::epsilon( ) };
-      static constexpr TScalar s_SigmoidLimit
-        { std::log( Self::s_1 - Self::s_E ) - std::log( Self::s_E ) };
+      // static constexpr TScalar s_L { std::log( Self::s_1 - Self::s_E ) - std::log( Self::s_E ) };
     };
   } // end namespace
 } // end namespace

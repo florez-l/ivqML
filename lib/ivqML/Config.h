@@ -4,6 +4,10 @@
 #ifndef __ivqML__Config__h__
 #define __ivqML__Config__h__
 
+#include <iostream>
+
+
+
 #include <ivqML/Export.h>
 #include <Eigen/Core>
 

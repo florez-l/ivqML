@@ -54,26 +54,7 @@ namespace ivqML
       TNatural number_of_layers( ) const;
       void init( );
 
-      template< class _X >
-      TMatrix evaluate( const Eigen::EigenBase< _X >& iX ) const;
-
-      template< class _G, class _X, class _Y >
-      void cost(
-        Eigen::EigenBase< _G >& iG,
-        const Eigen::EigenBase< _X >& iX,
-        const Eigen::EigenBase< _Y >& iY,
-        TScalar* J = nullptr
-        ) const;
-
     protected:
-      virtual void _synch( ) override;
-
-      template< class _X >
-      void _evaluate(
-        const Eigen::EigenBase< _X >& iX,
-        std::vector< TMap >& A, std::vector< TMap >& Z
-        ) const;
-
       virtual void _from_stream( std::istream& i ) override;
       virtual void _to_stream( std::ostream& o ) const override;
 
