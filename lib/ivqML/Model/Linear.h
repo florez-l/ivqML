@@ -36,12 +36,19 @@ namespace ivqML
 
       virtual TNatural number_of_outputs( ) const override;
 
+      virtual TNatural cache_size( ) const override;
+      virtual void resize_cache( const TNatural& s ) const override;
+
+      template< class _Y, class _X >
+      void fit(
+        const Eigen::EigenBase< _X >& iX, const Eigen::EigenBase< _Y >& iY,
+        const TScalar& l = 0
+        );
+
     protected:
-      virtual TNatural _cache_size( ) const override;
-      virtual void _resize_cache( const TNatural& s ) const override;
       virtual TMap& _input_cache( ) const override;
       virtual const TMap& _output_cache( ) const override;
-    
+
       virtual void _evaluate( const TNatural& m ) const override;
       // TODO: virtual void _cost( TScalar* J ) = 0;
 
@@ -54,7 +61,7 @@ namespace ivqML
   } // end namespace
 } // end namespace
 
-///// #include <ivqML/Model/Linear.hxx>
+#include <ivqML/Model/Linear.hxx>
 
 #endif // __ivqML__Model__Linear__h__
 

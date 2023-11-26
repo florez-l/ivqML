@@ -49,44 +49,32 @@ number_of_outputs( ) const
 }
 
 // -------------------------------------------------------------------------
-/* TODO
-template< class _S >
-void ivqML::Model::Linear< _S >::
-_synch( )
-{
-  if( this->m_P > 0 )
-    new( &this->m_M ) TMap( this->m_T.get( ) + 1, this->m_P - 1, 1 );
-  else
-    new( &this->m_M ) TMap( nullptr, 0, 0 );
-}
-*/
-// -------------------------------------------------------------------------
 template< class _S >
 typename ivqML::Model::Linear< _S >::
 TNatural ivqML::Model::Linear< _S >::
-_cache_size( ) const
+cache_size( ) const
 {
   return(
     TNatural(
       double( this->m_Cache.size( ) )
       /
       double( this->m_Parameters.size( ) + 1 )
-    )
-  );
+      )
+    );
 }
 
 // -------------------------------------------------------------------------
 template< class _S >
 void ivqML::Model::Linear< _S >::
-_resize_cache( const TNatural& s ) const
+resize_cache( const TNatural& s ) const
 {
-  if( s < this->_cache_size( ) )
+  if( s < this->cache_size( ) )
     return;
 
   TNatural n = this->number_of_inputs( );
   if( n > 0 && s > 0 )
   {
-    this->Superclass::_resize_cache( s * ( n + 2 ) );
+    this->Superclass::resize_cache( s * ( n + 2 ) );
     std::fill( this->m_Cache.data( ), this->m_Cache.data( ) + s, 1 );
     new( &this->m_Xi ) TMap( this->m_Cache.data( ), s, n + 1 );
     new( &this->m_X ) TMap( this->m_Cache.data( ) + s, s, n );
@@ -94,7 +82,7 @@ _resize_cache( const TNatural& s ) const
   }
   else
   {
-    this->Superclass::_resize_cache( 0 );
+    this->Superclass::resize_cache( 0 );
     this->m_Xi = TMap( nullptr, 0, 0 );
     this->m_X = TMap( nullptr, 0, 0 );
     this->m_Y = TMap( nullptr, 0, 0 );

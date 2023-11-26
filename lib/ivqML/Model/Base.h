@@ -60,16 +60,9 @@ namespace ivqML
 
       _S* end( );
       const _S* end( ) const;
-      
+
       template< class _X >
-      auto evaluate( const Eigen::EigenBase< _X >& iX ) const
-      {
-        TNatural m = iX.rows( );
-        this->_resize_cache( m );
-        this->_input_cache( ) = iX.derived( ).template cast< TScalar >( );
-        this->_evaluate( m );
-        return( this->_output_cache( ).block( 0, 0, m, this->number_of_outputs( ) ) );
-      }
+      auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
 
       template< class _G, class _X, class _Y >
       void cost(
@@ -80,12 +73,13 @@ namespace ivqML
         {
         }
 
+      virtual TNatural cache_size( ) const;
+      virtual void resize_cache( const TNatural& s ) const;
+
     protected:
-      virtual TNatural _cache_size( ) const;
-      virtual void _resize_cache( const TNatural& s ) const;
       virtual TMap& _input_cache( ) const = 0;
       virtual const TMap& _output_cache( ) const = 0;
-    
+
       virtual void _evaluate( const TNatural& m ) const = 0;
       // TODO: virtual void _cost( TScalar* J ) = 0;
       virtual void _from_stream( std::istream& i );

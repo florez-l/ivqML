@@ -30,23 +30,21 @@ namespace ivqML
       virtual ~Logistic( ) = default;
 
       template< class _X >
-      auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
+      auto threshold( const Eigen::EigenBase< _X >& iX ) const
+        {
+          return(
+            ( this->evaluate( iX ).array( ) >= TScalar( 0.5 ) )
+            .template cast< TScalar >( )
+            );
+        }
 
-      template< class _X >
-      auto threshold( const Eigen::EigenBase< _X >& iX ) const;
-
-      template< class _G, class _X, class _Y >
-      void cost(
-        Eigen::EigenBase< _G >& iG,
-        const Eigen::EigenBase< _X >& iX,
-        const Eigen::EigenBase< _Y >& iY,
-        TScalar* J = nullptr
-        ) const;
+    protected:
+      virtual void _evaluate( const TNatural& m ) const override;
     };
   } // end namespace
 } // end namespace
 
-#include <ivqML/Model/Logistic.hxx>
+//// #include <ivqML/Model/Logistic.hxx>
 
 #endif // __ivqML__Model__Logistic__h__
 

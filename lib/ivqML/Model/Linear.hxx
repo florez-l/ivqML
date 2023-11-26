@@ -7,43 +7,32 @@
 #include <Eigen/Dense>
 
 // -------------------------------------------------------------------------
-template< class _S >
-template< class _X >
-auto ivqML::Model::Linear< _S >::
-evaluate( const Eigen::EigenBase< _X >& iX ) const
-{
-  return(
-    ( iX.derived( ).template cast< TScalar >( ) * this->m_M ).array( )
-    +
-    this->m_T.get( )[ 0 ]
-    );
-}
+/* TODO
+   template< class _S >
+   template< class _G, class _X, class _Y >
+   void ivqML::Model::Linear< _S >::
+   cost(
+   Eigen::EigenBase< _G >& iG,
+   const Eigen::EigenBase< _X >& iX,
+   const Eigen::EigenBase< _Y >& iY,
+   TScalar* J
+   ) const
+   {
+   using _Gs = typename _G::Scalar;
 
-// -------------------------------------------------------------------------
-template< class _S >
-template< class _G, class _X, class _Y >
-void ivqML::Model::Linear< _S >::
-cost(
-  Eigen::EigenBase< _G >& iG,
-  const Eigen::EigenBase< _X >& iX,
-  const Eigen::EigenBase< _Y >& iY,
-  TScalar* J
-  ) const
-{
-  using _Gs = typename _G::Scalar;
+   auto X = iX.derived( ).template cast< TScalar >( );
+   auto Y = iY.derived( ).template cast< TScalar >( );
+   TMatrix D = this->evaluate( X ) - Y.array( );
 
-  auto X = iX.derived( ).template cast< TScalar >( );
-  auto Y = iY.derived( ).template cast< TScalar >( );
-  TMatrix D = this->evaluate( X ) - Y.array( );
-
-  iG.derived( )( 0, 0 ) = ( _Gs )( TScalar( 2 ) * D.mean( ) );
-  iG.derived( ).block( 0, 1, 1, iG.cols( ) - 1 )
-    =
-    ( ( D.transpose( ) * X ) * ( TScalar( 2 ) / TScalar( X.rows( ) ) ) )
-    .template cast< _Gs >( );
-  if( J != nullptr )
-    *J = D.array( ).pow( 2 ).mean( );
-}
+   iG.derived( )( 0, 0 ) = ( _Gs )( TScalar( 2 ) * D.mean( ) );
+   iG.derived( ).block( 0, 1, 1, iG.cols( ) - 1 )
+   =
+   ( ( D.transpose( ) * X ) * ( TScalar( 2 ) / TScalar( X.rows( ) ) ) )
+   .template cast< _Gs >( );
+   if( J != nullptr )
+   *J = D.array( ).pow( 2 ).mean( );
+   }
+*/
 
 // -------------------------------------------------------------------------
 template< class _S >
@@ -51,17 +40,17 @@ template< class _Y, class _X >
 void ivqML::Model::Linear< _S >::
 fit(
   const Eigen::EigenBase< _X >& iX, const Eigen::EigenBase< _Y >& iY,
-  const _S& l
+  const TScalar& l
   )
 {
-  auto X = iX.derived( ).template cast< TScalar >( );
-  auto Y = iY.derived( ).template cast< TScalar >( );
-
-  TScalar m = TScalar( X.rows( ) );
-  TNatural n = TScalar( X.cols( ) );
-  this->set_number_of_inputs( n );
-
   /* TODO
+     auto X = iX.derived( ).template cast< TScalar >( );
+     auto Y = iY.derived( ).template cast< TScalar >( );
+
+     TScalar m = TScalar( X.rows( ) );
+     TNatural n = TScalar( X.cols( ) );
+     this->set_number_of_inputs( n );
+
      TMatrix Xi( X.rows( ), X.cols( ) + 1 );
      Xi << TMatrix::Ones( X.rows( ), 1 ), X;
 

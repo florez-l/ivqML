@@ -120,7 +120,7 @@ end( ) const
 template< class _S >
 typename ivqML::Model::Base< _S >::
 TNatural ivqML::Model::Base< _S >::
-_cache_size( ) const
+cache_size( ) const
 {
   return( this->m_Cache.size( ) );
 }
@@ -128,7 +128,7 @@ _cache_size( ) const
 // -------------------------------------------------------------------------
 template< class _S >
 void ivqML::Model::Base< _S >::
-_resize_cache( const TNatural& s ) const
+resize_cache( const TNatural& s ) const
 {
   if( s == 0 )
     this->m_Cache.clear( );
