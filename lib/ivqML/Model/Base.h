@@ -64,9 +64,9 @@ namespace ivqML
       template< class _X >
       auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
 
-      template< class _G, class _X, class _Y >
+      template< class _X, class _Y >
       void cost(
-        Eigen::EigenBase< _G >& iG,
+        TScalar** G,
         const Eigen::EigenBase< _X >& iX, const Eigen::EigenBase< _Y >& iY,
         TScalar* J = nullptr
         ) const
