@@ -54,7 +54,19 @@ namespace ivqML
       TNatural number_of_layers( ) const;
       void init( );
 
+      virtual TNatural cache_size( ) const override;
+      virtual void resize_cache( const TNatural& s ) const override;
+
+      virtual void cost(
+        TMatrix& G, const TMap& X, const TMap& Y, TScalar* J = nullptr
+        ) const override;
+
     protected:
+      virtual TMap& _input_cache( ) const override;
+      virtual TMap& _output_cache( ) const override;
+
+      virtual void _evaluate( const TNatural& m ) const override;
+
       virtual void _from_stream( std::istream& i ) override;
       virtual void _to_stream( std::ostream& o ) const override;
 

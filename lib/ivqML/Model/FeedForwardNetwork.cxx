@@ -121,6 +121,51 @@ init( )
 }
 
 // -------------------------------------------------------------------------
+template< class _S >
+typename ivqML::Model::FeedForwardNetwork< _S >::
+TNatural ivqML::Model::FeedForwardNetwork< _S >::
+cache_size( ) const
+{
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::FeedForwardNetwork< _S >::
+resize_cache( const TNatural& s ) const
+{
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::FeedForwardNetwork< _S >::
+cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
+{
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+typename ivqML::Model::FeedForwardNetwork< _S >::
+TMap& ivqML::Model::FeedForwardNetwork< _S >::
+_input_cache( ) const
+{
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+typename ivqML::Model::FeedForwardNetwork< _S >::
+TMap& ivqML::Model::FeedForwardNetwork< _S >::
+_output_cache( ) const
+{
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::FeedForwardNetwork< _S >::
+_evaluate( const TNatural& m ) const
+{
+}
+
+// -------------------------------------------------------------------------
 /* TODO
 template< class _S >
 void ivqML::Model::FeedForwardNetwork< _S >::
