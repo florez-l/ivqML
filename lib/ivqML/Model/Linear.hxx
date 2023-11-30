@@ -43,29 +43,27 @@ fit(
   const TScalar& l
   )
 {
-  /* TODO
-     auto X = iX.derived( ).template cast< TScalar >( );
-     auto Y = iY.derived( ).template cast< TScalar >( );
+  auto X = iX.derived( ).template cast< TScalar >( );
+  auto Y = iY.derived( ).template cast< TScalar >( );
 
-     TScalar m = TScalar( X.rows( ) );
-     TNatural n = TScalar( X.cols( ) );
-     this->set_number_of_inputs( n );
+  TNatural m = TScalar( X.rows( ) );
+  TNatural n = TScalar( X.cols( ) );
+  this->set_number_of_inputs( n );
 
-     TMatrix Xi( X.rows( ), X.cols( ) + 1 );
-     Xi << TMatrix::Ones( X.rows( ), 1 ), X;
+  TMatrix Xi( m, n + 1 );
+  Xi << TMatrix::Ones( m, 1 ), X;
 
-     TMap( this->m_T.get( ), 1, n + 1 ) =
-     (
-     Y.transpose( ) * Xi
-     *
-     (
-     (
-     ( Xi.transpose( ) * Xi ) / m )
-     +
-     ( TMatrix::Identity( n + 1, n + 1 ) * l )
-     ).inverse( )
-     ) / m;
-  */
+  TMap( this->m_Parameters.data( ), 1, n + 1 ) =
+    (
+      Y.transpose( ) * Xi
+      *
+      (
+        (
+          ( Xi.transpose( ) * Xi ) / m )
+        +
+        ( TMatrix::Identity( n + 1, n + 1 ) * l )
+        ).inverse( )
+      ) / TScalar( m );
 }
 
 #endif // __ivqML__Model__Linear__hxx__

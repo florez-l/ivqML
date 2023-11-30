@@ -30,6 +30,9 @@ fit( )
   TScalar b1 = _1 - this->m_beta1;
   TScalar b2 = _1 - this->m_beta2;
 
+  // Prepare batches
+  auto batches = this->_batches( );
+
   // Prepare loop
   TMatrix G( 1, this->m_M->number_of_parameters( ) );
   TNatural B = this->m_Sizes.size( );
@@ -46,15 +49,9 @@ fit( )
     // Compute gradient
     M *= this->m_beta1;
     V *= this->m_beta2;
-    TNatural j = 0;
-    for( const TNatural& s: this->m_Sizes )
+    for( const auto& batch: batches )
     {
-      this->m_M->cost(
-        G,
-        this->m_X->derived( ).block( j, 0, s, this->m_X->cols( ) ),
-        this->m_Y->derived( ).block( j, 0, s, this->m_Y->cols( ) )
-        );
-      j += s;
+      this->m_M->cost( G, batch.first, batch.second );
       M2 = ( M + ( G * b1 ) ) / ( _1 - b1t );
       V2 =
         ( ( V.array( ) + ( G.array( ).pow( 2 ) * b2 ) ) / ( _1 - b2t ) )
@@ -81,7 +78,10 @@ fit( )
       ||
       debug_stop;
   } // end while
+
+  // Finish
   this->m_D( 0, G.norm( ), this->m_M, i, true );
+  this->_clear_batches( );
 }
 
 #endif // __ivqML__Optimizer__ADAM__hxx__

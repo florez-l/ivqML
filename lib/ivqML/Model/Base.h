@@ -64,24 +64,18 @@ namespace ivqML
       template< class _X >
       auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
 
-      template< class _X, class _Y >
-      void cost(
-        TScalar** G,
-        const Eigen::EigenBase< _X >& iX, const Eigen::EigenBase< _Y >& iY,
-        TScalar* J = nullptr
-        ) const
-        {
-        }
+      virtual void cost(
+        TMatrix& G, const TMap& X, const TMap& Y, TScalar* J = nullptr
+        ) const = 0;
 
       virtual TNatural cache_size( ) const;
       virtual void resize_cache( const TNatural& s ) const;
 
     protected:
       virtual TMap& _input_cache( ) const = 0;
-      virtual const TMap& _output_cache( ) const = 0;
+      virtual TMap& _output_cache( ) const = 0;
 
       virtual void _evaluate( const TNatural& m ) const = 0;
-      // TODO: virtual void _cost( TScalar* J ) = 0;
       virtual void _from_stream( std::istream& i );
       virtual void _to_stream( std::ostream& o ) const;
 

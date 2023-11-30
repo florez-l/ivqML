@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <limits>
+#include <utility>
 #include <vector>
 #include <boost/program_options.hpp>
 #include <ivqML/Config.h>
@@ -84,9 +85,14 @@ namespace ivqML
       virtual void fit( ) = 0;
 
     protected:
+      std::vector< std::pair< TMap, TMap > > _batches( );
+      void _clear_batches( );
+
+    protected:
       TModel*   m_M { nullptr };
       const TX* m_X { nullptr };
       const TY* m_Y { nullptr };
+      std::vector< TScalar > m_Buffer;
 
       std::vector< TNatural > m_Sizes;
 

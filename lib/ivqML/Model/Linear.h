@@ -39,6 +39,10 @@ namespace ivqML
       virtual TNatural cache_size( ) const override;
       virtual void resize_cache( const TNatural& s ) const override;
 
+      virtual void cost(
+        TMatrix& G, const TMap& X, const TMap& Y, TScalar* J = nullptr
+        ) const override;
+
       template< class _Y, class _X >
       void fit(
         const Eigen::EigenBase< _X >& iX, const Eigen::EigenBase< _Y >& iY,
@@ -47,10 +51,9 @@ namespace ivqML
 
     protected:
       virtual TMap& _input_cache( ) const override;
-      virtual const TMap& _output_cache( ) const override;
+      virtual TMap& _output_cache( ) const override;
 
       virtual void _evaluate( const TNatural& m ) const override;
-      // TODO: virtual void _cost( TScalar* J ) = 0;
 
     protected:
       mutable TMap m_T { nullptr, 0, 0 };
