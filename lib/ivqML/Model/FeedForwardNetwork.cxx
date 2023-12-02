@@ -110,67 +110,18 @@ init( )
   this->m_S.shrink_to_fit( );
 
   TNatural P = 0;
+  this->m_C = this->m_S[ 0 ];
   for( TNatural l = 1; l < this->m_S.size( ); ++l )
   {
     TNatural i = this->m_S[ l - 1 ];
     TNatural o = this->m_S[ l ];
     P += o * ( i + 1 );
+    this->m_C += ( this->m_S[ l ] << 1 );
   } // end for
   this->Superclass::set_number_of_parameters( P );
   this->random_fill( );
-}
 
-// -------------------------------------------------------------------------
-template< class _S >
-typename ivqML::Model::FeedForwardNetwork< _S >::
-TNatural ivqML::Model::FeedForwardNetwork< _S >::
-cache_size( ) const
-{
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
-resize_cache( const TNatural& s ) const
-{
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
-cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
-{
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-typename ivqML::Model::FeedForwardNetwork< _S >::
-TMap& ivqML::Model::FeedForwardNetwork< _S >::
-_input_cache( ) const
-{
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-typename ivqML::Model::FeedForwardNetwork< _S >::
-TMap& ivqML::Model::FeedForwardNetwork< _S >::
-_output_cache( ) const
-{
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
-_evaluate( const TNatural& m ) const
-{
-}
-
-// -------------------------------------------------------------------------
-/* TODO
-template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
-_synch( )
-{
+  // Create matrices and vectors
   this->m_W.clear( );
   this->m_B.clear( );
   TNatural s = 0;
@@ -188,7 +139,84 @@ _synch( )
   this->m_W.shrink_to_fit( );
   this->m_B.shrink_to_fit( );
 }
-*/
+
+// -------------------------------------------------------------------------
+template< class _S >
+typename ivqML::Model::FeedForwardNetwork< _S >::
+TNatural ivqML::Model::FeedForwardNetwork< _S >::
+cache_size( ) const
+{
+  return( TNatural( double( this->m_Cache.size( ) ) / double( this->m_C ) ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::FeedForwardNetwork< _S >::
+resize_cache( const TNatural& s ) const
+{
+  if( s < this->cache_size( ) )
+    return;
+
+  this->Superclass::resize_cache( s * this->m_C );
+  std::fill( this->m_Cache.begin( ), this->m_Cache.end( ), 0 );
+
+  this->m_A.clear( );
+  this->m_Z.clear( );
+
+  TScalar* c = this->m_Cache.data( );
+  this->m_A.push_back( TMap( c, s, this->m_S[ 0 ] ) );
+
+  TNatural j = s * this->m_S[ 0 ];
+  for( TNatural l = 1; l <= this->number_of_layers( ); ++l )
+  {
+    this->m_A.push_back( TMap( c + j, s, this->m_S[ l ] ) );
+    j += s * this->m_S[ l ];
+
+    this->m_Z.push_back( TMap( c + j, s, this->m_S[ l ] ) );
+    j += s * this->m_S[ l ];
+  } // end for
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::FeedForwardNetwork< _S >::
+cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
+{
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+typename ivqML::Model::FeedForwardNetwork< _S >::
+TMap& ivqML::Model::FeedForwardNetwork< _S >::
+_input_cache( ) const
+{
+  return( this->m_A[ 0 ] );
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+typename ivqML::Model::FeedForwardNetwork< _S >::
+TMap& ivqML::Model::FeedForwardNetwork< _S >::
+_output_cache( ) const
+{
+  return( this->m_A.back( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _S >
+void ivqML::Model::FeedForwardNetwork< _S >::
+_evaluate( const TNatural& m ) const
+{
+  TNatural L = this->number_of_layers( );
+  for( TNatural l = 0; l < L; ++l )
+  {
+    this->m_Z[ l ] =
+      ( this->m_A[ l ] * this->m_W[ l ] ).rowwise( )
+      +
+      this->m_B[ l ].row( 0 );
+    this->m_F[ l ].second( this->m_A[ l + 1 ], this->m_Z[ l ], false );
+  } // end for
+}
 
 // -------------------------------------------------------------------------
 template< class _S >

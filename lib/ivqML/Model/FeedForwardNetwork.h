@@ -74,8 +74,11 @@ namespace ivqML
       bool m_IsLabeling { true }; // TODO: detect this
 
       std::vector< TNatural > m_S;
+      TNatural m_C;
       std::vector< TMap > m_W;
       std::vector< TMap > m_B;
+      mutable std::vector< TMap > m_A;
+      mutable std::vector< TMap > m_Z;
       std::vector< std::pair< std::string, TActivation > > m_F;
     };
   } // end namespace

@@ -71,12 +71,11 @@ New( const std::string& n )
           [&d]( const TScalar& z ) -> TScalar
           {
             TScalar a;
-            /*if( z <= -s_L )
+            if( z <= -s_L )
               a = s_0;
             else if( z >= s_L )
               a = s_1;
             else
-            */
               a = s_1 / ( s_1 + std::exp( -z ) );
             return( d? ( a * ( s_1 - a ) ): a );
           }
