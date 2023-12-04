@@ -40,7 +40,12 @@ int main( int argc, char** argv )
   std::cout << "---------- BACKPROPAGATION ----------" << std::endl;
   _M::TMatrix G;
   _M::TScalar J;
-  // TODO: model.cost( G, Y, X, &J );
+  model.cost(
+    G,
+    _M::TMap( X.data( ), X.rows( ), X.cols( ) ),
+    _M::TMap( Y.data( ), Y.rows( ), Y.cols( ) ),
+    &J
+    );
 
   return( EXIT_SUCCESS );
 }

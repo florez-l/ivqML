@@ -182,6 +182,8 @@ template< class _S >
 void ivqML::Model::FeedForwardNetwork< _S >::
 cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
 {
+  // Forward propagation
+  this->evaluate( X );
 }
 
 // -------------------------------------------------------------------------
