@@ -194,6 +194,8 @@ cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
   TScalar m = TScalar( X.rows( ) );
   TNatural L = this->number_of_layers( );
   TMatrix D = this->m_A[ L ] - Y;
+  std::cout << X << std::endl;
+  std::cout << Y << std::endl;
 
   for( TNatural l = L; l > 0; --l )
   {
@@ -214,7 +216,11 @@ cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
       this->m_F[ l - 2 ].second( mZp, this->m_Z[ l - 2 ], true );
       D.array( ) *= Zp.array( );
     } // end if
-  }
+  } // end for
+
+  std::cout << G << std::endl;
+  std::exit( 1 );
+
 }
 
 // -------------------------------------------------------------------------
