@@ -11,6 +11,7 @@ set(
   _simple_examples
   FeedForwardNetwork_00
   FeedForwardNetwork_01
+  FeedForwardNetwork_ADAMFit_Image
   LinearModel_00
   LinearModel_AnalyticalFit_CSV
   LinearModel_ADAMFit_00
