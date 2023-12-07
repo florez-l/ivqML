@@ -67,17 +67,18 @@ New( const std::string& n )
     return(
       []( TMap& A, const TMap& Z, bool d ) -> void
       {
+        static const TScalar L = std::log( Self::s_1 - Self::s_E ) - std::log( Self::s_E );
         A = Z.unaryExpr(
-          [&d]( const TScalar& z ) -> TScalar
+          [&]( const TScalar& z ) -> TScalar
           {
             TScalar a;
-            if( z <= -s_L )
-              a = s_0;
-            else if( z >= s_L )
-              a = s_1;
+            if( z <= -L )
+              a = Self::s_0;
+            else if( z >= L )
+              a = Self::s_1;
             else
-              a = s_1 / ( s_1 + std::exp( -z ) );
-            return( d? ( a * ( s_1 - a ) ): a );
+              a = Self::s_1 / ( Self::s_1 + std::exp( -z ) );
+            return( d? ( a * ( Self::s_1 - a ) ): a );
           }
           );
       }
