@@ -21,6 +21,8 @@ set(
   LinearModel_GradientDescentFit_00
   LinearModel_GradientDescentFit_CSV
   LogisticModel_00
+  LogisticModel_ADAMFit_CSV
+  LogisticModel_GradientDescentFit_CSV
   LogisticModel_ADAMFit_Image
   LogisticModel_GradientDescentFit_Image
   )
