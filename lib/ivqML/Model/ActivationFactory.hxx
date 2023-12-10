@@ -14,6 +14,11 @@ typename ivqML::Model::ActivationFactory< _M >::
 TActivation ivqML::Model::ActivationFactory< _M >::
 New( const std::string& n )
 {
+  static const TScalar _0 { TScalar( 0 ) };
+  static const TScalar _1 { TScalar( 1 ) };
+  static const TScalar _E { TTraits::epsilon( ) };
+  static const TScalar _L = std::log( _1 - _E ) - std::log( _E );
+
   std::string rn = n;
   std::transform(
     rn.begin( ), rn.end( ), rn.begin( ),
@@ -27,7 +32,7 @@ New( const std::string& n )
         A = Z.unaryExpr(
           [&d]( const TScalar& z ) -> TScalar
           {
-            return( ( z < s_0 )? s_0: ( d? s_1: z ) );
+            return( ( z < _0 )? _0: ( d? _1: z ) );
           }
           );
       }
@@ -40,11 +45,11 @@ New( const std::string& n )
           [&d]( const TScalar& z ) -> TScalar
           {
             return(
-              ( z < s_0 )
+              ( z < _0 )
               ?
               ( d? TScalar( 1e-2 ): z * TScalar( 1e-2 ) )
               :
-              ( d? s_1: z )
+              ( d? _1: z )
               );
           }
           );
@@ -58,7 +63,7 @@ New( const std::string& n )
           [&d]( const TScalar& z ) -> TScalar
           {
             TScalar t = std::tanh( z );
-            return( d? ( s_1 - ( t * t ) ): t );
+            return( d? ( _1 - ( t * t ) ): t );
           }
           );
       }
@@ -67,18 +72,14 @@ New( const std::string& n )
     return(
       []( TMap& A, const TMap& Z, bool d ) -> void
       {
-        static const TScalar L = std::log( Self::s_1 - Self::s_E ) - std::log( Self::s_E );
         A = Z.unaryExpr(
           [&]( const TScalar& z ) -> TScalar
           {
             TScalar a;
-            if( z <= -L )
-              a = Self::s_0;
-            else if( z >= L )
-              a = Self::s_1;
-            else
-              a = Self::s_1 / ( Self::s_1 + std::exp( -z ) );
-            return( d? ( a * ( Self::s_1 - a ) ): a );
+            if     ( z <= -_L ) a = _0;
+            else if( z >=  _L ) a = _1;
+            else                a = _1 / ( _1 + std::exp( -z ) );
+            return( d? ( a * ( _1 - a ) ): a );
           }
           );
       }
@@ -98,7 +99,7 @@ New( const std::string& n )
         A = Z.unaryExpr(
           [&d]( const TScalar& z ) -> TScalar
           {
-            return( d? s_1: z );
+            return( d? _1: z );
           }
           );
       }

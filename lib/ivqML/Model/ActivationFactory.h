@@ -27,11 +27,6 @@ namespace ivqML
 
     public:
       static TActivation New( const std::string& n );
-
-    protected:
-      static constexpr TScalar s_0 { TScalar( 0 ) };
-      static constexpr TScalar s_1 { TScalar( 1 ) };
-      static constexpr TScalar s_E { TTraits::epsilon( ) };
     };
   } // end namespace
 } // end namespace
