@@ -81,11 +81,15 @@ bool ivqML::IO::CSV::Write(
   const char& separator
   )
 {
+  std::stringstream seps;
+  seps << separator;
+
   Eigen::IOFormat f(
-    Eigen::StreamPrecision, Eigen::DontAlignCols, ",", "\n", "", "", "", "\n"
+    Eigen::StreamPrecision, Eigen::DontAlignCols,
+    seps.str( ), "\n", "", "", "", "\n"
     );
   std::ofstream ofs( fname.c_str( ) );
-  ofs << M.format( f );
+  ofs << M.derived( ).format( f );
   ofs.close( );
 
   return( true );

@@ -9,6 +9,7 @@ include_directories(
 
 set(
   _simple_examples
+  ExtractSamplesFrom2DImage
   FeedForwardNetwork_00
   FeedForwardNetwork_01
   FeedForwardNetwork_ADAMFit_Image
