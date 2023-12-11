@@ -23,8 +23,6 @@ set(
   LogisticModel_00
   LogisticModel_ADAMFit_CSV
   LogisticModel_GradientDescentFit_CSV
-  LogisticModel_ADAMFit_Image
-  LogisticModel_GradientDescentFit_Image
   )
 foreach(_e ${_simple_examples})
   add_executable(ivqML_example_${_e} ${_e}.cxx)

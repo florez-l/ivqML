@@ -18,8 +18,20 @@ using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
 
 int main( int argc, char** argv )
 {
+  if( argc < 5 )
+  {
+    std::cerr
+      << "Usage: " << argv[ 0 ]
+      << " input_image samples labels output_csv [sep=',']"
+      << std::endl;
+    return( EXIT_FAILURE );
+  } // end if
+
   std::string in_fname = argv[ 1 ];
   std::string out_fname = argv[ 4 ];
+  char sep = ',';
+  if( argc > 5 )
+    sep = argv[ 5 ][ 0 ];
   unsigned long long samples, labels;
   std::istringstream( argv[ 2 ] ) >> samples;
   std::istringstream( argv[ 3 ] ) >> labels;
@@ -35,7 +47,7 @@ int main( int argc, char** argv )
     ivqML::Helpers::extract_discrete_samples_from_image< _I, _M >(
       reader->GetOutput( ), samples, labels
       );
-  ivqML::IO::CSV::Write( D, out_fname, ',' );
+  ivqML::IO::CSV::Write( D, out_fname, sep );
 
   return( EXIT_SUCCESS );
 }

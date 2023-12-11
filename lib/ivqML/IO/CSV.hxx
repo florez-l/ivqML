@@ -89,6 +89,9 @@ bool ivqML::IO::CSV::Write(
     seps.str( ), "\n", "", "", "", "\n"
     );
   std::ofstream ofs( fname.c_str( ) );
+  for( unsigned long long c = 0; c < M.cols( ) - 1; ++c )
+    ofs << "x_" << c << separator;
+  ofs << "y" << std::endl;
   ofs << M.derived( ).format( f );
   ofs.close( );
 

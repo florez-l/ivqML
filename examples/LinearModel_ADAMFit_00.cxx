@@ -2,45 +2,60 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
-#include <csignal>
-#include <iostream>
-
 #include <ivqML/Model/Linear.h>
 #include <ivqML/Optimizer/ADAM.h>
+#include <ivqML/Trainers/CommandLine.h>
 
 using _R = long double;
 using _M = ivqML::Model::Linear< _R >;
+using _O = ivqML::Optimizer::ADAM< _M >;
 
 /**
  */
 class Training
-  : public ivqML::Optimizer::ADAM< _M >
+  : public ivqML::Trainers::CommandLine< _O >
 {
 public:
   using Self = Training;
-  using Superclass = ivqML::Optimizer::ADAM< _M >;
+  using Superclass = ivqML::Trainers::CommandLine< _O >;
   ivqML_Optimizer_Typedefs;
 
 public:
   ivqMLAttributeMacro( samples, TNatural, 100 );
 
 public:
-  Training( );
+  Training( )
+    : Superclass( )
+    {
+      this->m_P.add_options( )
+        ivqML_Optimizer_OptionMacro( samples, "samples" );
+    }
   virtual ~Training( ) override = default;
 
-  static bool debug(
-    const _R& J, const _R& G, const _M* m, const _M::TNatural& i, bool d
-    );
-
-  virtual void fit( ) override;
-
 protected:
-  _M m_FittedModel;
-  _M::TMatrix m_dX;
-  _M::TMatrix m_dY;
-  static bool s_ManualStop;
+  virtual void _prepare_training( ) override
+    {
+      // Model to generate data
+      _M real_model( 1 );
+      real_model[ 0 ] = 3;
+      real_model[ 1 ] = -2.5;
+      std::cerr << "Real model: " << std::endl << real_model << std::endl;
+
+      // Some random input data
+      this->m_dX =
+        _M::TMatrix::Zero( this->m_samples, real_model.number_of_inputs( ) );
+      this->m_dX.setRandom( );
+      this->m_dX.array( ) *= 10;
+      this->m_dX.array( ) -= 5;
+      this->m_dY = real_model.evaluate( this->m_dX );
+
+      // Prepare model
+      this->m_Model.set_number_of_parameters(
+        real_model.number_of_parameters( )
+        );
+      this->m_Model.random_fill( );
+    }
 };
-bool Training::s_ManualStop = false;
 
 // -------------------------------------------------------------------------
 int main( int argc, char** argv )
@@ -57,61 +72,6 @@ int main( int argc, char** argv )
   tr_exp.fit( );
 
   return( EXIT_SUCCESS );
-}
-
-// -------------------------------------------------------------------------
-Training::
-Training( )
-  : Superclass( )
-{
-  this->m_P.add_options( )
-    ivqML_Optimizer_OptionMacro( samples, "samples" );
-
-  // Detect ctrl-c event to stop optimization and finish training
-  signal( SIGINT, []( int s ) -> void { Self::s_ManualStop = true; } );
-
-  // Some basic configuration
-  this->set_debug( Self::debug );
-}
-
-// -------------------------------------------------------------------------
-bool Training::
-debug( const _R& J, const _R& G, const _M* m, const _M::TNatural& i, bool d )
-{
-  if( d )
-    std::cout << "J=" << J << ", Gn=" << G << ", i=" << i << std::endl;
-  return( Self::s_ManualStop );
-}
-
-// -------------------------------------------------------------------------
-void Training::
-fit( )
-{
-  // Model to generate data
-  _M real_model( 1 );
-  real_model[ 0 ] = 3;
-  real_model[ 1 ] = -2.5;
-  std::cout << "Real model    : " << real_model << std::endl;
-
-  // Some random input data
-  this->m_dX =
-    _M::TMatrix::Zero( this->m_samples, real_model.number_of_inputs( ) );
-  this->m_dX.setRandom( );
-  this->m_dX.array( ) *= 10;
-  this->m_dX.array( ) -= 5;
-
-  this->m_dY = real_model.evaluate( this->m_dX );
-
-  // Model to be fitted
-  this->m_FittedModel
-    .set_number_of_parameters( real_model.number_of_parameters( ) );
-  this->m_FittedModel.random_fill( );
-  std::cout << "Initial model : " << this->m_FittedModel << std::endl;
-
-  // Go!
-  this->init( this->m_FittedModel, this->m_dX, this->m_dY );
-  this->Superclass::fit( );
-  std::cout << "Fitted model  : " << this->m_FittedModel << std::endl;
 }
 
 // eof - $RCSfile$
