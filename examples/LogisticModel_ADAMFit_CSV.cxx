@@ -38,7 +38,7 @@ protected:
     {
       // Data
       TMatrix D;
-      ivqML::IO::CSV::Read( D, this->m_input );
+      ivqML::IO::CSV::Read( D, this->m_input, 1 );
       this->m_dX = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
       this->m_dY = D.col( D.cols( ) - 1 );
 
