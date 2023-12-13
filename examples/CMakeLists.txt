@@ -23,6 +23,7 @@ set(
   LogisticModel_00
   LogisticModel_ADAMFit_CSV
   LogisticModel_GradientDescentFit_CSV
+  Sandbox
   )
 foreach(_e ${_simple_examples})
   add_executable(ivqML_example_${_e} ${_e}.cxx)
