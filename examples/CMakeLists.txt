@@ -23,6 +23,7 @@ set(
   LogisticModel_00
   LogisticModel_ADAMFit_CSV
   LogisticModel_GradientDescentFit_CSV
+  MNIST_FeedForwardNetwork_Train
   Sandbox
   )
 foreach(_e ${_simple_examples})
