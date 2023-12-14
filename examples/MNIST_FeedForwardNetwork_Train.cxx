@@ -3,6 +3,10 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+#include <set>
+
+#include <ivqML/Config.h>
+#include <ivqML/IO/Binary.h>
 #include <ivqML/Model/FeedForwardNetwork.h>
 #include <ivqML/Optimizer/ADAM.h>
 #include <ivqML/Trainers/CommandLine.h>
@@ -43,13 +47,21 @@ protected:
   virtual void _prepare_training( ) override
     {
       // Data
-      /* TODO
-         TMatrix D;
-         ivqML::IO::CSV::Read( D, this->m_input, 1 );
-         this->m_dX = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
-         this->m_dY = D.col( D.cols( ) - 1 );
+      ivqML::IO::Binary::Read( this->m_dX, this->m_trainX );
 
-         // Model to be fitted
+      Eigen::Matrix< Eigen::Index, Eigen::Dynamic, Eigen::Dynamic > Y;
+      ivqML::IO::Binary::Read( Y, this->m_trainY );
+
+      TNatural nLabels = Y.maxCoeff( ) + 1;
+      TMatrix I = TMatrix::Identity( nLabels,  nLabels );
+      this->m_dY = I( Y.col( 0 ), ivq_EIGEN_ALL );
+
+      // Model to be fitted
+      this->m_Model.add_layer( this->m_dX.cols( ), 30, "relu" );
+      this->m_Model.add_layer( 20, "relu" );
+      this->m_Model.add_layer( 10, "softmax" );
+      this->m_Model.init( );
+      /* TODO
          this->m_Model.set_number_of_inputs( this->m_dX.cols( ) );
          this->m_Model.random_fill( );
       */

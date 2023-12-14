@@ -9,6 +9,7 @@
 
 
 #include <ivqML/Export.h>
+#include <ivq/eigen/Config.h>
 #include <Eigen/Core>
 
 // -------------------------------------------------------------------------

@@ -65,7 +65,7 @@ fit( )
   std::cerr << "-------------- START ---------------" << std::endl;
   this->Superclass::fit( );
   std::cerr << "-------------- FINISH --------------" << std::endl;
-  std::cerr << "Fitted model: " << std::endl << this->m_Model << std::endl;
+  std::cout << this->m_Model << std::endl;
 }
 
 #endif // __ivqML__Trainers__CommandLine__hxx__
