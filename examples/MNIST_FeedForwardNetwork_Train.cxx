@@ -57,9 +57,16 @@ protected:
       this->m_dY = I( Y.col( 0 ), ivq_EIGEN_ALL );
 
       // Model to be fitted
-      this->m_Model.add_layer( this->m_dX.cols( ), 30, "relu" );
-      this->m_Model.add_layer( 20, "relu" );
+      this->m_Model.add_layer( this->m_dX.cols( ), 50, "relu" );
+      this->m_Model.add_layer( 40, "relu" );
+      this->m_Model.add_layer( 30, "relu" );
       this->m_Model.add_layer( 10, "softmax" );
+         
+      /* TODO
+         this->m_Model.add_layer( this->m_dX.cols( ), 30, "relu" );
+         this->m_Model.add_layer( 20, "relu" );
+         this->m_Model.add_layer( 10, "softmax" );
+      */
       this->m_Model.init( );
       /* TODO
          this->m_Model.set_number_of_inputs( this->m_dX.cols( ) );
