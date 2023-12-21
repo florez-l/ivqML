@@ -55,33 +55,16 @@ namespace ivqML
 
       virtual TNatural number_of_outputs( ) const = 0;
 
-      _S* begin( );
-      const _S* begin( ) const;
-
-      _S* end( );
-      const _S* end( ) const;
-
-      template< class _X >
-      auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
-
-      virtual void cost(
-        TMatrix& G, const TMap& X, const TMap& Y, TScalar* J = nullptr
-        ) const = 0;
-
-      virtual TNatural cache_size( ) const;
-      virtual void resize_cache( const TNatural& s ) const;
-
     protected:
-      virtual TMap& _input_cache( ) const = 0;
-      virtual TMap& _output_cache( ) const = 0;
-
-      virtual void _evaluate( const TNatural& m ) const = 0;
+      virtual void _map(
+        TMap& map,
+        const TNatural& r, const TNatural& c, const TNatural& o = 0
+        );
       virtual void _from_stream( std::istream& i );
       virtual void _to_stream( std::ostream& o ) const;
 
     protected:
       std::vector< TScalar > m_Parameters;
-      mutable std::vector< TScalar > m_Cache;
 
     public:
       friend std::istream& operator>>( std::istream& i, Self& m )

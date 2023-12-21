@@ -86,55 +86,10 @@ set_number_of_parameters( const TNatural& p )
 
 // -------------------------------------------------------------------------
 template< class _S >
-_S* ivqML::Model::Base< _S >::
-begin( )
-{
-  return( this->m_Parameters.data( ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-const _S* ivqML::Model::Base< _S >::
-begin( ) const
-{
-  return( this->m_Parameters.data( ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-_S* ivqML::Model::Base< _S >::
-end( )
-{
-  return( this->m_Parameters.data( ) + this->m_Parameters.size( ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-const _S* ivqML::Model::Base< _S >::
-end( ) const
-{
-  return( this->m_Parameters.data( ) + this->m_Parameters.size( ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-typename ivqML::Model::Base< _S >::
-TNatural ivqML::Model::Base< _S >::
-cache_size( ) const
-{
-  return( this->m_Cache.size( ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
 void ivqML::Model::Base< _S >::
-resize_cache( const TNatural& s ) const
+_map( TMap& map, const TNatural& r, const TNatural& c, const TNatural& o )
 {
-  if( s == 0 )
-    this->m_Cache.clear( );
-  if( s > this->m_Cache.size( ) )
-    this->m_Cache.resize( s );
-  this->m_Cache.shrink_to_fit( );
+  new( &map ) TMap( this->m_Parameters.data( ) + o, r, c );
 }
 
 // -------------------------------------------------------------------------
@@ -142,7 +97,11 @@ template< class _S >
 void ivqML::Model::Base< _S >::
 _from_stream( std::istream& i )
 {
-  // TODO
+  TNatural p;
+  i >> p;
+  this->set_number_of_parameters( p );
+  for( TNatural j = 0; j < this->m_Parameters.size( ); ++j )
+    i >> this->m_Parameters[ j ];
 }
 
 // -------------------------------------------------------------------------

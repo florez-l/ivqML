@@ -54,19 +54,36 @@ namespace ivqML
       TNatural number_of_layers( ) const;
       void init( );
 
-      virtual TNatural cache_size( ) const override;
-      virtual void resize_cache( const TNatural& s ) const override;
+      template< class _X >
+      auto evaluate( const Eigen::EigenBase< _X >& iX ) const
+        {
+          return( iX.derived( ) );
+        }
 
-      virtual void cost(
-        TMatrix& G, const TMap& X, const TMap& Y, TScalar* J = nullptr
-        ) const override;
+      template< class _G, class _X, class _Y >
+      void cost(
+        Eigen::EigenBase< _G >& iG,
+        const Eigen::EigenBase< _X >& iX,
+        const Eigen::EigenBase< _Y >& iY,
+        TScalar* J = nullptr
+        ) const
+        {
+        }
+
+      template< class _X >
+      auto threshold( const Eigen::EigenBase< _X >& iX ) const
+        {
+          return( iX.derived( ) );
+        }
+
+      /* TODO
+         virtual void cost(
+         TMatrix& G, const TMap& X, const TMap& Y, TScalar* J = nullptr
+         ) const override;
+         virtual void _evaluate( const TNatural& m ) const override;
+      */
 
     protected:
-      virtual TMap& _input_cache( ) const override;
-      virtual TMap& _output_cache( ) const override;
-
-      virtual void _evaluate( const TNatural& m ) const override;
-
       virtual void _from_stream( std::istream& i ) override;
       virtual void _to_stream( std::ostream& o ) const override;
 
@@ -78,10 +95,6 @@ namespace ivqML
       std::vector< TMap > m_W;
       std::vector< TMap > m_B;
       std::vector< std::pair< std::string, TActivation > > m_F;
-
-      TNatural m_C;
-      mutable std::vector< TMap > m_A;
-      mutable std::vector< TMap > m_Z;
     };
   } // end namespace
 } // end namespace
