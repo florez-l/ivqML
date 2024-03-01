@@ -1,8 +1,8 @@
 // =========================================================================
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
-#ifndef __ivqML__Model__Logistic__hxx__
-#define __ivqML__Model__Logistic__hxx__
+#ifndef __ivqML__Model__Regression__Logistic__hxx__
+#define __ivqML__Model__Regression__Logistic__hxx__
 
 #include <cmath>
 #include <limits>
@@ -10,8 +10,8 @@
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _X >
-auto ivqML::Model::Logistic< _S >::
-evaluate( const Eigen::EigenBase< _X >& iX ) const;
+auto ivqML::Model::Regression::Logistic< _S >::
+evaluate( const Eigen::EigenBase< _X >& iX ) const
 {
   static const TScalar _0 = TScalar( 0 );
   static const TScalar _1 = TScalar( 1 );
@@ -34,7 +34,7 @@ evaluate( const Eigen::EigenBase< _X >& iX ) const;
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _G, class _X, class _Y >
-void ivqML::Model::Logistic< _S >::
+void ivqML::Model::Regression::Logistic< _S >::
 cost(
   Eigen::EigenBase< _G >& iG,
   const Eigen::EigenBase< _X >& iX,
@@ -47,7 +47,7 @@ cost(
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _X >
-auto ivqML::Model::Logistic< _S >::
+auto ivqML::Model::Regression::Logistic< _S >::
 threshold( const Eigen::EigenBase< _X >& iX ) const
 {
   return(
@@ -101,6 +101,6 @@ threshold( const Eigen::EigenBase< _X >& iX ) const
    }
 */
 
-#endif // __ivqML__Model__Logistic__hxx__
+#endif // __ivqML__Model__Regression__Logistic__hxx__
 
 // eof - $RCSfile$

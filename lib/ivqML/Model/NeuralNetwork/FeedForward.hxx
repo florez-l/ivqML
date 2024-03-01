@@ -1,8 +1,8 @@
 // =========================================================================
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
-#ifndef __ivqML__Model__FeedForwardNetwork__hxx__
-#define __ivqML__Model__FeedForwardNetwork__hxx__
+#ifndef __ivqML__Model__NeuralNetwork__FeedForward__hxx__
+#define __ivqML__Model__NeuralNetwork__FeedForward__hxx__
 
 
 
@@ -29,8 +29,8 @@
 /* TODO
 template< class _S >
 template< class _X >
-typename ivqML::Model::FeedForwardNetwork< _S >::
-TMatrix ivqML::Model::FeedForwardNetwork< _S >::
+typename ivqML::Model::FeedForward< _S >::
+TMatrix ivqML::Model::FeedForward< _S >::
 evaluate( const Eigen::EigenBase< _X >& iX ) const
 {
   // Reserve some memory
@@ -62,7 +62,7 @@ evaluate( const Eigen::EigenBase< _X >& iX ) const
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _G, class _X, class _Y >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::FeedForward< _S >::
 cost(
   Eigen::EigenBase< _G >& iG,
   const Eigen::EigenBase< _X >& iX,
@@ -75,7 +75,7 @@ cost(
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _X >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::FeedForward< _S >::
 _evaluate(
   const Eigen::EigenBase< _X >& iX,
   std::vector< TMap >& A, std::vector< TMap >& Z
@@ -97,7 +97,7 @@ _evaluate(
 /* TODO
 template< class _S >
 template< class _Y, class _X >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::FeedForward< _S >::
 operator()(
   Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX,
   bool derivative
@@ -111,7 +111,7 @@ operator()(
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _Y, class _X >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::FeedForward< _S >::
 backpropagate(
   const Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX,
   std::vector< TMatrix >& A, std::vector< TMatrix >& Z
@@ -122,6 +122,6 @@ backpropagate(
 }
 */
 
-#endif // __ivqML__Model__FeedForwardNetwork__hxx__
+#endif // __ivqML__Model__NeuralNetwork__FeedForward__hxx__
 
 // eof - $RCSfile$

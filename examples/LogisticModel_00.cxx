@@ -3,10 +3,10 @@
 // =========================================================================
 
 #include <iostream>
-#include <ivqML/Model/Logistic.h>
+#include <ivqML/Model/Regression/Logistic.h>
 
-using _R = long double;
-using _L = ivqML::Model::Logistic< _R >;
+using TReal = long double;
+using TModel = ivqML::Model::Regression::Logistic< TReal >;
 
 int main( int argc, char** argv )
 {
@@ -14,22 +14,22 @@ int main( int argc, char** argv )
   unsigned int m = 10;
 
   // A model
-  _L model( n );
+  TModel model( n );
   model.random_fill( );
   std::cout << "Model: " << model << std::endl;
 
   // Some random input data
-  _L::TMatrix X( m, n );
+  TModel::TMatrix X( n, m );
   X.setRandom( );
   std::cout << "-------------- INPUTS --------------" << std::endl;
   std::cout << X << std::endl;
 
   std::cout << "-------------- OUTPUTS --------------" << std::endl;
-  _L::TMatrix Y = model.evaluate( X );
+  TModel::TMatrix Y = model.evaluate( X );
   std::cout << Y << std::endl;
 
   std::cout << "-------------- THRESHOLDS --------------" << std::endl;
-  _L::TMatrix Z = model.threshold( X );
+  TModel::TMatrix Z = model.threshold( X );
   std::cout << Z << std::endl;
 
   return( EXIT_SUCCESS );

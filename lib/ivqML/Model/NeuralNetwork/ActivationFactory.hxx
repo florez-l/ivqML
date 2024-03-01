@@ -1,8 +1,8 @@
 // =========================================================================
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
-#ifndef __ivqML__Model__ActivationFactory__hxx__
-#define __ivqML__Model__ActivationFactory__hxx__
+#ifndef __ivqML__Model__NeuralNetwork__ActivationFactory__hxx__
+#define __ivqML__Model__NeuralNetwork__ActivationFactory__hxx__
 
 #include <algorithm>
 #include <cctype>
@@ -10,8 +10,8 @@
 
 // -------------------------------------------------------------------------
 template< class _M >
-typename ivqML::Model::ActivationFactory< _M >::
-TActivation ivqML::Model::ActivationFactory< _M >::
+typename ivqML::Model::NeuralNetwork::ActivationFactory< _M >::
+TActivation ivqML::Model::NeuralNetwork::ActivationFactory< _M >::
 New( const std::string& n )
 {
   static const TScalar _0 { TScalar( 0 ) };
@@ -106,6 +106,6 @@ New( const std::string& n )
       );
 }
 
-#endif // __ivqML__Model__ActivationFactory__hxx__
+#endif // __ivqML__Model__NeuralNetwork__ActivationFactory__hxx__
 
 // eof - $RCSfile$

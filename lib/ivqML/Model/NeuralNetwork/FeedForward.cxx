@@ -6,19 +6,19 @@
 #include <cctype>
 #include <stdexcept>
 
-#include <ivqML/Model/FeedForwardNetwork.h>
+#include <ivqML/Model/NeuralNetwork/FeedForward.h>
 
 // -------------------------------------------------------------------------
 template< class _S >
-ivqML::Model::FeedForwardNetwork< _S >::
-FeedForwardNetwork( )
+ivqML::Model::NeuralNetwork::FeedForward< _S >::
+FeedForward( )
   : Superclass( TNatural( 0 ) )
 {
 }
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 random_fill( )
 {
   this->Superclass::random_fill( );
@@ -26,8 +26,8 @@ random_fill( )
 
 // -------------------------------------------------------------------------
 template< class _S >
-typename ivqML::Model::FeedForwardNetwork< _S >::
-TNatural ivqML::Model::FeedForwardNetwork< _S >::
+typename ivqML::Model::NeuralNetwork::FeedForward< _S >::
+TNatural ivqML::Model::NeuralNetwork::FeedForward< _S >::
 number_of_inputs( ) const
 {
   if( this->m_S.size( ) > 0 )
@@ -38,7 +38,7 @@ number_of_inputs( ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 set_number_of_inputs( const TNatural& p )
 {
   // WARNING: do nothing!
@@ -46,8 +46,8 @@ set_number_of_inputs( const TNatural& p )
 
 // -------------------------------------------------------------------------
 template< class _S >
-typename ivqML::Model::FeedForwardNetwork< _S >::
-TNatural ivqML::Model::FeedForwardNetwork< _S >::
+typename ivqML::Model::NeuralNetwork::FeedForward< _S >::
+TNatural ivqML::Model::NeuralNetwork::FeedForward< _S >::
 number_of_outputs( ) const
 {
   if( this->m_S.size( ) > 0 )
@@ -58,7 +58,7 @@ number_of_outputs( ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 set_number_of_parameters( const TNatural& p )
 {
   // WARNING: do nothing!
@@ -66,7 +66,7 @@ set_number_of_parameters( const TNatural& p )
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 add_layer( const TNatural& i, const TNatural& o, const std::string& a )
 {
   this->m_S.clear( );
@@ -83,7 +83,7 @@ add_layer( const TNatural& i, const TNatural& o, const std::string& a )
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 add_layer( const TNatural& o, const std::string& a )
 {
   this->m_S.push_back( o );
@@ -92,8 +92,8 @@ add_layer( const TNatural& o, const std::string& a )
 
 // -------------------------------------------------------------------------
 template< class _S >
-typename ivqML::Model::FeedForwardNetwork< _S >::
-TNatural ivqML::Model::FeedForwardNetwork< _S >::
+typename ivqML::Model::NeuralNetwork::FeedForward< _S >::
+TNatural ivqML::Model::NeuralNetwork::FeedForward< _S >::
 number_of_layers( ) const
 {
   if( this->m_S.size( ) > 0 )
@@ -104,7 +104,7 @@ number_of_layers( ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 init( )
 {
   this->m_S.shrink_to_fit( );
@@ -131,8 +131,8 @@ init( )
     TNatural i = this->m_S[ l - 1 ];
     TNatural o = this->m_S[ l ];
 
-    this->m_W.push_back( TMap( b + s, i, o ) );
-    this->m_B.push_back( TMap( b + s + ( i * o ), 1, o ) );
+    this->m_W.push_back( TMap( b + s, o, i ) );
+    this->m_B.push_back( TMap( b + s + ( i * o ), o, 1 ) );
 
     s += o * ( i + 1 );
   } // end for
@@ -143,7 +143,7 @@ init( )
 // -------------------------------------------------------------------------
 /* TODO
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
 {
   // Forward propagation
@@ -182,8 +182,8 @@ cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
-typename ivqML::Model::FeedForwardNetwork< _S >::
-TMap& ivqML::Model::FeedForwardNetwork< _S >::
+typename ivqML::Model::NeuralNetwork::FeedForward< _S >::
+TMap& ivqML::Model::NeuralNetwork::FeedForward< _S >::
 _input_cache( ) const
 {
   return( this->m_A[ 0 ] );
@@ -191,8 +191,8 @@ _input_cache( ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
-typename ivqML::Model::FeedForwardNetwork< _S >::
-TMap& ivqML::Model::FeedForwardNetwork< _S >::
+typename ivqML::Model::NeuralNetwork::FeedForward< _S >::
+TMap& ivqML::Model::NeuralNetwork::FeedForward< _S >::
 _output_cache( ) const
 {
   return( this->m_A.back( ) );
@@ -200,7 +200,7 @@ _output_cache( ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 _evaluate( const TNatural& m ) const
 {
   TNatural L = this->number_of_layers( );
@@ -217,7 +217,7 @@ _evaluate( const TNatural& m ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 _from_stream( std::istream& i )
 {
   TNatural L, in, out;
@@ -272,7 +272,7 @@ _from_stream( std::istream& i )
 
 // -------------------------------------------------------------------------
 template< class _S >
-void ivqML::Model::FeedForwardNetwork< _S >::
+void ivqML::Model::NeuralNetwork::FeedForward< _S >::
 _to_stream( std::ostream& o ) const
 {
   TNatural L = this->number_of_layers( );
@@ -285,8 +285,13 @@ _to_stream( std::ostream& o ) const
 }
 
 // -------------------------------------------------------------------------
-template class ivqML_EXPORT ivqML::Model::FeedForwardNetwork< float >;
-template class ivqML_EXPORT ivqML::Model::FeedForwardNetwork< double >;
-template class ivqML_EXPORT ivqML::Model::FeedForwardNetwork< long double >;
+template class ivqML_EXPORT
+ivqML::Model::NeuralNetwork::FeedForward< float >;
+
+template class ivqML_EXPORT
+ivqML::Model::NeuralNetwork::FeedForward< double >;
+
+template class ivqML_EXPORT
+ivqML::Model::NeuralNetwork::FeedForward< long double >;
 
 // eof - $RCSfile$

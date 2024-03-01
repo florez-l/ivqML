@@ -2,11 +2,11 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
-#include <ivqML/Model/Logistic.h>
+#include <ivqML/Model/Regression/Logistic.h>
 
 // -------------------------------------------------------------------------
 template< class _S >
-ivqML::Model::Logistic< _S >::
+ivqML::Model::Regression::Logistic< _S >::
 Logistic( const TNatural& n )
   : Superclass( n )
 {
@@ -15,7 +15,7 @@ Logistic( const TNatural& n )
 // -------------------------------------------------------------------------
 /* TODO
    template< class _S >
-   void ivqML::Model::Logistic< _S >::
+   void ivqML::Model::Regression::Logistic< _S >::
    _evaluate( const TNatural& m ) const
    {
    static const TScalar _0 = TScalar( 0 );
@@ -36,8 +36,8 @@ Logistic( const TNatural& n )
 */
 
 // -------------------------------------------------------------------------
-template class ivqML_EXPORT ivqML::Model::Logistic< float >;
-template class ivqML_EXPORT ivqML::Model::Logistic< double >;
-template class ivqML_EXPORT ivqML::Model::Logistic< long double >;
+template class ivqML_EXPORT ivqML::Model::Regression::Logistic< float >;
+template class ivqML_EXPORT ivqML::Model::Regression::Logistic< double >;
+template class ivqML_EXPORT ivqML::Model::Regression::Logistic< long double >;
 
 // eof - $RCSfile$
