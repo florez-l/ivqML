@@ -116,7 +116,6 @@ init( )
     TNatural i = this->m_S[ l - 1 ];
     TNatural o = this->m_S[ l ];
     P += o * ( i + 1 );
-    // TODO: this->m_C += ( this->m_S[ l ] << 1 );
   } // end for
   this->Superclass::set_number_of_parameters( P );
   this->random_fill( );
@@ -124,12 +123,14 @@ init( )
   // Create matrices and vectors
   this->m_W.clear( );
   this->m_B.clear( );
+  this->m_BSize = this->m_S[ 0 ];
   TNatural s = 0;
   TScalar* b = this->m_Parameters.data( );
   for( TNatural l = 1; l < this->m_S.size( ); ++l )
   {
     TNatural i = this->m_S[ l - 1 ];
     TNatural o = this->m_S[ l ];
+    this->m_BSize += o;
 
     this->m_W.push_back( TMap( b + s, o, i ) );
     this->m_B.push_back( TMap( b + s + ( i * o ), o, 1 ) );
@@ -142,77 +143,43 @@ init( )
 
 // -------------------------------------------------------------------------
 /* TODO
-template< class _S >
-void ivqML::Model::NeuralNetwork::FeedForward< _S >::
-cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
-{
-  // Forward propagation
-  this->evaluate( X );
+   template< class _S >
+   void ivqML::Model::NeuralNetwork::FeedForward< _S >::
+   cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
+   {
+   // Forward propagation
+   this->evaluate( X );
 
-  // Check sizes
-  TNatural n = this->number_of_parameters( );
-  if( G.size( ) != n )
-    G = TMatrix::Zero( 1, n );
+   // Check sizes
+   TNatural n = this->number_of_parameters( );
+   if( G.size( ) != n )
+   G = TMatrix::Zero( 1, n );
 
-  // Backwards propagation
-  TScalar m = TScalar( X.rows( ) );
-  TNatural L = this->number_of_layers( );
-  TMatrix D = this->m_A[ L ] - Y;
-  for( TNatural l = L; l > 0; --l )
-  {
-    // Update derivatives
-    n -= D.cols( );
-    TMap( G.data( ) + n, 1, D.cols( ) ) = D.colwise( ).mean( );
-    n -= this->m_A[ l - 1 ].cols( ) * D.cols( );
-    TMap( G.data( ) + n, this->m_A[ l - 1 ].cols( ), D.cols( )  )
-      =
-      ( this->m_A[ l - 1 ].transpose( ) * D ) / m;
+   // Backwards propagation
+   TScalar m = TScalar( X.rows( ) );
+   TNatural L = this->number_of_layers( );
+   TMatrix D = this->m_A[ L ] - Y;
+   for( TNatural l = L; l > 0; --l )
+   {
+   // Update derivatives
+   n -= D.cols( );
+   TMap( G.data( ) + n, 1, D.cols( ) ) = D.colwise( ).mean( );
+   n -= this->m_A[ l - 1 ].cols( ) * D.cols( );
+   TMap( G.data( ) + n, this->m_A[ l - 1 ].cols( ), D.cols( )  )
+   =
+   ( this->m_A[ l - 1 ].transpose( ) * D ) / m;
 
-    // Update delta if there is more back layers
-    if( l > 1 )
-    {
-      D = ( D * this->m_W[ l - 1 ].transpose( ) ).eval( );
-      TMatrix Zp( D.rows( ), D.cols( ) );
-      TMap mZp(  Zp.data( ), Zp.rows( ), Zp.cols( ) );
-      this->m_F[ l - 2 ].second( mZp, this->m_Z[ l - 2 ], true );
-      D.array( ) *= Zp.array( );
-    } // end if
-  } // end for
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-typename ivqML::Model::NeuralNetwork::FeedForward< _S >::
-TMap& ivqML::Model::NeuralNetwork::FeedForward< _S >::
-_input_cache( ) const
-{
-  return( this->m_A[ 0 ] );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-typename ivqML::Model::NeuralNetwork::FeedForward< _S >::
-TMap& ivqML::Model::NeuralNetwork::FeedForward< _S >::
-_output_cache( ) const
-{
-  return( this->m_A.back( ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-void ivqML::Model::NeuralNetwork::FeedForward< _S >::
-_evaluate( const TNatural& m ) const
-{
-  TNatural L = this->number_of_layers( );
-  for( TNatural l = 0; l < L; ++l )
-  {
-    this->m_Z[ l ] =
-      ( this->m_A[ l ] * this->m_W[ l ] ).rowwise( )
-      +
-      this->m_B[ l ].row( 0 );
-    this->m_F[ l ].second( this->m_A[ l + 1 ], this->m_Z[ l ], false );
-  } // end for
-}
+   // Update delta if there is more back layers
+   if( l > 1 )
+   {
+   D = ( D * this->m_W[ l - 1 ].transpose( ) ).eval( );
+   TMatrix Zp( D.rows( ), D.cols( ) );
+   TMap mZp(  Zp.data( ), Zp.rows( ), Zp.cols( ) );
+   this->m_F[ l - 2 ].second( mZp, this->m_Z[ l - 2 ], true );
+   D.array( ) *= Zp.array( );
+   } // end if
+   } // end for
+   }
 */
 
 // -------------------------------------------------------------------------

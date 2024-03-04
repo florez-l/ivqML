@@ -15,7 +15,7 @@ int main( int argc, char** argv )
   TModel model;
   model.add_layer( 8, 4, "ReLU" );
   model.add_layer( 2, "ReLU" );
-  // model.add_layer( 1, "siGmoID" );
+  model.add_layer( 1, "siGmoID" );
   model.init( );
 
   std::cout << model << std::endl;
@@ -30,8 +30,11 @@ int main( int argc, char** argv )
   TModel::TMatrix Y = model.evaluate( X );
   std::cout << Y << std::endl;
 
+  std::cout << "-------------- THRESHOLDS --------------" << std::endl;
+  TModel::TMatrix Z = model.threshold( X );
+  std::cout << Z << std::endl;
+
   return( EXIT_SUCCESS );
 }
-
 
 // eof - $RCSfile$

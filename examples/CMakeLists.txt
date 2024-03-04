@@ -10,7 +10,9 @@ include_directories(
 set(
   _simple_examples
   FeedForwardNetwork_00
+  FeedForwardNetwork_01
   LinearModel_00
+  LinearModel_AnalyticalFit_CSV
   LogisticModel_00
 
   #  ExtractSamplesFrom2DImage

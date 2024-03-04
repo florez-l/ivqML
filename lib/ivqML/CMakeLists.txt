@@ -7,7 +7,7 @@ file(GLOB_RECURSE _cxx ${CMAKE_CURRENT_SOURCE_DIR}/*.cxx)
 file(GLOB_RECURSE _h ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB_RECURSE _hxx ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 set(_src "${_c};${_cxx};${_h};${_hxx}")
-set(_libs ivq::ivq) ## if linux ----> atomic
+set(_libs atomic ivq::ivq)
 
 include_directories(
   ${PROJECT_BINARY_DIR}/lib

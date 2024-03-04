@@ -23,24 +23,25 @@ cost(
   Eigen::EigenBase< _G >& iG,
   const Eigen::EigenBase< _X >& iX,
   const Eigen::EigenBase< _Y >& iY,
-  TScalar* J
+  TScalar* J,
+  TScalar* buffer
   ) const
 {
-  /* TODO
-     auto D = this->evaluate( iX ) - iY.derived( ).array( );
+  auto D = this->evaluate( iX ) - iY.derived( ).array( );
 
-     iG.derived( )( 0, 0 ) = TScalar( 2 ) * D.mean( );
-     iG.derived( ).block( 0, 1, 1, iG.cols( ) - 1 )
-     =
-     (
-     ( D.matrix( ).transpose( ) * iX.derived( ) )
-     *
-     ( TScalar( 2 ) / TScalar( iX.rows( ) ) )
-     );
-     if( J != nullptr )
-     *J = D.array( ).pow( 2 ).mean( );
-     asdas
-  */
+  if( iG.rows( ) != iX.rows( ) || iG.cols( ) != 1 )
+    iG.derived( ).resize( iX.rows( ), 1 );
+
+  iG.derived( )( 0, 0 ) = TScalar( 2 ) * D.mean( );
+  iG.derived( ).block( 1, 0, iG.rows( ) - 1, 1 )
+    =
+    (
+      ( D.matrix( ).transpose( ) * iX.derived( ) )
+      *
+      ( TScalar( 2 ) / TScalar( iX.rows( ) ) )
+      );
+  if( J != nullptr )
+    *J = D.array( ).pow( 2 ).mean( );
 }
 
 // -------------------------------------------------------------------------
@@ -52,29 +53,25 @@ fit(
   const TScalar& l
   )
 {
-  /* TODO
-     auto X = iX.derived( ).template cast< TScalar >( );
-     auto Y = iY.derived( ).template cast< TScalar >( );
+  auto X = iX.derived( ).template cast< TScalar >( );
+  auto Y = iY.derived( ).template cast< TScalar >( );
 
-     TNatural m = TScalar( X.rows( ) );
-     TNatural n = TScalar( X.cols( ) );
-     this->set_number_of_inputs( n );
+  TNatural m = TScalar( X.cols( ) );
+  TNatural n = TScalar( X.rows( ) );
+  this->set_number_of_inputs( n );
 
-     TMatrix Xi( m, n + 1 );
-     Xi << TMatrix::Ones( m, 1 ), X;
+  TMatrix Xi( m, n + 1 );
+  Xi << TMatrix::Ones( m, 1 ), X.transpose( );
 
-     TMap( this->m_Parameters.data( ), 1, n + 1 ) =
-     (
-     Y.transpose( ) * Xi
-     *
-     (
-     (
-     ( Xi.transpose( ) * Xi ) / m )
-     +
-     ( TMatrix::Identity( n + 1, n + 1 ) * l )
-     ).inverse( )
-     ) / TScalar( m );
-  */
+  TMap( this->m_Parameters.data( ), 1, n + 1 ) =
+    (
+      Y * Xi * (
+        ( ( Xi.transpose( ) * Xi ) / TScalar( m ) )
+        +
+        ( TMatrix::Identity( n + 1, n + 1 ) * l ) ).inverse( )
+      )
+    /
+    TScalar( m );
 }
 
 #endif // __ivqML__Model__Regression__Linear__hxx__

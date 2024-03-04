@@ -3,48 +3,35 @@
 // =========================================================================
 
 #include <iostream>
-#include <boost/program_options.hpp>
+#include <string>
+#include <sstream>
 #include <ivqML/IO/CSV.h>
-#include <ivqML/Model/Linear.h>
+#include <ivqML/Model/Regression/Linear.h>
 
 using TScalar = long double;
-using TModel = ivqML::Model::Linear< TScalar >;
-
-// -------------------------------------------------------------------------
-#define _Arg( _I, _V, _H )                                              \
-  ( _I,                                                                 \
-    boost::program_options::value< decltype( _V ) >( &_V )              \
-    ->default_value( _V ), _H )
+using TModel = ivqML::Model::Regression::Linear< TScalar >;
 
 // -------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-  std::string input = "";
-  TScalar lambda = 0;
-
-  boost::program_options::options_description options { "Options." };
-  options.add_options( )
-    ( "help,h", "help message" )
-    _Arg( "input,i",  input, "Input file" )
-    _Arg( "lambda,l", lambda, "Regularization coefficient" );
-
-  boost::program_options::variables_map vmap;
-  boost::program_options::store(
-    boost::program_options::parse_command_line( argc, argv, options ), vmap
-    );
-  boost::program_options::notify( vmap );
-  if( vmap.count( "help" ) )
+  if( argc < 2 )
   {
-    std::cerr << options << std::endl;
+    std::cerr << "Usage: " << argv[ 0 ] << " csv [lambda]" << std::endl;
     return( EXIT_FAILURE );
   } // end if
+  std::string csv = argv[ 1 ];
+  TScalar lambda = 0;
+  if( argc > 2 )
+    std::istringstream( argv[ 2 ] ) >> lambda;
 
   TModel::TMatrix D;
-  ivqML::IO::CSV::Read( D, input );
+  ivqML::IO::CSV::Read( D, csv );
 
   TModel model;
   model.fit(
-    D.block( 0, 0, D.rows( ), D.cols( ) - 1 ), D.col( D.cols( ) - 1 ), lambda
+    D.block( 0, 0, D.rows( ), D.cols( ) - 1 ).transpose( ),
+    D.col( D.cols( ) - 1 ).transpose( ),
+    lambda
     );
 
   std::cout << "Fitted model: " << model << std::endl;

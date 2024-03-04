@@ -46,7 +46,8 @@ namespace ivqML
           Eigen::EigenBase< _G >& iG,
           const Eigen::EigenBase< _X >& iX,
           const Eigen::EigenBase< _Y >& iY,
-          TScalar* J = nullptr
+          TScalar* J = nullptr,
+          TScalar* buffer = nullptr
           ) const;
 
         template< class _Y, class _X >

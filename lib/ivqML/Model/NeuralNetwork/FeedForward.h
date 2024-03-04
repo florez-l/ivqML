@@ -58,34 +58,12 @@ namespace ivqML
         void init( );
 
         template< class _X >
-        auto evaluate( const Eigen::EigenBase< _X >& iX ) const
+        auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
+
+        template< class _X >
+        auto threshold( const Eigen::EigenBase< _X >& iX ) const
           {
-            /* TODO
-               TNatural s = 0;
-               for( TNatural i = 0; i < this->m_S.size( ); ++i )
-               s += this->m_S[ i ];
-               std::cout << s << std::endl;
-               std::cout << this->number_of_parameters( ) << std::endl;
-            */
-            TMatrix Z, A;
-            unsigned long long L = this->m_W.size( );
-            A = iX.derived( ).template cast< TScalar >( );
-            for( unsigned long long l = 0; l < L; ++l )
-            {
-              Z = ( this->m_W[ l ] * A ).colwise( ) + this->m_B[ l ].col( 0 );
-
-              std::cout << "============= " << l << std::endl;
-              std::cout << A << std::endl;
-              std::cout << "-------------" << std::endl;
-              std::cout << Z << std::endl;
-              std::cout << "=============" << std::endl;
-
-
-              TMap mA( A.data( ), A.rows( ), A.cols( ) );
-              TMap mZ( Z.data( ), Z.rows( ), Z.cols( ) );
-              this->m_F[ l ].second( mA, mZ, false );
-            } // end for
-            return( A );
+            return( iX.derived( ) );
           }
 
         template< class _G, class _X, class _Y >
@@ -98,19 +76,6 @@ namespace ivqML
           {
           }
 
-        template< class _X >
-        auto threshold( const Eigen::EigenBase< _X >& iX ) const
-          {
-            return( iX.derived( ) );
-          }
-
-        /* TODO
-           virtual void cost(
-           TMatrix& G, const TMap& X, const TMap& Y, TScalar* J = nullptr
-           ) const override;
-           virtual void _evaluate( const TNatural& m ) const override;
-        */
-
       protected:
         virtual void _from_stream( std::istream& i ) override;
         virtual void _to_stream( std::ostream& o ) const override;
@@ -119,6 +84,7 @@ namespace ivqML
         bool m_IsLabeling { true }; // TODO: detect this
 
         std::vector< TNatural > m_S;
+        TNatural m_BSize;
 
         std::vector< TMap > m_W;
         std::vector< TMap > m_B;

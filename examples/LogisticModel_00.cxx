@@ -32,6 +32,18 @@ int main( int argc, char** argv )
   TModel::TMatrix Z = model.threshold( X );
   std::cout << Z << std::endl;
 
+  std::cout << "-------------- COST --------------" << std::endl;
+  TModel model_for_cost( n );
+  model_for_cost.random_fill( );
+
+  TModel::TMatrix G;
+  TReal J;
+  model_for_cost.cost( G, X, Y, &J );
+
+  std::cout << "Model for cost: " << model_for_cost << std::endl;
+  std::cout << "Cost = " << J << std::endl;
+  std::cout << "Gradient = " << std::endl << G << std::endl;
+
   return( EXIT_SUCCESS );
 }
 

@@ -88,8 +88,8 @@ New( const std::string& n )
     return(
       []( TMap& A, const TMap& Z, bool d ) -> void
       {
-        A = ( Z.colwise( ) - Z.rowwise( ).maxCoeff( ) ).array( ).exp( );
-        A.array( ).colwise( ) /= A.array( ).rowwise( ).sum( );
+        A = ( Z.rowwise( ) - Z.colwise( ).maxCoeff( ) ).array( ).exp( );
+        A.array( ).rowwise( ) /= A.array( ).colwise( ).sum( );
       }
       );
   else // if( "linear" )
