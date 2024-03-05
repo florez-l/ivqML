@@ -45,7 +45,7 @@ int main( int argc, char** argv )
 
   std::cout << "Model for cost: " << std::endl << model_for_cost << std::endl;
   std::cout << "Cost = " << J << std::endl;
-  std::cout << "Gradient = " << std::endl << G << std::endl;
+  std::cout << "Gradient = " << std::endl << G.transpose( ) << std::endl;
 
   return( EXIT_SUCCESS );
 }

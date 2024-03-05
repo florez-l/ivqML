@@ -4,25 +4,30 @@
 #ifndef __ivqML__Model__NeuralNetwork__FeedForward__hxx__
 #define __ivqML__Model__NeuralNetwork__FeedForward__hxx__
 
+#include <cstdlib>
+
 // -------------------------------------------------------------------------
 template< class _S >
 template< class _X >
 auto ivqML::Model::NeuralNetwork::FeedForward< _S >::
-evaluate( const Eigen::EigenBase< _X >& iX ) const
+evaluate( const Eigen::EigenBase< _X >& iX, TScalar* iB ) const
 {
   // Computation buffer
   TNatural m = iX.cols( );
-  TNatural bsize = ( ( this->m_BSize << 1 ) - this->m_S[ 0 ] ) * m;
-  std::vector< TScalar > data( bsize, TScalar( 0 ) );
-  data.shrink_to_fit( );
-  TScalar* buffer = data.data( );
+  TNatural bsize = this->m_BSize * m;
+  TScalar* buffer = iB;
+  if( iB == nullptr )
+    buffer =
+      reinterpret_cast< TScalar* >(
+        std::malloc( sizeof( TScalar ) * bsize )
+        );
 
   // Loop
   TMap( buffer, this->m_S[ 0 ], m )
     = iX.derived( ).template cast< TScalar >( );
 
   TNatural as = 0, zs = this->m_S[ 0 ] * m;
-  TNatural L = this->m_W.size( );
+  TNatural L = this->number_of_layers( );
   for( TNatural l = 0; l < L; ++l )
   {
     TMap Z( buffer + zs, this->m_S[ l + 1 ], m );
@@ -38,35 +43,12 @@ evaluate( const Eigen::EigenBase< _X >& iX ) const
     zs += ( this->m_S[ l + 1 ] + this->m_S[ l + 1 ] ) * m;
   } // end for
 
-  return( TMatrix( TMap( buffer + as, this->m_S[ L ], m ) ) );
+  // Get result and free buffer
+  TMatrix R = TMap( buffer + as, this->m_S[ L ], m );
+  if( iB == nullptr )
+    std::free( buffer );
+  return( R );
 }
-
-/* TODO
-   template< class _S >
-   template< class _G, class _X, class _Y >
-   void ivqML::Model::FeedForward< _S >::
-   cost(
-   Eigen::EigenBase< _G >& iG,
-   const Eigen::EigenBase< _X >& iX,
-   const Eigen::EigenBase< _Y >& iY,
-   TScalar* J
-   ) const
-   {
-   }
-*/
-/* TODO
-   template< class _S >
-   template< class _Y, class _X >
-   void ivqML::Model::FeedForward< _S >::
-   backpropagate(
-   const Eigen::EigenBase< _Y >& iY, const Eigen::EigenBase< _X >& iX,
-   std::vector< TMatrix >& A, std::vector< TMatrix >& Z
-   ) const
-   {
-   TNatural L = this->number_of_layers( );
-   this->_eval( iX, A, Z );
-   }
-*/
 
 #endif // __ivqML__Model__NeuralNetwork__FeedForward__hxx__
 

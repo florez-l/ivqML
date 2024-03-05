@@ -130,7 +130,7 @@ init( )
   {
     TNatural i = this->m_S[ l - 1 ];
     TNatural o = this->m_S[ l ];
-    this->m_BSize += o;
+    this->m_BSize += ( o << 1 );
 
     this->m_W.push_back( TMap( b + s, o, i ) );
     this->m_B.push_back( TMap( b + s + ( i * o ), o, 1 ) );

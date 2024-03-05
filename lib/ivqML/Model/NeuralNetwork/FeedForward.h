@@ -4,6 +4,7 @@
 #ifndef __ivqML__Model__NeuralNetwork__FeedForward__h__
 #define __ivqML__Model__NeuralNetwork__FeedForward__h__
 
+#include <cstdlib>
 #include <functional>
 #include <string>
 #include <utility>
@@ -58,7 +59,10 @@ namespace ivqML
         void init( );
 
         template< class _X >
-        auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
+        auto evaluate(
+          const Eigen::EigenBase< _X >& iX,
+          TScalar* iB = nullptr
+          ) const;
 
         template< class _X >
         auto threshold( const Eigen::EigenBase< _X >& iX ) const
@@ -72,10 +76,50 @@ namespace ivqML
           const Eigen::EigenBase< _X >& iX,
           const Eigen::EigenBase< _Y >& iY,
           TScalar* J = nullptr,
-          TScalar* buffer = nullptr
+          TScalar* iB = nullptr
           ) const
           {
             using _Gs = typename _G::Scalar;
+
+            // Gradient size
+            if( iG.size( ) != this->number_of_parameters( ) )
+              iG.derived( ).resize( this->number_of_parameters( ), 1 );
+            // TODO: erase this
+            std::fill( iG.derived( ).data( ), iG.derived( ).data( ) + iG.size( ), std::numeric_limits< _Gs >::max( ) );
+
+            // Computation buffer
+            TNatural m = iX.cols( );
+            TNatural bsize = this->m_BSize * m;
+            TScalar* buffer = iB;
+            if( iB == nullptr )
+              buffer =
+                reinterpret_cast< TScalar* >(
+                  std::malloc( sizeof( TScalar ) * bsize )
+                  );
+
+            // Forward propagation
+            this->evaluate( iX, buffer );
+
+            // Last layer derivation
+            TNatural L = this->number_of_layers( );
+            TNatural as = bsize - ( this->m_S[ L ] * m );
+            TMap D( buffer + as, this->m_S[ L ], m );
+            D -= iY.derived( ).template cast< TScalar >( );
+
+            // Remaining layers
+            for( TNatural l = L; l > 0; --l )
+            {
+            } // end for
+
+            /* TODO
+               std::cout << "******************************" << std::endl;
+               std::cout << A << std::endl;
+               std::cout << "******************************" << std::endl;
+            */
+
+            // Free buffer
+            if( iB == nullptr )
+              std::free( buffer );
           }
 
       protected:
