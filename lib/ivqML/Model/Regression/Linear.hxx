@@ -17,29 +17,25 @@ evaluate( const Eigen::EigenBase< _X >& iX ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
-template< class _G, class _X, class _Y >
+template< class _X, class _Y >
 void ivqML::Model::Regression::Linear< _S >::
 cost(
-  Eigen::EigenBase< _G >& iG,
+  TScalar* bG,
   const Eigen::EigenBase< _X >& iX,
   const Eigen::EigenBase< _Y >& iY,
   TScalar* J,
   TScalar* buffer
   ) const
 {
+  static const TScalar _2 = TScalar( 2 );
   auto D = this->evaluate( iX ) - iY.derived( ).array( );
 
-  if( iG.rows( ) != iX.rows( ) || iG.cols( ) != 1 )
-    iG.derived( ).resize( iX.rows( ), 1 );
-
-  iG.derived( )( 0, 0 ) = TScalar( 2 ) * D.mean( );
-  iG.derived( ).block( 1, 0, iG.rows( ) - 1, 1 )
+  *bG = _2 * D.mean( );
+  TMap( bG + 1, iX.rows( ), 1 )
     =
-    (
-      ( D.matrix( ).transpose( ) * iX.derived( ) )
-      *
-      ( TScalar( 2 ) / TScalar( iX.rows( ) ) )
-      );
+    ( iX.derived( ).template cast< TScalar >( ) * D.matrix( ).transpose( ) )
+    *
+    ( _2 / TScalar( iX.rows( ) ) );
   if( J != nullptr )
     *J = D.array( ).pow( 2 ).mean( );
 }

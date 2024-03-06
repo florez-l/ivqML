@@ -39,13 +39,13 @@ int main( int argc, char** argv )
   model_for_cost = model;
   model_for_cost.init( );
 
-  TModel::TMatrix G;
+  TModel::TMatrix G( 1, model_for_cost.number_of_parameters( ) );
   TReal J;
-  model_for_cost.cost( G, X, Y, &J );
+  model_for_cost.cost( G.data( ), X, Y, &J );
 
   std::cout << "Model for cost: " << std::endl << model_for_cost << std::endl;
   std::cout << "Cost = " << J << std::endl;
-  std::cout << "Gradient = " << std::endl << G.transpose( ) << std::endl;
+  std::cout << "Gradient = " << G << std::endl;
 
   return( EXIT_SUCCESS );
 }

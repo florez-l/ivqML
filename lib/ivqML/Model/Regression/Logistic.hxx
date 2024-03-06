@@ -33,25 +33,21 @@ evaluate( const Eigen::EigenBase< _X >& iX ) const
 
 // -------------------------------------------------------------------------
 template< class _S >
-template< class _G, class _X, class _Y >
+template< class _X, class _Y >
 void ivqML::Model::Regression::Logistic< _S >::
 cost(
-  Eigen::EigenBase< _G >& iG,
+  TScalar* bG,
   const Eigen::EigenBase< _X >& iX,
   const Eigen::EigenBase< _Y >& iY,
   TScalar* J,
   TScalar* buffer
   ) const
 {
-  using _Gs = typename _G::Scalar;
-  static const TScalar _e = std::numeric_limits< TScalar >::epsilon( );
+  static const TScalar _E = std::numeric_limits< TScalar >::epsilon( );
 
   auto X = iX.derived( ).template cast< TScalar >( );
   auto Y = iY.derived( ).template cast< TScalar >( );
   TScalar m = TScalar( X.cols( ) );
-
-  if( iG.rows( ) != iX.rows( ) || iG.cols( ) != 1 )
-    iG.derived( ).resize( iX.rows( ), 1 );
 
   TMatrix Z = this->evaluate( X );
   std::atomic< TScalar > S = 0;
@@ -65,15 +61,14 @@ cost(
         if( J != nullptr )
         {
           TScalar l = ( Y( r, c ) == 0 )? ( TScalar( 1 ) - z ): z;
-          S = S - ( std::log( ( _e < l )? l: _e ) / m );
+          S = S - ( std::log( ( _E < l )? l: _E ) / m );
         } // end if
         return( z - Y( r, c ) );
       }
       );
 
-  iG.derived( )( 0, 0 ) = _Gs( Z.mean( ) );
-  iG.derived( ).block( 1, 0, iG.rows( ) - 1, 1 )
-    = ( ( X * Z.transpose( ) ) / m ).template cast< _Gs >( );
+  *bG = Z.mean( );
+  TMap( bG + 1, iX.rows( ), 1 ) = ( X * Z.transpose( ) ) / m;
   if( J != nullptr )
     *J = TScalar( S );
 }
