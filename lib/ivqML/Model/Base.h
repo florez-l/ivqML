@@ -7,7 +7,6 @@
 #include <ivqML/Config.h>
 #include <istream>
 #include <ostream>
-#include <vector>
 
 namespace ivqML
 {
@@ -64,7 +63,8 @@ namespace ivqML
       virtual void _to_stream( std::ostream& o ) const;
 
     protected:
-      std::vector< TScalar > m_Parameters;
+      TScalar* m_Parameters { nullptr };
+      TNatural m_Size       { 0 };
 
     public:
       friend std::istream& operator>>( std::istream& i, Self& m )

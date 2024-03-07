@@ -3,6 +3,7 @@
 // =========================================================================
 
 #include <ivqML/Model/Base.h>
+#include <cstdlib>
 #include <random>
 
 // -------------------------------------------------------------------------
@@ -18,6 +19,8 @@ template< class _S >
 ivqML::Model::Base< _S >::
 ~Base( )
 {
+  if( this->m_Parameters != nullptr )
+    std::free( this->m_Parameters );
 }
 
 // -------------------------------------------------------------------------
@@ -28,7 +31,7 @@ random_fill( )
   std::random_device r;
   std::mt19937 g( r( ) );
   std::uniform_real_distribution< _S > d( 0, 1 );
-  for( TNatural i = 0; i < this->m_Parameters.size( ); ++i )
+  for( TNatural i = 0; i < this->m_Size; ++i )
     this->m_Parameters[ i ] = d( g );
 }
 
@@ -38,7 +41,7 @@ _S& ivqML::Model::Base< _S >::
 operator[]( const TNatural& i )
 {
   static _S zero = 0;
-  if( i < this->m_Parameters.size( ) )
+  if( i < this->m_Size )
     return( this->m_Parameters[ i ] );
   else
   {
@@ -53,7 +56,7 @@ const _S& ivqML::Model::Base< _S >::
 operator[]( const TNatural& i ) const
 {
   static const _S zero = 0;
-  if( i < this->m_Parameters.size( ) )
+  if( i < this->m_Size )
     return( this->m_Parameters[ i ] );
   else
     return( zero );
@@ -65,7 +68,7 @@ typename ivqML::Model::Base< _S >::
 TNatural ivqML::Model::Base< _S >::
 number_of_parameters( ) const
 {
-  return( this->m_Parameters.size( ) );
+  return( this->m_Size );
 }
 
 // -------------------------------------------------------------------------
@@ -73,15 +76,20 @@ template< class _S >
 void ivqML::Model::Base< _S >::
 set_number_of_parameters( const TNatural& p )
 {
-  if( this->m_Parameters.size( ) != p )
+  if( this->m_Size != p )
   {
-    if( p > 0 )
-      this->m_Parameters.resize( p );
+    if( this->m_Parameters != nullptr )
+      std::free( this->m_Parameters );
+
+    this->m_Size = p;
+    if( this->m_Size > 0 )
+      this->m_Parameters =
+        reinterpret_cast< TScalar* >(
+          std::calloc( this->m_Size, sizeof( TScalar ) )
+          );
     else
-      this->m_Parameters.clear( );
-    this->m_Parameters.shrink_to_fit( );
+      this->m_Parameters = nullptr;
   } // end if
-  std::fill( this->m_Parameters.begin( ), this->m_Parameters.end( ), TScalar( 0 ) );
 }
 
 // -------------------------------------------------------------------------
@@ -89,7 +97,8 @@ template< class _S >
 void ivqML::Model::Base< _S >::
 _map( TMap& map, const TNatural& r, const TNatural& c, const TNatural& o )
 {
-  new( &map ) TMap( this->m_Parameters.data( ) + o, r, c );
+  if( this->m_Parameters != nullptr )
+    new( &map ) TMap( this->m_Parameters + o, r, c );
 }
 
 // -------------------------------------------------------------------------
@@ -100,7 +109,7 @@ _from_stream( std::istream& i )
   TNatural p;
   i >> p;
   this->set_number_of_parameters( p );
-  for( TNatural j = 0; j < this->m_Parameters.size( ); ++j )
+  for( TNatural j = 0; j < this->m_Size; ++j )
     i >> this->m_Parameters[ j ];
 }
 
@@ -109,8 +118,8 @@ template< class _S >
 void ivqML::Model::Base< _S >::
 _to_stream( std::ostream& o ) const
 {
-  o << this->m_Parameters.size( );
-  for( TNatural i = 0; i < this->m_Parameters.size( ); ++i )
+  o << this->m_Size;
+  for( TNatural i = 0; i < this->m_Size; ++i )
     o << " " << this->m_Parameters[ i ];
 }
 

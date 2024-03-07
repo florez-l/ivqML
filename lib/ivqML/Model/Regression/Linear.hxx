@@ -59,7 +59,7 @@ fit(
   TMatrix Xi( m, n + 1 );
   Xi << TMatrix::Ones( m, 1 ), X.transpose( );
 
-  TMap( this->m_Parameters.data( ), 1, n + 1 ) =
+  TMap( this->m_Parameters, 1, n + 1 ) =
     (
       Y * Xi * (
         ( ( Xi.transpose( ) * Xi ) / TScalar( m ) )

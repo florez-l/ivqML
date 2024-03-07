@@ -12,9 +12,7 @@ Base( const _O& other )
 {
   this->set_number_of_parameters( other.m_P );
   for( TNatural i = 0; i < this->m_P; ++i )
-    *( this->m_Parameters.data( ) + i )
-      =
-      _S( *( other.m_Parameters.data( ) + i ) );
+    *( this->m_Parameters + i ) = _S( *( other.m_Parameters + i ) );
 }
 
 // -------------------------------------------------------------------------
@@ -26,9 +24,7 @@ operator=( const _O& other )
 {
   this->set_number_of_parameters( other.m_P );
   for( TNatural i = 0; i < this->m_P; ++i )
-    *( this->m_Parameters.data( ) + i )
-      =
-      _S( *( other.m_Parameters.data( ) + i ) );
+    *( this->m_Parameters + i ) = _S( *( other.m_Parameters + i ) );
   return( *this );
 }
 
@@ -39,7 +35,7 @@ typename ivqML::Model::Base< _S >::
 Self& ivqML::Model::Base< _S >::
 operator+=( const Eigen::EigenBase< _D >& d )
 {
-  TMap( this->m_Parameters.data( ), d.rows( ), d.cols( ) )
+  TMap( this->m_Parameters, d.rows( ), d.cols( ) )
     +=
     d.derived( ).template cast< _S >( );
   return( *this );
@@ -52,7 +48,7 @@ typename ivqML::Model::Base< _S >::
 Self& ivqML::Model::Base< _S >::
 operator-=( const Eigen::EigenBase< _D >& d )
 {
-  TMap( this->m_Parameters.data( ), d.rows( ), d.cols( ) )
+  TMap( this->m_Parameters, d.rows( ), d.cols( ) )
     -=
     d.derived( ).template cast< _S >( );
   return( *this );

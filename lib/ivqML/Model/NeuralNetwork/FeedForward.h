@@ -77,77 +77,7 @@ namespace ivqML
           const Eigen::EigenBase< _Y >& iY,
           TScalar* J = nullptr,
           TScalar* iB = nullptr
-          ) const
-          {
-            // TODO: erase this
-            std::fill(
-              bG, bG + this->number_of_parameters( ),
-              std::numeric_limits< TScalar >::max( )
-              );
-
-            // Computation buffer
-            TNatural m = iX.cols( );
-            TNatural bsize = this->m_BSize * m;
-            TScalar* buffer = iB;
-            if( iB == nullptr )
-              buffer =
-                reinterpret_cast< TScalar* >(
-                  std::malloc( sizeof( TScalar ) * bsize )
-                  );
-
-            // Forward propagation
-            this->evaluate( iX, buffer );
-
-            // Last layer derivation
-            TNatural L = this->number_of_layers( );
-            TNatural as = bsize - ( this->m_S[ L ] * m );
-            TNatural zs = as - ( this->m_S[ L ] * m );
-            TNatural bs;
-            TNatural ws;
-
-            TMap D( buffer + as, this->m_S[ L ], m );
-            D -= iY.derived( ).template cast< TScalar >( );
-
-            // Remaining layers
-            for( TNatural l = L; l > 0; --l )
-            {
-              std::cout << zs << " --> " << as << "(" << bsize << ")" << std::endl;
-              // Update parameters
-              /* TODO
-                 Bl = D.rowwise( ).mean( );
-                 Wl = ( this->m_A[ l - 1 ].transpose( ) * D ) / m;
-              */
-
-              // Update delta if there is more back layers
-              /* TODO
-                 if( l > 1 )
-                 {
-                 D = ( D * this->m_W[ l - 1 ].transpose( ) ).eval( );
-                 TMatrix Zp( D.rows( ), D.cols( ) );
-                 TMap mZp(  Zp.data( ), Zp.rows( ), Zp.cols( ) );
-                 this->m_F[ l - 2 ].second( mZp, this->m_Z[ l - 2 ], true );
-                 D.array( ) *= Zp.array( );
-                 } // end if
-              */
-
-              if( l > 0 )
-              {
-                as -= ( this->m_S[ l - 1 ] + this->m_S[ l ] ) * m;
-                zs = as - ( this->m_S[ l - 1 ] * m );
-              } // end if
-
-            } // end for
-
-            /* TODO
-               std::cout << "******************************" << std::endl;
-               std::cout << A << std::endl;
-               std::cout << "******************************" << std::endl;
-            */
-
-            // Free buffer
-            if( iB == nullptr )
-              std::free( buffer );
-          }
+          ) const;
 
       protected:
         virtual void _from_stream( std::istream& i ) override;
