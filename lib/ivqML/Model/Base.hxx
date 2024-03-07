@@ -10,7 +10,7 @@ template< class _O >
 ivqML::Model::Base< _S >::
 Base( const _O& other )
 {
-  this->set_number_of_parameters( other.m_P );
+  this->set_number_of_parameters( other.m_Size );
   for( TNatural i = 0; i < this->m_P; ++i )
     *( this->m_Parameters + i ) = _S( *( other.m_Parameters + i ) );
 }
@@ -22,7 +22,7 @@ typename ivqML::Model::Base< _S >::
 Self& ivqML::Model::Base< _S >::
 operator=( const _O& other )
 {
-  this->set_number_of_parameters( other.m_P );
+  this->set_number_of_parameters( other.m_Size );
   for( TNatural i = 0; i < this->m_P; ++i )
     *( this->m_Parameters + i ) = _S( *( other.m_Parameters + i ) );
   return( *this );

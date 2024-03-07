@@ -63,61 +63,63 @@ cost(
   ) const
 {
   // Computation buffer
-  TNatural m = iX.cols( );
-  TNatural nparams = this->number_of_parameters( );
-  TNatural bsize = this->m_BSize * m;
-  TScalar* buffer = iB;
-  if( iB == nullptr )
-    buffer =
-      reinterpret_cast< TScalar* >( std::malloc( sizeof( TScalar ) * bsize ) );
+  /* TODO
+     TNatural m = iX.cols( );
+     TNatural nparams = this->number_of_parameters( );
+     TNatural bsize = this->m_BSize * m;
+     TScalar* buffer = iB;
+     if( iB == nullptr )
+     buffer =
+     reinterpret_cast< TScalar* >( std::malloc( sizeof( TScalar ) * bsize ) );
 
-  // Forward propagation
-  this->evaluate( iX, buffer );
+     // Forward propagation
+     this->evaluate( iX, buffer );
 
-  // Memory ranges
-  TNatural L = this->number_of_layers( );
-  TNatural as = bsize - ( this->m_S[ L ] * m );
-  TNatural zs = as - ( this->m_S[ L ] * m );
-  TNatural bs = nparams - this->m_S[ L ];
-  TNatural ws = bs - ( this->m_S[ L ] * this->m_S[ L - 1 ] );
+     // Memory ranges
+     TNatural L = this->number_of_layers( );
+     TNatural as = bsize - ( this->m_S[ L ] * m );
+     TNatural zs = as - ( this->m_S[ L ] * m );
+     TNatural bs = nparams - this->m_S[ L ];
+     TNatural ws = bs - ( this->m_S[ L ] * this->m_S[ L - 1 ] );
 
-  // Last layer delta
-  TMap( buffer + as, this->m_S[ L ], m )
-    -=
-    iY.derived( ).template cast< TScalar >( );
+     // Last layer delta
+     TMap( buffer + as, this->m_S[ L ], m )
+     -=
+     iY.derived( ).template cast< TScalar >( );
 
-  // Remaining layers
-  for( TNatural l = L; l > 0; --l )
-  {
-    TMap D( buffer + as, this->m_S[ l ], m );
-    as -= ( this->m_S[ l - 1 ] + this->m_S[ l ] ) * m;
-    zs = as - ( this->m_S[ l - 1 ] * m );
-    TMap E( buffer + as, this->m_S[ l - 1 ], m );
+     // Remaining layers
+     for( TNatural l = L; l > 0; --l )
+     {
+     TMap D( buffer + as, this->m_S[ l ], m );
+     as -= ( this->m_S[ l - 1 ] + this->m_S[ l ] ) * m;
+     zs = as - ( this->m_S[ l - 1 ] * m );
+     TMap E( buffer + as, this->m_S[ l - 1 ], m );
 
-    // Update derivatives
-    TMap( bG + bs, this->m_S[ l ], 1 )
-      =
-      D.rowwise( ).mean( );
-    TMap( bG + ws, this->m_S[ l ], this->m_S[ l - 1 ] )
-      =
-      ( D * E.transpose( ) ) / TScalar( m );
+     // Update derivatives
+     TMap( bG + bs, this->m_S[ l ], 1 )
+     =
+     D.rowwise( ).mean( );
+     TMap( bG + ws, this->m_S[ l ], this->m_S[ l - 1 ] )
+     =
+     ( D * E.transpose( ) ) / TScalar( m );
 
-    // Update delta if there is more back layers
-    if( l > 1 )
-    {
-      bs = ws - this->m_S[ l - 1 ];
-      ws = bs - ( this->m_S[ l - 1 ] * this->m_S[ l - 2 ] );
-      E = this->m_W[ l - 1 ].transpose( ) * D;
+     // Update delta if there is more back layers
+     if( l > 1 )
+     {
+     bs = ws - this->m_S[ l - 1 ];
+     ws = bs - ( this->m_S[ l - 1 ] * this->m_S[ l - 2 ] );
+     E = this->m_W[ l - 1 ].transpose( ) * D;
 
-      TMap Z( buffer + zs, this->m_S[ l - 1 ], m );
-      this->m_F[ l - 1 ].second( Z, Z, true );
-      E.array( ) *= Z.array( );
-    } // end if
-  } // end for
+     TMap Z( buffer + zs, this->m_S[ l - 1 ], m );
+     this->m_F[ l - 1 ].second( Z, Z, true );
+     E.array( ) *= Z.array( );
+     } // end if
+     } // end for
 
-  // Free buffer
-  if( iB == nullptr )
-    std::free( buffer );
+     // Free buffer
+     if( iB != nullptr )
+     std::free( buffer );
+  */
 }
 
 #endif // __ivqML__Model__NeuralNetwork__FeedForward__hxx__

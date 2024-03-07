@@ -43,6 +43,19 @@ namespace ivqML
         FeedForward( );
         virtual ~FeedForward( ) override = default;
 
+        template< class _O >
+        FeedForward( const _O& other )
+          : Superclass( )
+          {
+          }
+
+        template< class _O >
+        Self& operator=( const _O& other )
+          {
+            this->Superclass::operator=( other );
+            return( *this );
+          }
+
         virtual void random_fill( ) override;
 
         virtual TNatural number_of_inputs( ) const override;

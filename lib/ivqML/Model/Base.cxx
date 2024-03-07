@@ -20,7 +20,10 @@ ivqML::Model::Base< _S >::
 ~Base( )
 {
   if( this->m_Parameters != nullptr )
+  {
     std::free( this->m_Parameters );
+    this->m_Parameters = nullptr;
+  } // end if
 }
 
 // -------------------------------------------------------------------------
