@@ -45,6 +45,10 @@ namespace ivqML
 
         template< class _X >
         auto threshold( const Eigen::EigenBase< _X >& iX ) const;
+
+      private:
+        Logistic( const Self& other ) = delete;
+        Self& operator=( const Self& other ) = delete;
       };
     } // end namespace
   } // end namespace

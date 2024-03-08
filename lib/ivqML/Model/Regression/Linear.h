@@ -57,6 +57,10 @@ namespace ivqML
           const TScalar& l = 0
           );
 
+      private:
+        Linear( const Self& other ) = delete;
+        Self& operator=( const Self& other ) = delete;
+
       protected:
         TMap m_T { nullptr, 0, 0 };
       };

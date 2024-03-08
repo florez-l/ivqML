@@ -44,17 +44,7 @@ namespace ivqML
         virtual ~FeedForward( ) override = default;
 
         template< class _O >
-        FeedForward( const _O& other )
-          : Superclass( )
-          {
-          }
-
-        template< class _O >
-        Self& operator=( const _O& other )
-          {
-            this->Superclass::operator=( other );
-            return( *this );
-          }
+        void copy( const _O& other );
 
         virtual void random_fill( ) override;
 
@@ -95,6 +85,10 @@ namespace ivqML
       protected:
         virtual void _from_stream( std::istream& i ) override;
         virtual void _to_stream( std::ostream& o ) const override;
+
+      private:
+        FeedForward( const Self& other ) = delete;
+        Self& operator=( const Self& other ) = delete;
 
       protected:
         bool m_IsLabeling { true }; // TODO: detect this

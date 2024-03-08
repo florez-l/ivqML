@@ -88,12 +88,8 @@ New( const std::string& n )
     return(
       []( TMap& A, const TMap& Z, bool d ) -> void
       {
-        /* TODO
-           A = ( Z.rowwise( ) - Z.colwise( ).maxCoeff( ) ).array( ).exp( ).eval( );
-           A.array( ).rowwise( ) /= A.array( ).colwise( ).sum( );
-        */
-        std::cerr << "Check softmax" << std::endl;
-        std::exit( 1 );
+        A = ( Z.rowwise( ) - Z.colwise( ).maxCoeff( ) ).array( ).exp( ).eval( );
+        A.array( ).rowwise( ) /= A.array( ).colwise( ).sum( );
       }
       );
   else // if( "linear" )

@@ -30,10 +30,7 @@ namespace ivqML
       virtual ~Base( );
 
       template< class _O >
-      Base( const _O& other );
-
-      template< class _O >
-      Self& operator=( const _O& other );
+      void copy( const _O& other );
 
       virtual void random_fill( );
 
@@ -61,6 +58,10 @@ namespace ivqML
         );
       virtual void _from_stream( std::istream& i );
       virtual void _to_stream( std::ostream& o ) const;
+
+    private:
+      Base( const Self& other ) = delete;
+      Self& operator=( const Self& other ) = delete;
 
     protected:
       TScalar* m_Parameters { nullptr };

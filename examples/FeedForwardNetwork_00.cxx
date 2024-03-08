@@ -36,7 +36,7 @@ int main( int argc, char** argv )
 
   std::cout << "-------------- COST --------------" << std::endl;
   TModel model_for_cost;
-  model_for_cost = model;
+  model_for_cost.copy( model );
   model_for_cost.init( );
 
   TModel::TMatrix G( 1, model_for_cost.number_of_parameters( ) );

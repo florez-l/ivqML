@@ -110,7 +110,6 @@ init( )
   this->m_S.shrink_to_fit( );
 
   TNatural P = 0;
-  // TODO: this->m_C = this->m_S[ 0 ];
   for( TNatural l = 1; l < this->m_S.size( ); ++l )
   {
     TNatural i = this->m_S[ l - 1 ];
@@ -140,47 +139,6 @@ init( )
   this->m_W.shrink_to_fit( );
   this->m_B.shrink_to_fit( );
 }
-
-// -------------------------------------------------------------------------
-/* TODO
-   template< class _S >
-   void ivqML::Model::NeuralNetwork::FeedForward< _S >::
-   cost( TMatrix& G, const TMap& X, const TMap& Y, TScalar* J ) const
-   {
-   // Forward propagation
-   this->evaluate( X );
-
-   // Check sizes
-   TNatural n = this->number_of_parameters( );
-   if( G.size( ) != n )
-   G = TMatrix::Zero( 1, n );
-
-   // Backwards propagation
-   TScalar m = TScalar( X.rows( ) );
-   TNatural L = this->number_of_layers( );
-   TMatrix D = this->m_A[ L ] - Y;
-   for( TNatural l = L; l > 0; --l )
-   {
-   // Update derivatives
-   n -= D.cols( );
-   TMap( G.data( ) + n, 1, D.cols( ) ) = D.colwise( ).mean( );
-   n -= this->m_A[ l - 1 ].cols( ) * D.cols( );
-   TMap( G.data( ) + n, this->m_A[ l - 1 ].cols( ), D.cols( )  )
-   =
-   ( this->m_A[ l - 1 ].transpose( ) * D ) / m;
-
-   // Update delta if there is more back layers
-   if( l > 1 )
-   {
-   D = ( D * this->m_W[ l - 1 ].transpose( ) ).eval( );
-   TMatrix Zp( D.rows( ), D.cols( ) );
-   TMap mZp(  Zp.data( ), Zp.rows( ), Zp.cols( ) );
-   this->m_F[ l - 2 ].second( mZp, this->m_Z[ l - 2 ], true );
-   D.array( ) *= Zp.array( );
-   } // end if
-   } // end for
-   }
-*/
 
 // -------------------------------------------------------------------------
 template< class _S >
