@@ -14,37 +14,42 @@ namespace ivqML
     {
       /**
        */
-      template< class _S >
+      template< class _TScalar >
       class Logistic
-        : public ivqML::Model::Regression::Linear< _S >
+        : public ivqML::Model::Regression::Linear< _TScalar >
       {
       public:
-        using Self = Logistic;
-        using Superclass = ivqML::Model::Regression::Linear< _S >;
-
-        using TScalar = typename Superclass::TScalar;
-        using TNatural = typename Superclass::TNatural;
-        using TMatrix = typename Superclass::TMatrix;
-        using TMap = typename Superclass::TMap;
+      public:
+        using Self       = Logistic;
+        using Superclass = ivqML::Model::Regression::Linear< _TScalar >;
+        using TScalar    = typename Superclass::TScalar;
+        using TNatural   = typename Superclass::TNatural;
+        using TMatrix    = typename Superclass::TMatrix;
+        using TColumn    = typename Superclass::TColumn;
+        using TRow       = typename Superclass::TRow;
 
       public:
         Logistic( const TNatural& n = 0 );
         virtual ~Logistic( ) = default;
 
-        template< class _X >
-        auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
-
-        template< class _X, class _Y >
-        void cost(
-          TScalar* bG,
-          const Eigen::EigenBase< _X >& iX,
-          const Eigen::EigenBase< _Y >& iY,
-          TScalar* J = nullptr,
-          TScalar* buffer = nullptr
+        template< class _TInputX >
+        auto evaluate(
+          const Eigen::EigenBase< _TInputX >& iX, TScalar* iB = nullptr
           ) const;
 
-        template< class _X >
-        auto threshold( const Eigen::EigenBase< _X >& iX ) const;
+        /* TODO
+           template< class _X, class _Y >
+           void cost(
+           TScalar* bG,
+           const Eigen::EigenBase< _X >& iX,
+           const Eigen::EigenBase< _Y >& iY,
+           TScalar* J = nullptr,
+           TScalar* buffer = nullptr
+           ) const;
+        */
+
+        template< class _TInputX >
+        auto threshold( const Eigen::EigenBase< _TInputX >& iX ) const;
 
       private:
         Logistic( const Self& other ) = delete;

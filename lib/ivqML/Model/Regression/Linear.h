@@ -14,46 +14,52 @@ namespace ivqML
     {
       /**
        */
-      template< class _S >
+      template< class _TScalar >
       class Linear
-        : public ivqML::Model::Base< _S >
+        : public ivqML::Model::Base< _TScalar >
       {
       public:
-        using Self = Linear;
-        using Superclass = ivqML::Model::Base< _S >;
-
-        using TScalar = typename Superclass::TScalar;
-        using TNatural = typename Superclass::TNatural;
-        using TMatrix = typename Superclass::TMatrix;
-        using TMap = typename Superclass::TMap;
+        using Self       = Linear;
+        using Superclass = ivqML::Model::Base< _TScalar >;
+        using TScalar    = typename Superclass::TScalar;
+        using TNatural   = typename Superclass::TNatural;
+        using TMatrix    = typename Superclass::TMatrix;
+        using TColumn    = typename Superclass::TColumn;
+        using TRow       = typename Superclass::TRow;
 
       public:
         Linear( const TNatural& n = 0 );
         virtual ~Linear( ) override = default;
 
-        virtual void set_number_of_parameters( const TNatural& p ) override;
+        /* TODO
+           virtual void set_number_of_parameters( const TNatural& p ) override;
+        */
 
         virtual TNatural number_of_inputs( ) const override;
         virtual void set_number_of_inputs( const TNatural& p ) override;
 
         virtual TNatural number_of_outputs( ) const override;
 
-        template< class _X >
-        auto evaluate( const Eigen::EigenBase< _X >& iX ) const;
-
-        template< class _X, class _Y >
-        void cost(
-          TScalar* bG,
-          const Eigen::EigenBase< _X >& iX,
-          const Eigen::EigenBase< _Y >& iY,
-          TScalar* J = nullptr,
-          TScalar* buffer = nullptr
+        template< class _TInputX >
+        auto evaluate(
+          const Eigen::EigenBase< _TInputX >& iX, TScalar* iB = nullptr
           ) const;
 
-        template< class _Y, class _X >
+        /* TODO
+           template< class _TInputX, class _TInputY >
+           void cost(
+           TScalar* bG,
+           const Eigen::EigenBase< _TInputX >& iX,
+           const Eigen::EigenBase< _TInputY >& iY,
+           TScalar* J = nullptr,
+           TScalar* buffer = nullptr
+           ) const;
+        */
+
+        template< class _TInputY, class _TInputX >
         void fit(
-          const Eigen::EigenBase< _X >& iX,
-          const Eigen::EigenBase< _Y >& iY,
+          const Eigen::EigenBase< _TInputX >& iX,
+          const Eigen::EigenBase< _TInputY >& iY,
           const TScalar& l = 0
           );
 
@@ -61,8 +67,10 @@ namespace ivqML
         Linear( const Self& other ) = delete;
         Self& operator=( const Self& other ) = delete;
 
-      protected:
-        TMap m_T { nullptr, 0, 0 };
+        /* TODO
+           protected:
+           TMap m_T { nullptr, 0, 0 };
+        */
       };
     } // end namespace
   } // end namespace

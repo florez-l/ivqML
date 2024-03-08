@@ -14,35 +14,42 @@ namespace ivqML
   {
     /**
      */
-    template< class _S >
+    template< class _TScalar >
     class Base
     {
     public:
-      using Self = Base;
-      using TScalar = _S;
+      using Self     = Base;
+      using TScalar  = _TScalar;
       using TNatural = unsigned long long;
 
-      using TMatrix = Eigen::Matrix< _S, Eigen::Dynamic, Eigen::Dynamic >;
-      using TMap = Eigen::Map< TMatrix >;
+      using TMatrix = Eigen::Matrix< TScalar, Eigen::Dynamic, Eigen::Dynamic >;
+      using TColumn = Eigen::Matrix< TScalar, Eigen::Dynamic, 1 >;
+      using TRow    = Eigen::Matrix< TScalar, 1, Eigen::Dynamic >;
 
     public:
       Base( const TNatural& n = 1 );
       virtual ~Base( );
 
-      template< class _O >
-      void copy( const _O& other );
+      template< class _TOther >
+      void shallow_copy( const _TOther& other );
+
+      template< class _TOther >
+      void deep_copy( const _TOther& other );
 
       virtual void random_fill( );
 
-      _S& operator[]( const TNatural& i );
-      const _S& operator[]( const TNatural& i ) const;
+      _TScalar& operator[]( const TNatural& i );
+      const _TScalar& operator[]( const TNatural& i ) const;
 
-      template< class _D >
-      Self& operator+=( const Eigen::EigenBase< _D >& d );
+      /* TODO
+         template< class _D >
+         Self& operator+=( const Eigen::EigenBase< _D >& d );
 
-      template< class _D >
-      Self& operator-=( const Eigen::EigenBase< _D >& d );
+         template< class _D >
+         Self& operator-=( const Eigen::EigenBase< _D >& d );
+      */
 
+      virtual TNatural buffer_size( ) const;
       virtual TNatural number_of_parameters( ) const;
       virtual void set_number_of_parameters( const TNatural& p );
 
@@ -52,10 +59,33 @@ namespace ivqML
       virtual TNatural number_of_outputs( ) const = 0;
 
     protected:
-      virtual void _map(
-        TMap& map,
+      Eigen::Map< TMatrix > _matrix(
         const TNatural& r, const TNatural& c, const TNatural& o = 0
         );
+      Eigen::Map< const TMatrix > _matrix(
+        const TNatural& r, const TNatural& c, const TNatural& o = 0
+        ) const;
+
+      Eigen::Map< TColumn > _column(
+        const TNatural& r, const TNatural& o = 0
+        );
+      Eigen::Map< const TColumn > _column(
+        const TNatural& r, const TNatural& o = 0
+        ) const;
+
+      Eigen::Map< TRow > _row(
+        const TNatural& c, const TNatural& o = 0
+        );
+      Eigen::Map< const TRow > _row(
+        const TNatural& c, const TNatural& o = 0
+        ) const;
+
+      /* TODO
+         virtual void _map(
+         TMap& map,
+         const TNatural& r, const TNatural& c, const TNatural& o = 0
+         );
+      */
       virtual void _from_stream( std::istream& i );
       virtual void _to_stream( std::ostream& o ) const;
 

@@ -21,30 +21,34 @@ namespace ivqML
     {
       /**
        */
-      template< class _S >
+      template< class _TScalar >
       class FeedForward
-        : public ivqML::Model::Base< _S >
+        : public ivqML::Model::Base< _TScalar >
       {
       public:
-        using Self = FeedForward;
-        using Superclass = ivqML::Model::Base< _S >;
+        using Self       = FeedForward;
+        using Superclass = ivqML::Model::Base< _TScalar >;
+        using TScalar    = typename Superclass::TScalar;
+        using TNatural   = typename Superclass::TNatural;
+        using TMatrix    = typename Superclass::TMatrix;
+        using TColumn    = typename Superclass::TColumn;
+        using TRow       = typename Superclass::TRow;
 
-        using TScalar = typename Superclass::TScalar;
-        using TNatural = typename Superclass::TNatural;
-        using TMatrix = typename Superclass::TMatrix;
-        using TMap = typename Superclass::TMap;
-
-        using TSignature = void( TMap&, const TMap&, bool );
-        using TActivation = std::function< TSignature >;
-        using TActivationFactory =
-          ivqML::Model::NeuralNetwork::ActivationFactory< Self >;
+        /* TODO
+           using TActivationSignature = void( TMap&, const TMap&, bool );
+           using TActivation = std::function< TActivationSignature >;
+           using TActivationFactory =
+           ivqML::Model::NeuralNetwork::ActivationFactory< Self >;
+        */
 
       public:
         FeedForward( );
         virtual ~FeedForward( ) override = default;
 
-        template< class _O >
-        void copy( const _O& other );
+        /* TODO
+           template< class _O >
+           void copy( const _O& other );
+        */
 
         virtual void random_fill( ) override;
 
@@ -52,35 +56,35 @@ namespace ivqML
         virtual void set_number_of_inputs( const TNatural& p ) override;
         virtual TNatural number_of_outputs( ) const override;
 
+        virtual TNatural buffer_size( ) const override;
         virtual void set_number_of_parameters( const TNatural& p ) final;
 
-        void add_layer(
-          const TNatural& i, const TNatural& o, const std::string& a
-          );
+        void add_layer( const TNatural& i );
         void add_layer( const TNatural& o, const std::string& a );
         TNatural number_of_layers( ) const;
         void init( );
 
-        template< class _X >
+        template< class _TInputX >
         auto evaluate(
-          const Eigen::EigenBase< _X >& iX,
-          TScalar* iB = nullptr
+          const Eigen::EigenBase< _TInputX >& iX, TScalar* iB = nullptr
           ) const;
 
-        template< class _X >
-        auto threshold( const Eigen::EigenBase< _X >& iX ) const
-          {
-            return( iX.derived( ) );
-          }
+        /* TODO
+           template< class _TInputX >
+           auto threshold( const Eigen::EigenBase< _TInputX >& iX ) const
+           {
+           return( iX.derived( ) );
+           }
 
-        template< class _X, class _Y >
-        void cost(
-          TScalar* bG,
-          const Eigen::EigenBase< _X >& iX,
-          const Eigen::EigenBase< _Y >& iY,
-          TScalar* J = nullptr,
-          TScalar* iB = nullptr
-          ) const;
+           template< class _TInputX, class _TInputY >
+           void cost(
+           TScalar* bG,
+           const Eigen::EigenBase< _TInputX >& iX,
+           const Eigen::EigenBase< _TInputY >& iY,
+           TScalar* J = nullptr,
+           TScalar* iB = nullptr
+           ) const;
+        */
 
       protected:
         virtual void _from_stream( std::istream& i ) override;
@@ -91,14 +95,22 @@ namespace ivqML
         Self& operator=( const Self& other ) = delete;
 
       protected:
-        bool m_IsLabeling { true }; // TODO: detect this
+        std::vector< TNatural > m_Layers;
 
-        std::vector< TNatural > m_S;
-        TNatural m_BSize;
 
-        std::vector< TMap > m_W;
-        std::vector< TMap > m_B;
-        std::vector< std::pair< std::string, TActivation > > m_F;
+        /* TODO
+           bool m_IsLabeling { true }; // TODO: detect this
+
+           std::vector< TNatural > m_S;
+           TNatural m_BSize;
+
+           std::vector< TMap > m_W;
+           std::vector< TMap > m_B;
+        */
+
+        /* TODO
+           std::vector< std::pair< std::string, TActivation > > m_F;
+        */
       };
     } // end namespace
   } // end namespace

@@ -7,16 +7,16 @@
 #include <random>
 
 // -------------------------------------------------------------------------
-template< class _S >
-ivqML::Model::Base< _S >::
+template< class _TScalar >
+ivqML::Model::Base< _TScalar >::
 Base( const TNatural& n )
 {
   this->set_number_of_parameters( n );
 }
 
 // -------------------------------------------------------------------------
-template< class _S >
-ivqML::Model::Base< _S >::
+template< class _TScalar >
+ivqML::Model::Base< _TScalar >::
 ~Base( )
 {
   if( this->m_Parameters != nullptr )
@@ -27,38 +27,38 @@ ivqML::Model::Base< _S >::
 }
 
 // -------------------------------------------------------------------------
-template< class _S >
-void ivqML::Model::Base< _S >::
+template< class _TScalar >
+void ivqML::Model::Base< _TScalar >::
 random_fill( )
 {
   std::random_device r;
   std::mt19937 g( r( ) );
-  std::uniform_real_distribution< _S > d( 0, 1 );
+  std::uniform_real_distribution< TScalar > d( 0, 1 );
   for( TNatural i = 0; i < this->m_Size; ++i )
     this->m_Parameters[ i ] = d( g );
 }
 
 // -------------------------------------------------------------------------
-template< class _S >
-_S& ivqML::Model::Base< _S >::
+template< class _TScalar >
+_TScalar& ivqML::Model::Base< _TScalar >::
 operator[]( const TNatural& i )
 {
-  static _S zero = 0;
+  static TScalar zero = TScalar( 0 );
   if( i < this->m_Size )
     return( this->m_Parameters[ i ] );
   else
   {
-    zero = 0;
+    zero = TScalar( 0 );
     return( zero );
   } // end if
 }
 
 // -------------------------------------------------------------------------
-template< class _S >
-const _S& ivqML::Model::Base< _S >::
+template< class _TScalar >
+const _TScalar& ivqML::Model::Base< _TScalar >::
 operator[]( const TNatural& i ) const
 {
-  static const _S zero = 0;
+  static const TScalar zero = TScalar( 0 );
   if( i < this->m_Size )
     return( this->m_Parameters[ i ] );
   else
@@ -66,17 +66,26 @@ operator[]( const TNatural& i ) const
 }
 
 // -------------------------------------------------------------------------
-template< class _S >
-typename ivqML::Model::Base< _S >::
-TNatural ivqML::Model::Base< _S >::
+template< class _TScalar >
+typename ivqML::Model::Base< _TScalar >::
+TNatural ivqML::Model::Base< _TScalar >::
+buffer_size( ) const
+{
+  return( this->number_of_parameters( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+typename ivqML::Model::Base< _TScalar >::
+TNatural ivqML::Model::Base< _TScalar >::
 number_of_parameters( ) const
 {
   return( this->m_Size );
 }
 
 // -------------------------------------------------------------------------
-template< class _S >
-void ivqML::Model::Base< _S >::
+template< class _TScalar >
+void ivqML::Model::Base< _TScalar >::
 set_number_of_parameters( const TNatural& p )
 {
   if( this->m_Size != p )
@@ -96,17 +105,80 @@ set_number_of_parameters( const TNatural& p )
 }
 
 // -------------------------------------------------------------------------
-template< class _S >
-void ivqML::Model::Base< _S >::
-_map( TMap& map, const TNatural& r, const TNatural& c, const TNatural& o )
+template< class _TScalar >
+Eigen::Map< typename ivqML::Model::Base< _TScalar >::TMatrix >
+ivqML::Model::Base< _TScalar >::
+_matrix( const TNatural& r, const TNatural& c, const TNatural& o )
 {
   if( this->m_Parameters != nullptr )
-    new( &map ) TMap( this->m_Parameters + o, r, c );
+    if( ( r * c ) <= ( this->m_Size - o ) )
+      return( Eigen::Map< TMatrix >( this->m_Parameters + o, r, c ) );
+  return( Eigen::Map< TMatrix >( nullptr, 0, 0 ) );
 }
 
 // -------------------------------------------------------------------------
-template< class _S >
-void ivqML::Model::Base< _S >::
+template< class _TScalar >
+Eigen::Map< const typename ivqML::Model::Base< _TScalar >::TMatrix >
+ivqML::Model::Base< _TScalar >::
+_matrix( const TNatural& r, const TNatural& c, const TNatural& o ) const
+{
+  if( this->m_Parameters != nullptr )
+    if( ( r * c ) <= ( this->m_Size - o ) )
+      return( Eigen::Map< const TMatrix >( this->m_Parameters + o, r, c ) );
+  return( Eigen::Map< const TMatrix >( nullptr, 0, 0 ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+Eigen::Map< typename ivqML::Model::Base< _TScalar >::TColumn >
+ivqML::Model::Base< _TScalar >::
+_column( const TNatural& r, const TNatural& o )
+{
+  if( this->m_Parameters != nullptr )
+    if( r <= ( this->m_Size - o ) )
+      return( Eigen::Map< TColumn >( this->m_Parameters + o, r, 1 ) );
+  return( Eigen::Map< TColumn >( nullptr, 0, 1 ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+Eigen::Map< const typename ivqML::Model::Base< _TScalar >::TColumn >
+ivqML::Model::Base< _TScalar >::
+_column( const TNatural& r, const TNatural& o ) const
+{
+  if( this->m_Parameters != nullptr )
+    if( r <= ( this->m_Size - o ) )
+      return( Eigen::Map< const TColumn >( this->m_Parameters + o, r, 1 ) );
+  return( Eigen::Map< const TColumn >( nullptr, 0, 1 ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+Eigen::Map< typename ivqML::Model::Base< _TScalar >::TRow >
+ivqML::Model::Base< _TScalar >::
+_row( const TNatural& c, const TNatural& o )
+{
+  if( this->m_Parameters != nullptr )
+    if( c <= ( this->m_Size - o ) )
+      return( Eigen::Map< TRow >( this->m_Parameters + o, 1, c ) );
+  return( Eigen::Map< TRow >( nullptr, 1, 0 ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+Eigen::Map< const typename ivqML::Model::Base< _TScalar >::TRow >
+ivqML::Model::Base< _TScalar >::
+_row( const TNatural& c, const TNatural& o ) const
+{
+  if( this->m_Parameters != nullptr )
+    if( c <= ( this->m_Size - o ) )
+      return( Eigen::Map< const TRow >( this->m_Parameters + o, 1, c ) );
+  return( Eigen::Map< const TRow >( nullptr, 1, 0 ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+void ivqML::Model::Base< _TScalar >::
 _from_stream( std::istream& i )
 {
   TNatural p;
@@ -117,8 +189,8 @@ _from_stream( std::istream& i )
 }
 
 // -------------------------------------------------------------------------
-template< class _S >
-void ivqML::Model::Base< _S >::
+template< class _TScalar >
+void ivqML::Model::Base< _TScalar >::
 _to_stream( std::ostream& o ) const
 {
   o << this->m_Size;

@@ -5,62 +5,24 @@
 #define __ivqML__Model__Base__hxx__
 
 // -------------------------------------------------------------------------
-template< class _S >
-template< class _O >
-void ivqML::Model::Base< _S >::
-copy( const _O& other )
+template< class _TScalar >
+template< class _TOther >
+void ivqML::Model::Base< _TScalar >::
+shallow_copy( const _TOther& other )
 {
   this->set_number_of_parameters( other.m_Size );
+  this->random_fill( );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+template< class _TOther >
+void ivqML::Model::Base< _TScalar >::
+deep_copy( const _TOther& other )
+{
+  this->shallow_copy( other );
   for( TNatural i = 0; i < this->m_Size; ++i )
-    *( this->m_Parameters + i ) = _S( *( other.m_Parameters + i ) );
-}
-
-/* TODO
-
-
-   template< class _O >
-      Base( const _O& other )
-   {
-   }
-
-   // -------------------------------------------------------------------------
-   template< class _S >
-   template< class _O >
-   typename ivqML::Model::Base< _S >::
-   Self& ivqML::Model::Base< _S >::
-   operator=( const _O& other )
-   {
-   this->set_number_of_parameters( other.m_Size );
-   for( TNatural i = 0; i < this->m_P; ++i )
-   *( this->m_Parameters + i ) = _S( *( other.m_Parameters + i ) );
-   return( *this );
-   }
-*/
-
-// -------------------------------------------------------------------------
-template< class _S >
-template< class _D >
-typename ivqML::Model::Base< _S >::
-Self& ivqML::Model::Base< _S >::
-operator+=( const Eigen::EigenBase< _D >& d )
-{
-  TMap( this->m_Parameters, d.rows( ), d.cols( ) )
-    +=
-    d.derived( ).template cast< _S >( );
-  return( *this );
-}
-
-// -------------------------------------------------------------------------
-template< class _S >
-template< class _D >
-typename ivqML::Model::Base< _S >::
-Self& ivqML::Model::Base< _S >::
-operator-=( const Eigen::EigenBase< _D >& d )
-{
-  TMap( this->m_Parameters, d.rows( ), d.cols( ) )
-    -=
-    d.derived( ).template cast< _S >( );
-  return( *this );
+    *( this->m_Parameters + i ) = TScalar( *( other.m_Parameters + i ) );
 }
 
 #endif // __ivqML__Model__Base__hxx__

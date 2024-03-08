@@ -5,8 +5,8 @@
 #include <ivqML/Model/Regression/Logistic.h>
 
 // -------------------------------------------------------------------------
-template< class _S >
-ivqML::Model::Regression::Logistic< _S >::
+template< class _TScalar >
+ivqML::Model::Regression::Logistic< _TScalar >::
 Logistic( const TNatural& n )
   : Superclass( n )
 {
@@ -14,8 +14,8 @@ Logistic( const TNatural& n )
 
 // -------------------------------------------------------------------------
 /* TODO
-   template< class _S >
-   void ivqML::Model::Regression::Logistic< _S >::
+   template< class _TScalar >
+   void ivqML::Model::Regression::Logistic< _TScalar >::
    _evaluate( const TNatural& m ) const
    {
    static const TScalar _0 = TScalar( 0 );
