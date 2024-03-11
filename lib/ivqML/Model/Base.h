@@ -22,32 +22,36 @@ namespace ivqML
       using TScalar  = _TScalar;
       using TNatural = unsigned long long;
 
-      using TMatrix = Eigen::Matrix< TScalar, Eigen::Dynamic, Eigen::Dynamic >;
-      using TColumn = Eigen::Matrix< TScalar, Eigen::Dynamic, 1 >;
-      using TRow    = Eigen::Matrix< TScalar, 1, Eigen::Dynamic >;
+      using TMat = Eigen::Matrix< TScalar, Eigen::Dynamic, Eigen::Dynamic >;
+      using TCol = Eigen::Matrix< TScalar, Eigen::Dynamic, 1 >;
+      using TRow = Eigen::Matrix< TScalar, 1, Eigen::Dynamic >;
+
+      using TMatMap = Eigen::Map< TMat >;
+      using TColMap = Eigen::Map< TCol >;
+      using TRowMap = Eigen::Map< TRow >;
+
+      using TMatCMap = Eigen::Map< const TMat >;
+      using TColCMap = Eigen::Map< const TCol >;
+      using TRowCMap = Eigen::Map< const TRow >;
 
     public:
       Base( const TNatural& n = 1 );
-      virtual ~Base( );
+      virtual ~Base( ) = default;
 
-      template< class _TOther >
-      void shallow_copy( const _TOther& other );
+      virtual bool has_backpropagation( ) const;
 
-      template< class _TOther >
-      void deep_copy( const _TOther& other );
+      /* TODO
+         virtual void backpropagation(
+         TScalar* G,
+         TScalar* B,
+         const TMatCMap& X, const TMatCMap& Y
+         ) const;
+      */
 
       virtual void random_fill( );
 
       _TScalar& operator[]( const TNatural& i );
       const _TScalar& operator[]( const TNatural& i ) const;
-
-      /* TODO
-         template< class _D >
-         Self& operator+=( const Eigen::EigenBase< _D >& d );
-
-         template< class _D >
-         Self& operator-=( const Eigen::EigenBase< _D >& d );
-      */
 
       virtual TNatural buffer_size( ) const;
       virtual TNatural number_of_parameters( ) const;
@@ -58,44 +62,25 @@ namespace ivqML
 
       virtual TNatural number_of_outputs( ) const = 0;
 
+      TMatMap matrix(
+        const TNatural& r, const TNatural& c, const TNatural& o = 0
+        );
+      TMatCMap matrix(
+        const TNatural& r, const TNatural& c, const TNatural& o = 0
+        ) const;
+
+      TColMap column( const TNatural& r, const TNatural& o = 0 );
+      TColCMap column( const TNatural& r, const TNatural& o = 0 ) const;
+
+      TRowMap row( const TNatural& c, const TNatural& o = 0 );
+      TRowCMap row( const TNatural& c, const TNatural& o = 0 ) const;
+
     protected:
-      Eigen::Map< TMatrix > _matrix(
-        const TNatural& r, const TNatural& c, const TNatural& o = 0
-        );
-      Eigen::Map< const TMatrix > _matrix(
-        const TNatural& r, const TNatural& c, const TNatural& o = 0
-        ) const;
-
-      Eigen::Map< TColumn > _column(
-        const TNatural& r, const TNatural& o = 0
-        );
-      Eigen::Map< const TColumn > _column(
-        const TNatural& r, const TNatural& o = 0
-        ) const;
-
-      Eigen::Map< TRow > _row(
-        const TNatural& c, const TNatural& o = 0
-        );
-      Eigen::Map< const TRow > _row(
-        const TNatural& c, const TNatural& o = 0
-        ) const;
-
-      /* TODO
-         virtual void _map(
-         TMap& map,
-         const TNatural& r, const TNatural& c, const TNatural& o = 0
-         );
-      */
       virtual void _from_stream( std::istream& i );
       virtual void _to_stream( std::ostream& o ) const;
 
-    private:
-      Base( const Self& other ) = delete;
-      Self& operator=( const Self& other ) = delete;
-
     protected:
-      TScalar* m_Parameters { nullptr };
-      TNatural m_Size       { 0 };
+      TCol m_P { 0 };
 
     public:
       friend std::istream& operator>>( std::istream& i, Self& m )

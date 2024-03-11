@@ -23,17 +23,19 @@ namespace ivqML
         using Superclass = ivqML::Model::Base< _TScalar >;
         using TScalar    = typename Superclass::TScalar;
         using TNatural   = typename Superclass::TNatural;
-        using TMatrix    = typename Superclass::TMatrix;
-        using TColumn    = typename Superclass::TColumn;
+        using TMat       = typename Superclass::TMat;
+        using TCol       = typename Superclass::TCol;
         using TRow       = typename Superclass::TRow;
+        using TMatMap    = typename Superclass::TMatMap;
+        using TColMap    = typename Superclass::TColMap;
+        using TRowMap    = typename Superclass::TRowMap;
+        using TMatCMap   = typename Superclass::TMatCMap;
+        using TColCMap   = typename Superclass::TColCMap;
+        using TRowCMap   = typename Superclass::TRowCMap;
 
       public:
         Linear( const TNatural& n = 0 );
         virtual ~Linear( ) override = default;
-
-        /* TODO
-           virtual void set_number_of_parameters( const TNatural& p ) override;
-        */
 
         virtual TNatural number_of_inputs( ) const override;
         virtual void set_number_of_inputs( const TNatural& p ) override;
@@ -41,9 +43,7 @@ namespace ivqML
         virtual TNatural number_of_outputs( ) const override;
 
         template< class _TInputX >
-        auto evaluate(
-          const Eigen::EigenBase< _TInputX >& iX, TScalar* iB = nullptr
-          ) const;
+        auto eval( const Eigen::EigenBase< _TInputX >& iX ) const;
 
         /* TODO
            template< class _TInputX, class _TInputY >
@@ -62,15 +62,6 @@ namespace ivqML
           const Eigen::EigenBase< _TInputY >& iY,
           const TScalar& l = 0
           );
-
-      private:
-        Linear( const Self& other ) = delete;
-        Self& operator=( const Self& other ) = delete;
-
-        /* TODO
-           protected:
-           TMap m_T { nullptr, 0, 0 };
-        */
       };
     } // end namespace
   } // end namespace

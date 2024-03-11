@@ -30,9 +30,15 @@ namespace ivqML
         using Superclass = ivqML::Model::Base< _TScalar >;
         using TScalar    = typename Superclass::TScalar;
         using TNatural   = typename Superclass::TNatural;
-        using TMatrix    = typename Superclass::TMatrix;
-        using TColumn    = typename Superclass::TColumn;
+        using TMat       = typename Superclass::TMat;
+        using TCol       = typename Superclass::TCol;
         using TRow       = typename Superclass::TRow;
+        using TMatMap    = typename Superclass::TMatMap;
+        using TColMap    = typename Superclass::TColMap;
+        using TRowMap    = typename Superclass::TRowMap;
+        using TMatCMap   = typename Superclass::TMatCMap;
+        using TColCMap   = typename Superclass::TColCMap;
+        using TRowCMap   = typename Superclass::TRowCMap;
 
         /* TODO
            using TActivationSignature = void( TMap&, const TMap&, bool );
@@ -44,13 +50,6 @@ namespace ivqML
       public:
         FeedForward( );
         virtual ~FeedForward( ) override = default;
-
-        /* TODO
-           template< class _O >
-           void copy( const _O& other );
-        */
-
-        virtual void random_fill( ) override;
 
         virtual TNatural number_of_inputs( ) const override;
         virtual void set_number_of_inputs( const TNatural& p ) override;
@@ -64,10 +63,14 @@ namespace ivqML
         TNatural number_of_layers( ) const;
         void init( );
 
+        TMatMap W( const TNatural& l );
+        TMatCMap W( const TNatural& l ) const;
+
+        TColMap B( const TNatural& l );
+        TColCMap B( const TNatural& l ) const;
+
         template< class _TInputX >
-        auto evaluate(
-          const Eigen::EigenBase< _TInputX >& iX, TScalar* iB = nullptr
-          ) const;
+        auto eval( const Eigen::EigenBase< _TInputX >& iX ) const;
 
         /* TODO
            template< class _TInputX >
@@ -87,15 +90,17 @@ namespace ivqML
         */
 
       protected:
+        template< class _TInputX >
+        void _eval(
+          const Eigen::EigenBase< _TInputX >& iX, TScalar* buffer
+          ) const;
+
         virtual void _from_stream( std::istream& i ) override;
         virtual void _to_stream( std::ostream& o ) const override;
 
-      private:
-        FeedForward( const Self& other ) = delete;
-        Self& operator=( const Self& other ) = delete;
-
       protected:
-        std::vector< TNatural > m_Layers;
+        std::vector< TNatural > m_S;
+        std::vector< TNatural > m_O;
 
 
         /* TODO

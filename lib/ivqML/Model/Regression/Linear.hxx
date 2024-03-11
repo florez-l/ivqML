@@ -10,11 +10,11 @@
 template< class _TScalar >
 template< class _TInputX >
 auto ivqML::Model::Regression::Linear< _TScalar >::
-evaluate( const Eigen::EigenBase< _TInputX >& iX, TScalar* iB ) const
+eval( const Eigen::EigenBase< _TInputX >& iX ) const
 {
-  auto R = this->_row( this->m_Size - 1, 1 );
+  auto R = this->row( this->m_P.size( ) - 1, 1 );
   auto X = iX.derived( ).template cast< TScalar >( );
-  return( ( ( R * X ).array( ) + this->m_Parameters[ 0 ] ).eval( ) );
+  return( ( ( R * X ).array( ) + this->m_P( 0 ) ).eval( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -34,16 +34,16 @@ fit(
   TNatural n = TScalar( X.rows( ) );
   this->set_number_of_inputs( n );
 
-  TMatrix Xi( m, n + 1 );
-  Xi << TMatrix::Ones( m, 1 ), X.transpose( );
+  TMat Xi( m, n + 1 );
+  Xi << TMat::Ones( m, 1 ), X.transpose( );
 
-  this->_row( n + 1 )
+  this->row( n + 1 )
     =
     (
       Y * Xi * (
         ( ( Xi.transpose( ) * Xi ) / TScalar( m ) )
         +
-        ( TMatrix::Identity( n + 1, n + 1 ) * l ) ).inverse( )
+        ( TMat::Identity( n + 1, n + 1 ) * l ) ).inverse( )
       )
     /
     TScalar( m );

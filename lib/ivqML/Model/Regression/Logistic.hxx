@@ -11,7 +11,7 @@
 template< class _TScalar >
 template< class _TInputX >
 auto ivqML::Model::Regression::Logistic< _TScalar >::
-evaluate( const Eigen::EigenBase< _TInputX >& iX, TScalar* iB ) const
+eval( const Eigen::EigenBase< _TInputX >& iX ) const
 {
   static const TScalar _0 = TScalar( 0 );
   static const TScalar _1 = TScalar( 1 );
@@ -19,7 +19,7 @@ evaluate( const Eigen::EigenBase< _TInputX >& iX, TScalar* iB ) const
   static const TScalar _L = std::log( _1 - _E ) - std::log( _E );
 
   return(
-    this->Superclass::evaluate( iX.derived( ) )
+    this->Superclass::eval( iX.derived( ) )
     .unaryExpr(
       []( const TScalar& z ) -> TScalar
       {
@@ -83,7 +83,7 @@ auto ivqML::Model::Regression::Logistic< _TScalar >::
 threshold( const Eigen::EigenBase< _TInputX >& iX ) const
 {
   return(
-    ( this->evaluate( iX ) >= TScalar( 0.5 ) ).template cast< TScalar >( )
+    ( this->eval( iX ) >= TScalar( 0.5 ) ).template cast< TScalar >( )
     );
 }
 

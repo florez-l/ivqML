@@ -7,74 +7,72 @@
 #include <cstdlib>
 
 // -------------------------------------------------------------------------
-/* TODO
-   template< class _S >
-   template< class _O >
-   void ivqML::Model::NeuralNetwork::FeedForward< _S >::
-   copy( const _O& other )
-   {
-   auto f = other.m_F.begin( );
+template< class _TScalar >
+template< class _TInputX >
+auto ivqML::Model::NeuralNetwork::FeedForward< _TScalar >::
+eval( const Eigen::EigenBase< _TInputX >& iX ) const
+{
+  TRow buffer = TRow( this->buffer_size( ) * iX.cols( ) );
 
-   this->add_layer( other.m_S[ 0 ], other.m_S[ 1 ], ( f++ )->first );
-   for( TNatural i = 2; i < other.m_S.size( ); ++i )
-   this->add_layer( other.m_S[ i ], ( f++ )->first );
-   this->init( );
+  std::cout << "-------------> " << buffer.size( ) << std::endl;
+  this->_eval( iX, buffer.data( ) );
 
-   for( TNatural i = 0; i < this->m_Size; ++i )
-   *( this->m_Parameters + i ) = _S( *( other.m_Parameters + i ) );
-   }
-*/
+  return( buffer.data( ) + ( buffer.size( ) - ( this->m_S.back( ) * iX.cols( ) ) ) );
+
+  // Computation buffer
+  /* TODO
+     TNatural m = iX.cols( );
+     TNatural s = this->buffer_size( ) * m;
+     TScalar* buffer = iB;
+     if( iB == nullptr )
+     buffer =
+     reinterpret_cast< TScalar* >( std::calloc( s, sizeof( TScalar ) ) );
+
+     // Input layer
+     TMatMap( buffer, this->m_Layers[ 0 ], m )
+     =
+     iX.derived( ).template cast< TScalar >( );
+
+     // Loop
+     TNatural as = 0, zs = this->m_Layers[ 0 ] * m;
+     TNatural ws = 0, bs = this->m_Layers[ 0 ] * this->m_Layers[ 1 ];
+     TNatural L = this->number_of_layers( );
+     for( TNatural l = 0; l < L; ++l )
+     {
+     TMatMap Z( buffer + zs, this->m_Layers[ l + 1 ], m );
+     TMatMap A( buffer + as, this->m_Layers[ l ], m );
+     TMatMap R(
+     buffer + ( zs + ( this->m_Layers[ l + 1 ] * m ) ),
+     this->m_Layers[ l + 1 ], m
+     );
+     auto W = this->_matrix( this->m_Layers[ l + 1 ], this->m_Layers[ l ], ws );
+     auto B = this->_column( this->m_Layers[ l + 1 ], bs );
+
+     Z = ( W * A ).colwise( ) + B;
+     this->m_F[ l ].second( R, Z, false );
+
+     if( l < L - 1 )
+     {
+     as += ( this->m_Layers[ l ] + this->m_Layers[ l + 1 ] ) * m;
+     zs += ( this->m_Layers[ l + 1 ] + this->m_Layers[ l + 1 ] ) * m;
+     ws = bs + this->m_Layers[ l + 1 ];
+     bs = ws + ( this->m_Layers[ l + 2 ] * this->m_Layers[ l + 1 ] );
+     } // end if
+     } // end for
+
+     TMat res = TMatMap( buffer + as, this->m_Layers[ L ], m );
+     if( iB == nullptr )
+     std::free( buffer );
+     return( res );
+  */
+}
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
 template< class _TInputX >
-auto ivqML::Model::NeuralNetwork::FeedForward< _TScalar >::
-evaluate( const Eigen::EigenBase< _TInputX >& iX, TScalar* iB ) const
+void ivqML::Model::NeuralNetwork::FeedForward< _TScalar >::
+_eval( const Eigen::EigenBase< _TInputX >& iX, TScalar* buffer ) const
 {
-  // Computation buffer
-  TNatural m = iX.cols( );
-  TNatural s = this->buffer_size( ) * m;
-  TScalar* buffer = iB;
-  if( iB == nullptr )
-    buffer =
-      reinterpret_cast< TScalar* >( std::calloc( s, sizeof( TScalar ) ) );
-
-  // Input layer
-  Eigen::Map< TMatrix >( buffer, this->m_Layers[ 0 ], m )
-    =
-    iX.derived( ).template cast< TScalar >( );
-
-  // Loop
-  TNatural as = 0, zs = this->m_Layers[ 0 ] * m;
-  TNatural ws = 0, bs = this->m_Layers[ 0 ] * this->m_Layers[ 1 ];
-  TNatural L = this->number_of_layers( );
-  for( TNatural l = 0; l < L; ++l )
-  {
-    Eigen::Map< TMatrix > Z( buffer + zs, this->m_Layers[ l + 1 ], m );
-    Eigen::Map< TMatrix > A( buffer + as, this->m_Layers[ l ], m );
-    Eigen::Map< TMatrix > R(
-      buffer + ( zs + ( this->m_Layers[ l + 1 ] * m ) ),
-      this->m_Layers[ l + 1 ], m
-      );
-    auto W = this->_matrix( this->m_Layers[ l + 1 ], this->m_Layers[ l ], ws );
-    auto B = this->_column( this->m_Layers[ l + 1 ], bs );
-
-    Z = ( W * A ).colwise( ) + B;
-    this->m_F[ l ].second( R, Z, false );
-
-    if( l < L - 1 )
-    {
-      as += ( this->m_Layers[ l ] + this->m_Layers[ l + 1 ] ) * m;
-      zs += ( this->m_Layers[ l + 1 ] + this->m_Layers[ l + 1 ] ) * m;
-      ws = bs + this->m_Layers[ l + 1 ];
-      bs = ws + ( this->m_Layers[ l + 2 ] * this->m_Layers[ l + 1 ] );
-    } // end if
-  } // end for
-
-  TMatrix res = Eigen::Map< TMatrix >( buffer + as, this->m_Layers[ L ], m );
-  if( iB == nullptr )
-    std::free( buffer );
-  return( res );
 }
 
 // -------------------------------------------------------------------------

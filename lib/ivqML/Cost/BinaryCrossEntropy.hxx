@@ -21,7 +21,7 @@ operator()( TScalar* G ) const
   static const TScalar _E = std::numeric_limits< TScalar >::epsilon( );
 
   TScalar m = TScalar( this->m_X.cols( ) );
-  TMatrix Z = this->m_M->evaluate( this->m_X );
+  TMat Z = this->m_M->eval( this->m_X );
   std::atomic< TScalar > S = 0;
   Z.noalias( )
     =
@@ -39,7 +39,7 @@ operator()( TScalar* G ) const
   if( G != nullptr )
   {
     *G = Z.mean( );
-    Eigen::Map< TColumn >( G + 1, this->m_X.rows( ), 1 )
+    TColMap( G + 1, this->m_X.rows( ), 1 )
       =
       ( this->m_X * Z.transpose( ) ) / m;
   } // end if

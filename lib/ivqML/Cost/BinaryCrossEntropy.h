@@ -22,9 +22,15 @@ namespace ivqML
       using TModel     = typename Superclass::TModel;
       using TScalar    = typename Superclass::TScalar;
       using TNatural   = typename Superclass::TNatural;
-      using TMatrix    = typename Superclass::TMatrix;
-      using TColumn    = typename Superclass::TColumn;
+      using TMat       = typename Superclass::TMat;
+      using TCol       = typename Superclass::TCol;
       using TRow       = typename Superclass::TRow;
+      using TMatMap    = typename Superclass::TMatMap;
+      using TColMap    = typename Superclass::TColMap;
+      using TRowMap    = typename Superclass::TRowMap;
+      using TMatCMap   = typename Superclass::TMatCMap;
+      using TColCMap   = typename Superclass::TColCMap;
+      using TRowCMap   = typename Superclass::TRowCMap;
 
     public:
       BinaryCrossEntropy( _TModel& m );

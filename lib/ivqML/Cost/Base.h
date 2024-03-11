@@ -18,9 +18,15 @@ namespace ivqML
       using TModel   = _TModel;
       using TScalar  = typename TModel::TScalar;
       using TNatural = typename TModel::TNatural;
-      using TMatrix  = typename TModel::TMatrix;
-      using TColumn  = typename TModel::TColumn;
+      using TMat     = typename TModel::TMat;
+      using TCol     = typename TModel::TCol;
       using TRow     = typename TModel::TRow;
+      using TMatMap  = typename TModel::TMatMap;
+      using TColMap  = typename TModel::TColMap;
+      using TRowMap  = typename TModel::TRowMap;
+      using TMatCMap = typename TModel::TMatCMap;
+      using TColCMap = typename TModel::TColCMap;
+      using TRowCMap = typename TModel::TRowCMap;
 
     public:
       Base( _TModel& m );
@@ -36,8 +42,8 @@ namespace ivqML
 
     protected:
       TModel* m_M;
-      TMatrix m_X;
-      TRow    m_Y;
+      TMat m_X;
+      TRow m_Y;
     };
   } // end namespace
 } // end namespace

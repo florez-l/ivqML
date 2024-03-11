@@ -24,18 +24,22 @@ namespace ivqML
         using Superclass = ivqML::Model::Regression::Linear< _TScalar >;
         using TScalar    = typename Superclass::TScalar;
         using TNatural   = typename Superclass::TNatural;
-        using TMatrix    = typename Superclass::TMatrix;
-        using TColumn    = typename Superclass::TColumn;
+        using TMat       = typename Superclass::TMat;
+        using TCol       = typename Superclass::TCol;
         using TRow       = typename Superclass::TRow;
+        using TMatMap    = typename Superclass::TMatMap;
+        using TColMap    = typename Superclass::TColMap;
+        using TRowMap    = typename Superclass::TRowMap;
+        using TMatCMap   = typename Superclass::TMatCMap;
+        using TColCMap   = typename Superclass::TColCMap;
+        using TRowCMap   = typename Superclass::TRowCMap;
 
       public:
         Logistic( const TNatural& n = 0 );
         virtual ~Logistic( ) = default;
 
         template< class _TInputX >
-        auto evaluate(
-          const Eigen::EigenBase< _TInputX >& iX, TScalar* iB = nullptr
-          ) const;
+        auto eval( const Eigen::EigenBase< _TInputX >& iX ) const;
 
         /* TODO
            template< class _X, class _Y >
@@ -50,10 +54,6 @@ namespace ivqML
 
         template< class _TInputX >
         auto threshold( const Eigen::EigenBase< _TInputX >& iX ) const;
-
-      private:
-        Logistic( const Self& other ) = delete;
-        Self& operator=( const Self& other ) = delete;
       };
     } // end namespace
   } // end namespace

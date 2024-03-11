@@ -21,18 +21,18 @@ int main( int argc, char** argv )
   std::cout << "Model: " << model << std::endl;
 
   // Some random input data
-  TModel::TMatrix X( n, m );
+  TModel::TMat X( n, m );
   X.setRandom( );
   std::cout << "-------------- INPUTS --------------" << std::endl;
   std::cout << X << std::endl;
 
   std::cout << "-------------- OUTPUTS --------------" << std::endl;
-  TModel::TMatrix Y = model.evaluate( X );
+  TModel::TMat Y = model.eval( X );
   std::cout << Y << std::endl;
 
   std::cout << "-------------- COST --------------" << std::endl;
-  TModel model_for_cost;
-  model_for_cost.shallow_copy( model );
+  TModel model_for_cost = model;
+  model_for_cost.random_fill( );
 
   TCost J( model_for_cost );
   J.set_data( X, Y );

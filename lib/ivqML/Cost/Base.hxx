@@ -22,7 +22,7 @@ set_data(
   )
 {
   this->m_X = iX.derived( ).template cast< TScalar >( );
-  this->m_Y = iY.derived( ).template cast< TScalar >( );
+  this->m_Y = iY.derived( ).row( 0 ).template cast< TScalar >( );
 }
 
 #endif // __ivqML__Cost__Base__hxx__
