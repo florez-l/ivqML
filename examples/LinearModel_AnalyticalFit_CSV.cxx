@@ -24,7 +24,7 @@ int main( int argc, char** argv )
   if( argc > 2 )
     std::istringstream( argv[ 2 ] ) >> lambda;
 
-  TModel::TMatrix D;
+  TModel::TMat D;
   ivqML::IO::CSV::Read( D, csv );
 
   TModel model;

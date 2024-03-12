@@ -18,6 +18,14 @@ FeedForward( )
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
+bool ivqML::Model::NeuralNetwork::FeedForward< _TScalar >::
+has_backpropagation( ) const
+{
+  return( true );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
 typename ivqML::Model::NeuralNetwork::FeedForward< _TScalar >::
 TNatural ivqML::Model::NeuralNetwork::FeedForward< _TScalar >::
 number_of_inputs( ) const
@@ -35,19 +43,6 @@ set_number_of_inputs( const TNatural& p )
 {
   this->m_S.clear( );
   this->m_S.push_back( p );
-
-  /* TODO
-     this->m_S.clear( );
-     this->m_F.clear( );
-     this->m_W.clear( );
-     this->m_B.clear( );
-     this->m_F.clear( );
-
-     this->m_S.push_back( i );
-     this->m_S.push_back( o );
-
-     this->m_F.push_back( std::make_pair( a, TActivationFactory::New( a ) ) );
-  */
 }
 
 // -------------------------------------------------------------------------
@@ -96,9 +91,7 @@ void ivqML::Model::NeuralNetwork::FeedForward< _TScalar >::
 add_layer( const TNatural& o, const std::string& a )
 {
   this->m_S.push_back( o );
-  /* TODO
-     this->m_F.push_back( std::make_pair( a, TActivationFactory::New( a ) ) );
-  */
+  this->m_A.push_back( std::make_pair( a, TActivationFactory::New( a ) ) );
 }
 
 // -------------------------------------------------------------------------
@@ -136,30 +129,6 @@ init( )
 
   this->Superclass::set_number_of_parameters( P );
   this->random_fill( );
-
-
-
-  // Create matrices and vectors
-  /* TODO
-     this->m_W.clear( );
-     this->m_B.clear( );
-     this->m_BSize = this->m_S[ 0 ];
-     TNatural s = 0;
-     TScalar* b = this->m_Parameters;
-     for( TNatural l = 1; l < this->m_S.size( ); ++l )
-     {
-     TNatural i = this->m_S[ l - 1 ];
-     TNatural o = this->m_S[ l ];
-     this->m_BSize += ( o << 1 );
-
-     this->m_W.push_back( TMap( b + s, o, i ) );
-     this->m_B.push_back( TMap( b + s + ( i * o ), o, 1 ) );
-     
-     s += o * ( i + 1 );
-     } // end for
-     this->m_W.shrink_to_fit( );
-     this->m_B.shrink_to_fit( );
-  */
 }
 
 // -------------------------------------------------------------------------
@@ -233,56 +202,53 @@ template< class _TScalar >
 void ivqML::Model::NeuralNetwork::FeedForward< _TScalar >::
 _from_stream( std::istream& i )
 {
-  /* TODO
-     TNatural L, in, out;
-     std::string a;
+  TNatural L, in, out;
+  std::string a;
 
-     i >> L >> in >> out >> a;
-     this->add_layer( in, out, a );
+  i >> L >> in >> out >> a;
+  this->add_layer( in );
+  this->add_layer( out, a );
+  for( TNatural l = 1; l < L; ++l )
+  {
+    i >> out >> a;
+    this->add_layer( out, a );
+  } // end for
+  this->init( );
 
-     for( TNatural l = 1; l < L; ++l )
-     {
-     i >> out >> a;
-     this->add_layer( out, a );
-     } // end for
-
-     this->init( );
-
-     i >> a;
-     std::transform(
-     a.begin( ), a.end( ), a.begin( ),
-     []( unsigned char c ){ return( std::tolower( c ) ); }
-     );
-
-     if( a == "random" )
-     {
-     // Do nothing since init() randomly fills
-     }
-     else if( a == "zeros" )
-     {
-     std::transform(
-     this->m_Parameters, this->m_Parameters + this->m_Size,
-     this->m_Parameters,
-     []( const TScalar& v ){ return( TScalar( 0 ) ); }
-     );
-     }
-     else if( a == "ones" )
-     {
-     std::transform(
-     this->m_Parameters, this->m_Parameters + this->m_Size,
-     this->m_Parameters,
-     []( const TScalar& v ){ return( TScalar( 1 ) ); }
-     );
-     }
-     else
-     {
-     TNatural P = std::atoi( a.c_str( ) );
-     if( P != this->m_Size )
-     throw std::length_error( "Length mismatch while reading model." );
-     for( TNatural p = 0; p < P; ++p )
-     i >> this->m_Parameters[ p ];
-     } // end if
-  */
+  i >> a;
+  std::transform(
+    a.begin( ), a.end( ), a.begin( ),
+    []( unsigned char c ){ return( std::tolower( c ) ); }
+    );
+  
+  if( a == "random" )
+  {
+    // Do nothing since init() randomly fills
+  }
+  else if( a == "zeros" )
+  {
+    std::transform(
+      this->m_P.data( ), this->m_P.data( ) + this->m_P.size( ),
+      this->m_P.data( ),
+      []( const TScalar& v ){ return( TScalar( 0 ) ); }
+      );
+  }
+  else if( a == "ones" )
+  {
+    std::transform(
+      this->m_P.data( ), this->m_P.data( ) + this->m_P.size( ),
+      this->m_P.data( ),
+      []( const TScalar& v ){ return( TScalar( 1 ) ); }
+      );
+  }
+  else
+  {
+    TNatural P = std::atoi( a.c_str( ) );
+    if( P != this->m_P.size( ) )
+      throw std::length_error( "Length mismatch while reading model." );
+    for( TNatural p = 0; p < P; ++p )
+      i >> this->m_P( p );
+  } // end if
 }
 
 // -------------------------------------------------------------------------
@@ -294,7 +260,7 @@ _to_stream( std::ostream& o ) const
   o << L << " " << this->m_S[ 0 ] << std::endl;
   for( TNatural l = 0; l < L; ++l )
     o
-      << this->m_S[ l + 1 ] /* << " " << this->m_F[ l ].first */
+      << this->m_S[ l + 1 ] << " " << this->m_A[ l ].first
       << std::endl;
   this->Superclass::_to_stream( o );
 }

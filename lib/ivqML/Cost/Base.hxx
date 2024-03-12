@@ -14,6 +14,15 @@ Base( _TModel& m )
 
 // -------------------------------------------------------------------------
 template< class _TModel >
+ivqML::Cost::Base< _TModel >::
+~Base( )
+{
+  if( this->m_B != nullptr )
+    delete this->m_B;
+}
+
+// -------------------------------------------------------------------------
+template< class _TModel >
 template< class _TInputX, class _TInputY >
 void ivqML::Cost::Base< _TModel >::
 set_data(
@@ -22,7 +31,7 @@ set_data(
   )
 {
   this->m_X = iX.derived( ).template cast< TScalar >( );
-  this->m_Y = iY.derived( ).row( 0 ).template cast< TScalar >( );
+  this->m_Y = iY.derived( ).template cast< TScalar >( );
 }
 
 #endif // __ivqML__Cost__Base__hxx__

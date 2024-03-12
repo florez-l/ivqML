@@ -40,7 +40,7 @@ int main( int argc, char** argv )
   TCost J( model_for_cost );
   J.set_data( X, Y );
 
-  TModel::TRow G( model_for_cost.number_of_parameters( ) );
+  TModel::TRow G = TModel::TRow::Zero( model_for_cost.number_of_parameters( ) );
   std::cout << "Model for cost: " << std::endl << model_for_cost << std::endl;
   std::cout << "Cost = " << J( G.data( ) ) << std::endl;
   std::cout << "Gradient = " << G << std::endl;

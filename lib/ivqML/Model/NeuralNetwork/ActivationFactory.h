@@ -22,8 +22,16 @@ namespace ivqML
         using Self        = ActivationFactory;
         using TModel      = _M;
         using TScalar     = typename TModel::TScalar;
-        using TMap        = typename TModel::TMap;
-        using TMatrix     = typename TModel::TMatrix;
+        using TNatural    = typename TModel::TNatural;
+        using TMat        = typename TModel::TMat;
+        using TCol        = typename TModel::TCol;
+        using TRow        = typename TModel::TRow;
+        using TMatMap     = typename TModel::TMatMap;
+        using TColMap     = typename TModel::TColMap;
+        using TRowMap     = typename TModel::TRowMap;
+        using TMatCMap    = typename TModel::TMatCMap;
+        using TColCMap    = typename TModel::TColCMap;
+        using TRowCMap    = typename TModel::TRowCMap;
         using TActivation = typename TModel::TActivation;
         using TTraits     = std::numeric_limits< TScalar >;
 
@@ -33,7 +41,7 @@ namespace ivqML
     } // end namespace
   } // end namespace
 } // end namespace
-  
+
 #include <ivqML/Model/NeuralNetwork/ActivationFactory.hxx>
 
 #endif // __ivqML__Model__NeuralNetwork__ActivationFactory__h__

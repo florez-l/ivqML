@@ -38,16 +38,6 @@ namespace ivqML
       Base( const TNatural& n = 1 );
       virtual ~Base( ) = default;
 
-      virtual bool has_backpropagation( ) const;
-
-      /* TODO
-         virtual void backpropagation(
-         TScalar* G,
-         TScalar* B,
-         const TMatCMap& X, const TMatCMap& Y
-         ) const;
-      */
-
       virtual void random_fill( );
 
       _TScalar& operator[]( const TNatural& i );
@@ -74,6 +64,19 @@ namespace ivqML
 
       TRowMap row( const TNatural& c, const TNatural& o = 0 );
       TRowCMap row( const TNatural& c, const TNatural& o = 0 ) const;
+
+      virtual bool has_backpropagation( ) const;
+
+      template< class _TInputX, class _TInputY >
+      void backpropagation(
+        TScalar* G,
+        TScalar* B,
+        const Eigen::EigenBase< _TInputX >& iX,
+        const Eigen::EigenBase< _TInputY >& iY
+        ) const
+        {
+          // Do nothing!
+        }
 
     protected:
       virtual void _from_stream( std::istream& i );

@@ -30,7 +30,7 @@ namespace ivqML
 
     public:
       Base( _TModel& m );
-      virtual ~Base( ) = default;
+      virtual ~Base( );
 
       template< class _TInputX, class _TInputY >
       void set_data(
@@ -43,7 +43,9 @@ namespace ivqML
     protected:
       TModel* m_M;
       TMat m_X;
-      TRow m_Y;
+      TMat m_Y;
+
+      mutable TScalar* m_B { nullptr };
     };
   } // end namespace
 } // end namespace

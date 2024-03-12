@@ -40,16 +40,16 @@ namespace ivqML
         using TColCMap   = typename Superclass::TColCMap;
         using TRowCMap   = typename Superclass::TRowCMap;
 
-        /* TODO
-           using TActivationSignature = void( TMap&, const TMap&, bool );
-           using TActivation = std::function< TActivationSignature >;
-           using TActivationFactory =
-           ivqML::Model::NeuralNetwork::ActivationFactory< Self >;
-        */
+        using TActivationSignature = void( TMatMap&, const TMatMap&, bool );
+        using TActivation = std::function< TActivationSignature >;
+        using TActivationFactory =
+          ivqML::Model::NeuralNetwork::ActivationFactory< Self >;
 
       public:
         FeedForward( );
         virtual ~FeedForward( ) override = default;
+
+        virtual bool has_backpropagation( ) const override;
 
         virtual TNatural number_of_inputs( ) const override;
         virtual void set_number_of_inputs( const TNatural& p ) override;
@@ -71,6 +71,14 @@ namespace ivqML
 
         template< class _TInputX >
         auto eval( const Eigen::EigenBase< _TInputX >& iX ) const;
+
+        template< class _TInputX, class _TInputY >
+        void backpropagation(
+          TScalar* G,
+          TScalar* B,
+          const Eigen::EigenBase< _TInputX >& iX,
+          const Eigen::EigenBase< _TInputY >& iY
+          ) const;
 
         /* TODO
            template< class _TInputX >
@@ -101,20 +109,10 @@ namespace ivqML
       protected:
         std::vector< TNatural > m_S;
         std::vector< TNatural > m_O;
-
+        std::vector< std::pair< std::string, TActivation > > m_A;
 
         /* TODO
            bool m_IsLabeling { true }; // TODO: detect this
-
-           std::vector< TNatural > m_S;
-           TNatural m_BSize;
-
-           std::vector< TMap > m_W;
-           std::vector< TMap > m_B;
-        */
-
-        /* TODO
-           std::vector< std::pair< std::string, TActivation > > m_F;
         */
       };
     } // end namespace

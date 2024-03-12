@@ -5,9 +5,11 @@
 #include <iostream>
 #include <fstream>
 #include <ivqML/Model/NeuralNetwork/FeedForward.h>
+#include <ivqML/Cost/BinaryCrossEntropy.h>
 
 using TReal = long double;
 using TModel = ivqML::Model::NeuralNetwork::FeedForward< TReal >;
+using TCost = ivqML::Cost::BinaryCrossEntropy< TModel >;
 
 int main( int argc, char** argv )
 {
@@ -25,32 +27,29 @@ int main( int argc, char** argv )
   std::ifstream d_str( d.c_str( ) );
   d_str >> model;
   d_str.close( );
-
-  std::cout << model << std::endl;
+  std::cout << "Model: " << std::endl << model << std::endl;
 
   // Some random input data
-  TModel::TMatrix X( model.number_of_inputs( ), m );
+  TModel::TMat X( model.number_of_inputs( ), m );
   X.setRandom( );
   std::cout << "-------------- INPUTS --------------" << std::endl;
   std::cout << X << std::endl;
 
   std::cout << "-------------- OUTPUTS --------------" << std::endl;
-  TModel::TMatrix Y = model.evaluate( X );
+  TModel::TMat Y = model.eval( X );
   std::cout << Y << std::endl;
 
-  /* TODO
-     std::cout << "---------- BACKPROPAGATION ----------" << std::endl;
-     TModel::TMatrix G;
-     TModel::TScalar J;
-     model.init( );
-     model.cost(
-     G,
-     TModel::TMap( X.data( ), X.rows( ), X.cols( ) ),
-     TModel::TMap( Y.data( ), Y.rows( ), Y.cols( ) ),
-     &J
-     );
-     std::cout << G << std::endl;
-  */
+  std::cout << "-------------- COST --------------" << std::endl;
+  TModel model_for_cost = model;
+  model_for_cost.random_fill( );
+
+  TCost J( model_for_cost );
+  J.set_data( X, Y );
+
+  TModel::TRow G( model_for_cost.number_of_parameters( ) );
+  std::cout << "Model for cost: " << std::endl << model_for_cost << std::endl;
+  std::cout << "Cost = " << J( G.data( ) ) << std::endl;
+  std::cout << "Gradient = " << G << std::endl;
 
   return( EXIT_SUCCESS );
 }

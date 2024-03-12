@@ -27,7 +27,7 @@ New( const std::string& n )
 
   if( rn == "relu" )
     return(
-      []( TMap& A, const TMap& Z, bool d ) -> void
+      []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
           [&d]( const TScalar& z ) -> TScalar
@@ -39,7 +39,7 @@ New( const std::string& n )
       );
   else if( rn == "leakyrelu" )
     return(
-      []( TMap& A, const TMap& Z, bool d ) -> void
+      []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
           [&d]( const TScalar& z ) -> TScalar
@@ -57,7 +57,7 @@ New( const std::string& n )
       );
   else if( rn == "tanh" )
     return(
-      []( TMap& A, const TMap& Z, bool d ) -> void
+      []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
           [&d]( const TScalar& z ) -> TScalar
@@ -70,7 +70,7 @@ New( const std::string& n )
       );
   else if( rn == "sigmoid" )
     return(
-      []( TMap& A, const TMap& Z, bool d ) -> void
+      []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
           [&]( const TScalar& z ) -> TScalar
@@ -86,7 +86,7 @@ New( const std::string& n )
       );
   else if( rn == "softmax" )
     return(
-      []( TMap& A, const TMap& Z, bool d ) -> void
+      []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = ( Z.rowwise( ) - Z.colwise( ).maxCoeff( ) ).array( ).exp( ).eval( );
         A.array( ).rowwise( ) /= A.array( ).colwise( ).sum( );
@@ -94,7 +94,7 @@ New( const std::string& n )
       );
   else // if( "linear" )
     return(
-      []( TMap& A, const TMap& Z, bool d ) -> void
+      []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
           [&d]( const TScalar& z ) -> TScalar

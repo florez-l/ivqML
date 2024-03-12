@@ -15,14 +15,6 @@ Base( const TNatural& n )
 
 // -------------------------------------------------------------------------
 template< class _TScalar >
-bool ivqML::Model::Base< _TScalar >::
-has_backpropagation( ) const
-{
-  return( false );
-}
-
-// -------------------------------------------------------------------------
-template< class _TScalar >
 void ivqML::Model::Base< _TScalar >::
 random_fill( )
 {
@@ -150,6 +142,14 @@ row( const TNatural& c, const TNatural& o ) const
   if( c <= ( this->m_P.size( ) - o ) )
     return( TRowCMap( this->m_P.data( ) + o, 1, c ) );
   return( TRowCMap( nullptr, 1, 0 ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScalar >
+bool ivqML::Model::Base< _TScalar >::
+has_backpropagation( ) const
+{
+  return( false );
 }
 
 // -------------------------------------------------------------------------
