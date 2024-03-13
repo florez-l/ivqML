@@ -5,58 +5,50 @@
 #define __ivqML__Optimizer__GradientDescent__hxx__
 
 // -------------------------------------------------------------------------
-template< class _M, class _X, class _Y >
-ivqML::Optimizer::GradientDescent< _M, _X, _Y >::
+template< class _TCost >
+ivqML::Optimizer::GradientDescent< _TCost >::
 GradientDescent( )
   : Superclass( )
 {
-  this->m_P.add_options( )
-    ivqML_Optimizer_OptionMacro( alpha, "alpha,a" );
+  this->m_Options.add_options( )
+    ivqML_Optimizer_OptionMacro( learning_rate, "alpha,A" );
 }
 
 // -------------------------------------------------------------------------
-template< class _M, class _X, class _Y >
-void ivqML::Optimizer::GradientDescent< _M, _X, _Y >::
+template< class _TCost >
+void ivqML::Optimizer::GradientDescent< _TCost >::
 fit( )
 {
-  static const TScalar _2 = TScalar( 2 );
-  static const TScalar _10 = TScalar( 10 );
-  TScalar e = std::pow( _10, std::log10( this->m_alpha ) * _2 );
+  if( !this->has_model( ) )
+    return;
 
-  // Prepare batches
-  auto batches = this->_batches( );
-
-  // Prepare loop
-  TMatrix G( 1, this->m_M->number_of_parameters( ) );
+  // Initialize optimizer
+  TNatural p = this->m_Model->number_of_parameters( );
+  TRowMap mp = this->m_Model->row( p );
+  TRow G( p );
+  bool stop = false;
+  TNatural i = 0;
 
   // Main loop
-  bool stop = false, debug_stop = false;
-  TNatural i = 0;
   while( !stop )
   {
-    for( const auto& batch: batches )
-    {
-      this->m_M->cost( G, batch.first, batch.second );
-      *( this->m_M ) -= G * this->m_alpha;
-    } // end for
+    // Update function
+    TScalar J = this->m_Costs[ 0 ]( G.data( ) );
+    mp -= G * this->m_learning_rate;
 
-    debug_stop =
-      this->m_D(
-        0, G.norm( ), this->m_M, i,
-        ( i % this->m_debug_iterations == 0 )
+    // Check stop
+    TScalar gn = G.norm( );
+    stop  = ( gn < this->m_epsilon );
+    stop |= ( std::isnan( gn ) || std::isinf( gn ) );
+    stop |= ( ++i >= this->m_max_iterations );
+
+    // Process debug information
+    stop |=
+      this->m_Debugger(
+        J, gn, this->m_Model, i,
+        stop || i == 1 || i % this->m_debug_iterations == 0
         );
-    i++;
-    stop =
-      ( G.norm( ) <= e )
-      ||
-      ( this->m_max_iterations == i )
-      ||
-      debug_stop;
   } // end while
-
-  // Finish
-  this->m_D( 0, G.norm( ), this->m_M, i, true );
-  this->_clear_batches( );
 }
 
 #endif // __ivqML__Optimizer__GradientDescent__hxx__

@@ -1,24 +1,22 @@
 // =========================================================================
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
-#ifndef __ivqML__Optimizer__GradientDescent__h__
-#define __ivqML__Optimizer__GradientDescent__h__
-
-#include <ivqML/Optimizer/Base.h>
+#ifndef __ivqML__Trainer__CommandLine__h__
+#define __ivqML__Trainer__CommandLine__h__
 
 namespace ivqML
 {
-  namespace Optimizer
+  namespace Trainer
   {
     /**
      */
-    template< class _TCost >
-    class GradientDescent
-      : public ivqML::Optimizer::Base< _TCost >
+    template< class _TOptimizer >
+    class CommandLine
+      : public _TOptimizer
     {
     public:
-      using Self       = GradientDescent;
-      using Superclass = ivqML::Optimizer::Base< _TCost >;
+      using Self       = CommandLine;
+      using Superclass = _TOptimizer;
       using TCost      = typename Superclass::TCost;
       using TModel     = typename Superclass::TModel;
       using TScalar    = typename Superclass::TScalar;
@@ -34,23 +32,25 @@ namespace ivqML
       using TRowCMap   = typename Superclass::TRowCMap;
 
     public:
-      ivqMLAttributeMacro( learning_rate, TScalar, 1e-2 );
+      CommandLine( );
+      virtual ~CommandLine( ) = default;
 
-    public:
-      GradientDescent( );
-      virtual ~GradientDescent( ) = default;
+      static bool debugger(
+        const TScalar& J,
+        const TScalar& G,
+        const TModel* m,
+        const TNatural& i,
+        bool d
+        );
 
-      virtual void fit( ) override;
-
-    private:
-      GradientDescent( const Self& ) = delete;
-      Self& operator=( const Self& ) = delete;
+    protected:
+      static bool s_Stop;
     };
   } // end namespace
 } // end namespace
 
-#include <ivqML/Optimizer/GradientDescent.hxx>
+#include <ivqML/Trainer/CommandLine.hxx>
 
-#endif // __ivqML__Optimizer__GradientDescent__h__
+#endif // __ivqML__Trainer__CommandLine__h__
 
 // eof - $RCSfile$

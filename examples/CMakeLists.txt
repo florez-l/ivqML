@@ -13,6 +13,7 @@ set(
   FeedForwardNetwork_01
   LinearModel_00
   LinearModel_AnalyticalFit_CSV
+  LinearModel_GradientDescentFit_00
   LogisticModel_00
 
   #  ExtractSamplesFrom2DImage

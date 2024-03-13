@@ -6,10 +6,10 @@
 
 #include <functional>
 #include <limits>
-#include <utility>
+#include <string>
 #include <vector>
+
 #include <boost/program_options.hpp>
-#include <ivqML/Config.h>
 
 // -------------------------------------------------------------------------
 #define ivqML_Optimizer_OptionMacro( _N, _O )                           \
@@ -19,98 +19,76 @@
     ( &( this->m_##_N ) )->default_value( this->m_##_N ), ""            \
     )
 
-// -------------------------------------------------------------------------
-#define ivqML_Optimizer_Typedefs                        \
-  using TModel = typename Superclass::TModel;           \
-  using TDX = typename Superclass::TDX;                 \
-  using TDY = typename Superclass::TDY;                 \
-  using TX = typename Superclass::TX;                   \
-  using TY = typename Superclass::TY;                   \
-  using TScalar = typename Superclass::TScalar;         \
-  using TNatural = typename Superclass::TNatural;       \
-  using TMatrix = typename Superclass::TMatrix;         \
-  using TMap = typename Superclass::TMap;               \
-  using TSignature = typename Superclass::TSignature;   \
-  using TDebug = typename Superclass::TDebug
-
 namespace ivqML
 {
   namespace Optimizer
   {
     /**
      */
-    template< class _M, class _X, class _Y >
+    template< class _TCost >
     class Base
     {
     public:
-      using Self = Base;
-      using TModel = _M;
-      using TDX = _X;
-      using TDY = _Y;
-      using TX = Eigen::EigenBase< _X >;
-      using TY = Eigen::EigenBase< _Y >;
-      using TScalar = typename _M::TScalar;
-      using TNatural = typename _M::TNatural;
-      using TMatrix = typename _M::TMatrix;
-      using TMap = typename _M::TMap;
+      using Self     = Base;
+      using TCost    = _TCost;
+      using TModel   = typename TCost::TModel;
+      using TScalar  = typename TCost::TScalar;
+      using TNatural = typename TCost::TNatural;
+      using TMat     = typename TCost::TMat;
+      using TCol     = typename TCost::TCol;
+      using TRow     = typename TCost::TRow;
+      using TMatMap  = typename TCost::TMatMap;
+      using TColMap  = typename TCost::TColMap;
+      using TRowMap  = typename TCost::TRowMap;
+      using TMatCMap = typename TCost::TMatCMap;
+      using TColCMap = typename TCost::TColCMap;
+      using TRowCMap = typename TCost::TRowCMap;
 
-      using TSignature =
-        bool(
-          const TScalar&,
-          const TScalar&,
-          const TModel*,
-          const TNatural&,
-          bool
-          );
-      using TDebug = std::function< TSignature >;
+      using TDebugger = std::function< bool( const TScalar&, const TScalar&, const TModel*, const TNatural&, bool d ) >;
 
     public:
       ivqMLAttributeMacro( batch_size, TNatural, 0 );
+      ivqMLAttributeMacro( epsilon, TScalar, 0 );
       ivqMLAttributeMacro( lambda, TScalar, 0 );
-      ivqMLAttributeMacro( debug_iterations, TNatural, 1000 );
+      ivqMLAttributeMacro( debug_iterations, TNatural, 100 );
       ivqMLAttributeMacro(
         max_iterations, TNatural, std::numeric_limits< TNatural >::max( )
         );
-      // TODO: this->_configure_parameter( "regularization", "ridge" );
 
     public:
       Base( );
-      virtual ~Base( ) = default;
+      virtual ~Base( );
 
-      virtual std::string parse_options( int argc, char** argv );
-      virtual void init( TModel& m, const TX& iX, const TY& iY );
+      std::string parse_arguments( int c, char** v );
 
-      void set_debug( TDebug d );
+      bool has_model( ) const;
+      TModel& model( );
+      const TModel& model( ) const;
+
+      template< class _TInputX, class _TInputY >
+      void set_data(
+        const Eigen::EigenBase< _TInputX >& iX,
+        const Eigen::EigenBase< _TInputY >& iY
+        );
+
+      void set_debugger( TDebugger d );
+      void unset_debugger( );
 
       virtual void fit( ) = 0;
 
-    protected:
-      std::vector< std::pair< TMap, TMap > > _batches( );
-      void _clear_batches( );
+    private:
+      Base( const Self& ) = delete;
+      Self& operator=( const Self& ) = delete;
 
     protected:
-      TModel*   m_M { nullptr };
-      const TX* m_X { nullptr };
-      const TY* m_Y { nullptr };
-      std::vector< TScalar > m_Buffer;
+      TModel* m_Model { nullptr };
+      bool m_ManagedModel { false };
 
-      std::vector< TNatural > m_Sizes;
+      std::vector< TCost > m_Costs;
 
-      TDebug m_D
-        {
-          [](
-            const TScalar&,
-            const TScalar&,
-            const TModel*,
-            const TNatural&,
-            bool
-            ) -> bool
-          {
-            return( false );
-          }
-        };
+      boost::program_options::options_description m_Options { "Options." };
 
-      boost::program_options::options_description m_P { "Options." };
+      TDebugger m_Debugger;
     };
   } // end namespace
 } // end namespace
