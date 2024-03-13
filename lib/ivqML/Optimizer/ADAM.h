@@ -12,25 +12,41 @@ namespace ivqML
   {
     /**
      */
-    template< class _M, class _X = typename _M::TMatrix, class _Y = typename _M::TMatrix >
+    template< class _TCost >
     class ADAM
-      : public ivqML::Optimizer::Base< _M, _X, _Y >
+      : public ivqML::Optimizer::Base< _TCost >
     {
     public:
-      using Self = ADAM;
-      using Superclass = ivqML::Optimizer::Base< _M, _X, _Y >;
-      ivqML_Optimizer_Typedefs;
+      using Self       = ADAM;
+      using Superclass = ivqML::Optimizer::Base< _TCost >;
+      using TCost      = typename Superclass::TCost;
+      using TModel     = typename Superclass::TModel;
+      using TScalar    = typename Superclass::TScalar;
+      using TNatural   = typename Superclass::TNatural;
+      using TMat       = typename Superclass::TMat;
+      using TCol       = typename Superclass::TCol;
+      using TRow       = typename Superclass::TRow;
+      using TMatMap    = typename Superclass::TMatMap;
+      using TColMap    = typename Superclass::TColMap;
+      using TRowMap    = typename Superclass::TRowMap;
+      using TMatCMap   = typename Superclass::TMatCMap;
+      using TColCMap   = typename Superclass::TColCMap;
+      using TRowCMap   = typename Superclass::TRowCMap;
 
     public:
-      ivqMLAttributeMacro( alpha, TScalar, 1e-3 );
+      ivqMLAttributeMacro( alpha, TScalar, 1e-4 );
       ivqMLAttributeMacro( beta1, TScalar, 0.9 );
       ivqMLAttributeMacro( beta2, TScalar, 0.999 );
 
     public:
       ADAM( );
-      virtual ~ADAM( ) override = default;
+      virtual ~ADAM( ) = default;
 
       virtual void fit( ) override;
+
+    private:
+      ADAM( const Self& ) = delete;
+      Self& operator=( const Self& ) = delete;
     };
   } // end namespace
 } // end namespace

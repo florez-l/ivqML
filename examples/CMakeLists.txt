@@ -13,6 +13,7 @@ set(
   FeedForwardNetwork_01
   LinearModel_00
   LinearModel_AnalyticalFit_CSV
+  LinearModel_ADAMFit_00
   LinearModel_GradientDescentFit_00
   LogisticModel_00
 
