@@ -12,6 +12,8 @@
 #include <ivqML/Cost/BinaryCrossEntropy.h>
 #include <ivqML/Optimizer/ADAM.h>
 #include <ivqML/Optimizer/GradientDescent.h>
+#include <ivqML/Trainer/CommandLine.h>
+#include <ivqML/IO/CSV.h>
 
 // -------------------------------------------------------------------------
 using TScalar = long double;
@@ -25,30 +27,76 @@ using TScalar = long double;
 template< class _TOptimizer >
 bool fit( int argc, char** argv )
 {
-  std::cout << "_Z" << typeid( _TOptimizer ).name( ) << std::endl;
-
-  return( false );
+  char** csv = std::find( argv, argv + argc, std::string( "--csv" ) );
+  if( csv != argv + argc )
+    csv++;
+  if( csv != argv + argc )
+  {
+    typename _TOptimizer::TModel::TMat D;
+    if( ivqML::IO::CSV::Read( D, *csv ) )
+    {
+      ivqML::Trainer::CommandLine< _TOptimizer > opt;
+      opt.set_data(
+        D.block( 0, 0, D.rows( ), D.cols( ) - 1 ).transpose( ),
+        D.block( 0, D.cols( ) - 1, D.rows( ), 1 ).transpose( )
+        );
+      std::string parsing = opt.parse_arguments( argc, argv );
+      if( parsing == "" )
+      {
+        opt.fit( );
+        std::cout
+          << "Fitted model:" << std::endl << opt.model( )
+          << std::endl;
+        return( true );
+      }
+      else
+      {
+        std::cerr << parsing << std::endl;
+        return( false );
+      } // end if
+    }
+    else
+    {
+      std::cerr << "Could not read \"" << *csv << "\"" << std::endl;
+      return( false );
+    } // end if
+  }
+  else
+  {
+    std::cerr
+      << "Usage: " << argv[ 0 ]
+      << " ... --csv [input_file_name.csv] ..."
+      << std::endl;
+    return( false );
+  } // end if
 }
 
 // -------------------------------------------------------------------------
 template< class _TCost >
 bool choose_optimizer( int argc, char** argv )
 {
-  unsigned int optimizer
-    =
-    std::distance(
-      argv + 1, std::find( argv + 1, argv + argc, "--optimizer" )
-      );
-  if( optimizer < argc )
+  char** optimizer =
+    std::find( argv, argv + argc, std::string( "--optimizer" ) );
+  if( optimizer != argv + argc )
   {
-    if( std::string( argv[ optimizer ] ) == "gd" )
-      return(
-        fit< ivqML::Optimizer::GradientDescent< _TCost > >( argc, argv )
-        );
-    else if( std::string( argv[ optimizer ] ) == "ADAM" )
-      return(
-        fit< ivqML::Optimizer::ADAM< _TCost > >( argc, argv )
-        );
+    optimizer++;
+    if( optimizer != argv + argc )
+    {
+      if( *optimizer == std::string( "gd" ) )
+        return(
+          fit< ivqML::Optimizer::GradientDescent< _TCost > >( argc, argv )
+          );
+      else if( *optimizer == std::string( "ADAM" ) )
+        return( fit< ivqML::Optimizer::ADAM< _TCost > >( argc, argv ) );
+      else
+      {
+        std::cerr
+          << "Usage: " << argv[ 0 ]
+          << " ... --optimizer [gd/ADAM] ..."
+          << std::endl;
+        return( false );
+      } // end if
+    }
     else
     {
       std::cerr
@@ -60,26 +108,6 @@ bool choose_optimizer( int argc, char** argv )
   }
   else
     return( fit< ivqML::Optimizer::ADAM< _TCost > >( argc, argv ) );
-
-  /* TODO
-     if( optimizer == "gd" )
-     {
-     return( fit< ivqML::Optimizer::GradientDescent< _TCost > >( opt, csv ) );
-     }
-     else if( optimizer == "ADAM" )
-     {
-     return( fit< ivqML::Optimizer::ADAM< _TCost > >( opt, csv ) );
-     }
-     else
-     {
-     std::cerr << opt << std::endl;
-     std::cerr << "******** POSSIBLE OPTIMIZERS ********" << std::endl;
-     std::cerr << "gd,ADAM" << std::endl;
-     std::cerr << "*************************************" << std::endl;
-     return( false );
-     } // end if
-  */
-  return( false );
 }
 
 // -------------------------------------------------------------------------
@@ -101,24 +129,25 @@ bool logistic_fit( int argc, char** argv )
 // -------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-  unsigned int model
-    =
-    std::distance(
-      argv + 1,
-      std::find_if(
-        argv + 1, argv + argc,
-        []( char* s ) -> bool
-        {
-          return( std::strcmp( s, "--model" ) == 0 );
-        }
-        )
-      );
-  if( model < argc )
+  char** model = std::find( argv, argv + argc, std::string( "--model" ) );
+  if( model != argv + argc )
+    model++;
+  if( model != argv + argc )
   {
-    if( std::string( argv[ model ] ) == "linear" )
-      return( linear_fit( argc, argv ) );
-    else if( std::string( argv[ model ] ) == "logistic" )
-      return( logistic_fit( argc, argv ) );
+    if( *model == std::string( "linear" ) )
+    {
+      if( linear_fit( argc, argv ) )
+        return( EXIT_SUCCESS );
+      else
+        return( EXIT_FAILURE );
+    }
+    else if( *model == std::string( "logistic" ) )
+    {
+      if( logistic_fit( argc, argv ) )
+        return( EXIT_SUCCESS );
+      else
+        return( EXIT_FAILURE );
+    }
     else
     {
       std::cerr
@@ -136,55 +165,7 @@ int main( int argc, char** argv )
       << std::endl;
     return( EXIT_FAILURE );
   } // end if
-
-  /* TODO
-     std::string model = "linear";
-     std::string optimizer = "ADAM";
-     std::string csv = "cvs_file_with_data";
-     boost::program_options::options_description opt { "Options" };
-     opt.add_options( )
-     ( "help,h", "help message" )
-     PROGRAM_OPTIONS_OPTION( model, "model" )
-     PROGRAM_OPTIONS_OPTION( csv, "csv" )
-     PROGRAM_OPTIONS_OPTION( optimizer, "optimizer" );
-
-     boost::program_options::variables_map m;
-     boost::program_options::store(
-     boost::program_options::parse_command_line( argc, argv, opt ), m
-     );
-     boost::program_options::notify( m );
-     if( m.count( "help" ) )
-     {
-     std::cerr << opt << std::endl;
-     return( EXIT_FAILURE );
-     } // end if
-
-     if( model == "linear" )
-     {
-     if( !linear_fit( opt, csv, optimizer ) )
-     return( EXIT_FAILURE );
-     }
-     else if( model == "logistic" )
-     {
-     if( !logistic_fit( opt, csv, optimizer ) )
-     return( EXIT_FAILURE );
-     }
-     else
-     {
-     std::cerr << opt << std::endl;
-     std::cerr << "******** POSSIBLE MODELS ********" << std::endl;
-     std::cerr << "linear,logistic" << std::endl;
-     std::cerr << "*********************************" << std::endl;
-     return( EXIT_FAILURE );
-     } // end if
-  */
-
-  return( EXIT_SUCCESS );
 }
-
-// -------------------------------------------------------------------------
-/* TODO
-*/
 
 // -------------------------------------------------------------------------
 /* TODO

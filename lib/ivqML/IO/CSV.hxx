@@ -25,6 +25,8 @@ bool ivqML::IO::CSV::Read(
 
   // Load buffer
   std::ifstream ifs( fname.c_str( ) );
+  if( !ifs )
+    return( false );
   ifs.seekg( 0, std::ios::end );
   std::size_t size = ifs.tellg( );
   ifs.seekg( 0, std::ios::beg );
