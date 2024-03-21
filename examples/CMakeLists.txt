@@ -7,6 +7,10 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/lib
   )
 
+add_executable(ivqML_example_Sandbox Sandbox.cxx)
+target_link_libraries(ivqML_example_Sandbox Eigen3::Eigen)
+
+
 set(
   _simple_examples
   FeedForwardNetwork_00
