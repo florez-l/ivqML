@@ -45,8 +45,9 @@ parse_arguments( int c, char** v )
 {
   boost::program_options::variables_map m;
   boost::program_options::store(
-    boost::program_options::
-    parse_command_line( c, v, this->m_Options ), m
+    boost::program_options::command_line_parser( c, v )
+    .options( this->m_Options ).allow_unregistered( ).run( ),
+    m
     );
   boost::program_options::notify( m );
   if( m.count( "help" ) )
