@@ -19,8 +19,8 @@ namespace ivqML
       using Superclass = _TOptimizer;
       using TCost      = typename Superclass::TCost;
       using TModel     = typename Superclass::TModel;
-      using TScalar    = typename Superclass::TScalar;
-      using TNatural   = typename Superclass::TNatural;
+      using TScl       = typename Superclass::TScl;
+      using TNat       = typename Superclass::TNat;
       using TMat       = typename Superclass::TMat;
       using TCol       = typename Superclass::TCol;
       using TRow       = typename Superclass::TRow;
@@ -36,10 +36,10 @@ namespace ivqML
       virtual ~CommandLine( ) = default;
 
       static bool debugger(
-        const TScalar& J,
-        const TScalar& G,
+        const TScl& J,
+        const TScl& G,
         const TModel* m,
-        const TNatural& i,
+        const TNat& i,
         bool d
         );
 

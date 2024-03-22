@@ -7,31 +7,27 @@
 // -------------------------------------------------------------------------
 template< class _TModel >
 ivqML::Cost::MeanSquareError< _TModel >::
-MeanSquareError( _TModel& m )
-  : Superclass( m )
+MeanSquareError( )
+  : Superclass( )
 {
 }
 
 // -------------------------------------------------------------------------
 template< class _TModel >
 typename ivqML::Cost::MeanSquareError< _TModel >::
-TScalar ivqML::Cost::MeanSquareError< _TModel >::
-operator()( TScalar* G ) const
+TScl ivqML::Cost::MeanSquareError< _TModel >::
+operator()( const TModel& model, TScl* G ) const
 {
-  auto D = ( this->m_M->eval( this->m_X ) - this->m_Y.array( ) ).eval( );
-
+  this->m_Z = model.eval( this->m_X ) - this->m_Y.array( );
   if( G != nullptr )
   {
-    TNatural n = this->m_X.rows( );
+    TNat n = this->m_X.rows( );
 
-    *G = D.mean( ) * TScalar( 2 );
-    TColMap( G + 1, n, 1 )
-      =
-      ( this->m_X * D.matrix( ).transpose( ) )
-      *
-      ( TScalar( 2 ) / TScalar( n ) );
+    *G = this->m_Z.mean( ) * TScl( 2 );
+    TColMap( G + 1, n, 1 ) =
+      ( this->m_X * this->m_Z.transpose( ) ) * ( TScl( 2 ) / TScl( n ) );
   } // end if
-  return( D.array( ).pow( 2 ).mean( ) );
+  return( this->m_Z.array( ).pow( 2 ).mean( ) );
 }
 
 #endif // __ivqML__Cost__MeanSquareError__hxx__

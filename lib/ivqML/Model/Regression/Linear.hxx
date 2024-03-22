@@ -7,31 +7,33 @@
 #include <Eigen/Dense>
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
+template< class _TScl >
 template< class _TInputX >
-auto ivqML::Model::Regression::Linear< _TScalar >::
+auto ivqML::Model::Regression::Linear< _TScl >::
 eval( const Eigen::EigenBase< _TInputX >& iX ) const
 {
-  auto R = this->row( this->m_P.size( ) - 1, 1 );
-  auto X = iX.derived( ).template cast< TScalar >( );
-  return( ( ( R * X ).array( ) + this->m_P( 0 ) ).eval( ) );
+  return(
+    ( this->m_T * iX.derived( ).template cast< TScl >( ) ).array( )
+    +
+    this->operator[]( 0 )
+    );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
+template< class _TScl >
 template< class _TInputY, class _TInputX >
-void ivqML::Model::Regression::Linear< _TScalar >::
+void ivqML::Model::Regression::Linear< _TScl >::
 fit(
   const Eigen::EigenBase< _TInputX >& iX,
   const Eigen::EigenBase< _TInputY >& iY,
-  const TScalar& l
+  const TScl& lambda
   )
 {
-  auto X = iX.derived( ).template cast< TScalar >( );
-  auto Y = iY.derived( ).template cast< TScalar >( );
+  auto X = iX.derived( ).template cast< TScl >( );
+  auto Y = iY.derived( ).template cast< TScl >( );
 
-  TNatural m = TScalar( X.cols( ) );
-  TNatural n = TScalar( X.rows( ) );
+  TNat m = TScl( X.cols( ) );
+  TNat n = TScl( X.rows( ) );
   this->set_number_of_inputs( n );
 
   TMat Xi( m, n + 1 );
@@ -40,13 +42,14 @@ fit(
   this->row( n + 1 )
     =
     (
-      Y * Xi * (
-        ( ( Xi.transpose( ) * Xi ) / TScalar( m ) )
+      Y * Xi
+      *
+      (
+        ( ( Xi.transpose( ) * Xi ) / TScl( m ) )
         +
-        ( TMat::Identity( n + 1, n + 1 ) * l ) ).inverse( )
-      )
-    /
-    TScalar( m );
+        ( TMat::Identity( n + 1, n + 1 ) * lambda )
+        ).inverse( )
+      ) / TScl( m );
 }
 
 #endif // __ivqML__Model__Regression__Linear__hxx__

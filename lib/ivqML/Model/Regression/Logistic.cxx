@@ -5,9 +5,9 @@
 #include <ivqML/Model/Regression/Logistic.h>
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-ivqML::Model::Regression::Logistic< _TScalar >::
-Logistic( const TNatural& n )
+template< class _TScl >
+ivqML::Model::Regression::Logistic< _TScl >::
+Logistic( const TNat& n )
   : Superclass( n )
 {
 }

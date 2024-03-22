@@ -14,17 +14,17 @@ namespace ivqML
   {
     /**
      */
-    template< class _TScalar >
+    template< class _TScl >
     class Base
     {
     public:
-      using Self     = Base;
-      using TScalar  = _TScalar;
-      using TNatural = unsigned long long;
+      using Self = Base;
+      using TScl = _TScl;
+      using TNat = unsigned long long;
 
-      using TMat = Eigen::Matrix< TScalar, Eigen::Dynamic, Eigen::Dynamic >;
-      using TCol = Eigen::Matrix< TScalar, Eigen::Dynamic, 1 >;
-      using TRow = Eigen::Matrix< TScalar, 1, Eigen::Dynamic >;
+      using TMat = Eigen::Matrix< TScl, Eigen::Dynamic, Eigen::Dynamic >;
+      using TCol = Eigen::Matrix< TScl, Eigen::Dynamic, 1 >;
+      using TRow = Eigen::Matrix< TScl, 1, Eigen::Dynamic >;
 
       using TMatMap = Eigen::Map< TMat >;
       using TColMap = Eigen::Map< TCol >;
@@ -35,42 +35,38 @@ namespace ivqML
       using TRowCMap = Eigen::Map< const TRow >;
 
     public:
-      Base( const TNatural& n = 1 );
-      virtual ~Base( ) = default;
+      Base( const TNat& n = 1 );
+      virtual ~Base( );
 
       virtual void random_fill( );
 
-      _TScalar& operator[]( const TNatural& i );
-      const _TScalar& operator[]( const TNatural& i ) const;
+      _TScl& operator[]( const TNat& i );
+      const _TScl& operator[]( const TNat& i ) const;
 
-      virtual TNatural buffer_size( ) const;
-      virtual TNatural number_of_parameters( ) const;
-      virtual void set_number_of_parameters( const TNatural& p );
+      virtual TNat buffer_size( ) const;
+      virtual TNat number_of_parameters( ) const;
+      virtual void set_number_of_parameters( const TNat& p );
 
-      virtual TNatural number_of_inputs( ) const = 0;
-      virtual void set_number_of_inputs( const TNatural& p ) = 0;
+      virtual TNat number_of_inputs( ) const = 0;
+      virtual void set_number_of_inputs( const TNat& p ) = 0;
 
-      virtual TNatural number_of_outputs( ) const = 0;
+      virtual TNat number_of_outputs( ) const = 0;
 
-      TMatMap matrix(
-        const TNatural& r, const TNatural& c, const TNatural& o = 0
-        );
-      TMatCMap matrix(
-        const TNatural& r, const TNatural& c, const TNatural& o = 0
-        ) const;
+      TMatMap matrix( const TNat& r, const TNat& c, const TNat& o = 0 );
+      TMatCMap matrix( const TNat& r, const TNat& c, const TNat& o = 0 ) const;
 
-      TColMap column( const TNatural& r, const TNatural& o = 0 );
-      TColCMap column( const TNatural& r, const TNatural& o = 0 ) const;
+      TColMap column( const TNat& r, const TNat& o = 0 );
+      TColCMap column( const TNat& r, const TNat& o = 0 ) const;
 
-      TRowMap row( const TNatural& c, const TNatural& o = 0 );
-      TRowCMap row( const TNatural& c, const TNatural& o = 0 ) const;
+      TRowMap row( const TNat& c, const TNat& o = 0 );
+      TRowCMap row( const TNat& c, const TNat& o = 0 ) const;
 
       virtual bool has_backpropagation( ) const;
 
       template< class _TInputX, class _TInputY >
       void backpropagation(
-        TScalar* G,
-        TScalar* B,
+        TScl* G,
+        TScl* B,
         const Eigen::EigenBase< _TInputX >& iX,
         const Eigen::EigenBase< _TInputY >& iY
         ) const
@@ -82,8 +78,13 @@ namespace ivqML
       virtual void _from_stream( std::istream& i );
       virtual void _to_stream( std::ostream& o ) const;
 
-    protected:
-      TCol m_P { 0 };
+    private:
+      Base( const Self& ) = delete;
+      Self& operator=( const Self& ) = delete;
+
+    private:
+      TScl* m_P { nullptr };
+      TNat  m_S { 0 };
 
     public:
       friend std::istream& operator>>( std::istream& i, Self& m )
@@ -99,8 +100,6 @@ namespace ivqML
     };
   } // end namespace
 } // end namespace
-
-#include <ivqML/Model/Base.hxx>
 
 #endif // __ivqML__Model__Base__h__
 

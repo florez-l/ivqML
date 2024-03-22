@@ -8,61 +8,64 @@
 #include <limits>
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
+template< class _TScl >
 template< class _TInputX >
-auto ivqML::Model::Regression::Logistic< _TScalar >::
+auto ivqML::Model::Regression::Logistic< _TScl >::
 eval( const Eigen::EigenBase< _TInputX >& iX ) const
 {
-  static const TScalar _0 = TScalar( 0 );
-  static const TScalar _1 = TScalar( 1 );
-  static const TScalar _E = std::numeric_limits< TScalar >::epsilon( );
-  static const TScalar _L = std::log( _1 - _E ) - std::log( _E );
+  static const TScl _0 = TScl( 0 );
+  static const TScl _1 = TScl( 1 );
+  static const TScl _E = std::numeric_limits< TScl >::epsilon( );
+  static const TScl _L = std::log( _1 - _E ) - std::log( _E );
 
   return(
-    this->Superclass::eval( iX.derived( ) )
+    (
+      ( this->m_T * iX.derived( ).template cast< TScl >( ) ).array( )
+      +
+      this->operator[]( 0 )
+      )
     .unaryExpr(
-      []( const TScalar& z ) -> TScalar
+      []( const TScl& z ) -> TScl
       {
         if     ( z >  _L ) return( _1 );
         else if( z < -_L ) return( _0 );
         else               return( _1 / ( _1 + std::exp( -z ) ) );
       }
       )
-    .eval( )
     );
 }
 
 // -------------------------------------------------------------------------
 /* TODO
-   template< class _TScalar >
+   template< class _TScl >
    template< class _TInputX, class _TInputY >
-   void ivqML::Model::Regression::Logistic< _TScalar >::
+   void ivqML::Model::Regression::Logistic< _TScl >::
    cost(
-   TScalar* bG,
+   TScl* bG,
    const Eigen::EigenBase< _TInputX >& iX,
    const Eigen::EigenBase< _TInputY >& iY,
-   TScalar* J,
-   TScalar* buffer
+   TScl* J,
+   TScl* buffer
    ) const
    {
-   static const TScalar _E = std::numeric_limits< TScalar >::epsilon( );
+   static const TScl _E = std::numeric_limits< TScl >::epsilon( );
 
-   auto X = iX.derived( ).template cast< TScalar >( );
-   auto Y = iY.derived( ).template cast< TScalar >( );
-   TScalar m = TScalar( X.cols( ) );
+   auto X = iX.derived( ).template cast< TScl >( );
+   auto Y = iY.derived( ).template cast< TScl >( );
+   TScl m = TScl( X.cols( ) );
 
    TMatrix Z = this->evaluate( X );
-   std::atomic< TScalar > S = 0;
+   std::atomic< TScl > S = 0;
    Z.noalias( )
    =
    Z.NullaryExpr(
    Z.rows( ), Z.cols( ),
-   [&]( const Eigen::Index& r, const Eigen::Index& c ) -> TScalar
+   [&]( const Eigen::Index& r, const Eigen::Index& c ) -> TScl
    {
-   TScalar z = Z( r, c );
+   TScl z = Z( r, c );
    if( J != nullptr )
    {
-   TScalar l = ( Y( r, c ) == 0 )? ( TScalar( 1 ) - z ): z;
+   TScl l = ( Y( r, c ) == 0 )? ( TScl( 1 ) - z ): z;
    S = S - ( std::log( ( _E < l )? l: _E ) / m );
    } // end if
    return( z - Y( r, c ) );
@@ -72,18 +75,18 @@ eval( const Eigen::EigenBase< _TInputX >& iX ) const
    *bG = Z.mean( );
    TMap( bG + 1, iX.rows( ), 1 ) = ( X * Z.transpose( ) ) / m;
    if( J != nullptr )
-   *J = TScalar( S );
+   *J = TScl( S );
    }
 */
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
+template< class _TScl >
 template< class _TInputX >
-auto ivqML::Model::Regression::Logistic< _TScalar >::
+auto ivqML::Model::Regression::Logistic< _TScl >::
 threshold( const Eigen::EigenBase< _TInputX >& iX ) const
 {
   return(
-    ( this->eval( iX ) >= TScalar( 0.5 ) ).template cast< TScalar >( )
+    ( this->eval( iX ) >= TScl( 0.5 ) ).template cast< TScl >( )
     );
 }
 

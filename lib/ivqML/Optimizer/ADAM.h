@@ -17,12 +17,12 @@ namespace ivqML
       : public ivqML::Optimizer::Base< _TCost >
     {
     public:
+      using TCost      = _TCost;
       using Self       = ADAM;
-      using Superclass = ivqML::Optimizer::Base< _TCost >;
-      using TCost      = typename Superclass::TCost;
+      using Superclass = ivqML::Optimizer::Base< TCost >;
       using TModel     = typename Superclass::TModel;
-      using TScalar    = typename Superclass::TScalar;
-      using TNatural   = typename Superclass::TNatural;
+      using TScl       = typename Superclass::TScl;
+      using TNat       = typename Superclass::TNat;
       using TMat       = typename Superclass::TMat;
       using TCol       = typename Superclass::TCol;
       using TRow       = typename Superclass::TRow;
@@ -34,15 +34,19 @@ namespace ivqML
       using TRowCMap   = typename Superclass::TRowCMap;
 
     public:
-      ivqMLAttributeMacro( alpha, TScalar, 1e-4 );
-      ivqMLAttributeMacro( beta1, TScalar, 0.9 );
-      ivqMLAttributeMacro( beta2, TScalar, 0.999 );
+      ivqMLAttributeMacro( alpha, TScl, 1e-4 );
+      ivqMLAttributeMacro( beta1, TScl, 0.9 );
+      ivqMLAttributeMacro( beta2, TScl, 0.999 );
 
     public:
       ADAM( );
-      virtual ~ADAM( ) = default;
+      virtual ~ADAM( );
 
-      virtual void fit( ) override;
+      virtual void register_options(
+        boost::program_options::options_description& opt
+        ) override;
+
+      virtual void fit( TModel& model ) override;
 
     private:
       ADAM( const Self& ) = delete;
@@ -54,5 +58,3 @@ namespace ivqML
 #include <ivqML/Optimizer/ADAM.hxx>
 
 #endif // __ivqML__Optimizer__ADAM__h__
-
-// eof - $RCSfile$

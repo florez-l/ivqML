@@ -20,8 +20,8 @@ namespace ivqML
       using Self       = MeanSquareError;
       using Superclass = ivqML::Cost::Base< _TModel >;
       using TModel     = typename Superclass::TModel;
-      using TScalar    = typename Superclass::TScalar;
-      using TNatural   = typename Superclass::TNatural;
+      using TScl       = typename Superclass::TScl;
+      using TNat       = typename Superclass::TNat;
       using TMat       = typename Superclass::TMat;
       using TCol       = typename Superclass::TCol;
       using TRow       = typename Superclass::TRow;
@@ -33,10 +33,15 @@ namespace ivqML
       using TRowCMap   = typename Superclass::TRowCMap;
 
     public:
-      MeanSquareError( _TModel& m );
+      MeanSquareError( );
       virtual ~MeanSquareError( ) = default;
 
-      virtual TScalar operator()( TScalar* G = nullptr ) const override;
+      virtual TScl operator()(
+        const TModel& model, TScl* G = nullptr
+        ) const override;
+
+    protected:
+      mutable TMat m_Z;
     };
   } // end namespace
 } // end namespace

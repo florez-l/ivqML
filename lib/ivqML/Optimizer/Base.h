@@ -6,7 +6,6 @@
 
 #include <functional>
 #include <limits>
-#include <string>
 #include <vector>
 
 #include <boost/program_options.hpp>
@@ -32,8 +31,8 @@ namespace ivqML
       using Self     = Base;
       using TCost    = _TCost;
       using TModel   = typename TCost::TModel;
-      using TScalar  = typename TCost::TScalar;
-      using TNatural = typename TCost::TNatural;
+      using TScl     = typename TCost::TScl;
+      using TNat     = typename TCost::TNat;
       using TMat     = typename TCost::TMat;
       using TCol     = typename TCost::TCol;
       using TRow     = typename TCost::TRow;
@@ -44,26 +43,19 @@ namespace ivqML
       using TColCMap = typename TCost::TColCMap;
       using TRowCMap = typename TCost::TRowCMap;
 
-      using TDebugger = std::function< bool( const TScalar&, const TScalar&, const TModel*, const TNatural&, bool d ) >;
-
     public:
-      ivqMLAttributeMacro( batch_size, TNatural, 0 );
-      ivqMLAttributeMacro( epsilon, TScalar, 0 );
-      ivqMLAttributeMacro( lambda, TScalar, 0 );
-      ivqMLAttributeMacro( debug_iterations, TNatural, 100 );
-      ivqMLAttributeMacro(
-        max_iterations, TNatural, std::numeric_limits< TNatural >::max( )
-        );
+      ivqMLAttributeMacro( batch_size, TNat, 0 );
+      ivqMLAttributeMacro( epsilon, TScl, 0 );
+      ivqMLAttributeMacro( lambda, TScl, 0 );
+      ivqMLAttributeMacro( max_iter, TNat, std::numeric_limits< TNat >::max( ) );
 
     public:
       Base( );
       virtual ~Base( );
 
-      std::string parse_arguments( int c, char** v );
-
-      bool has_model( ) const;
-      TModel& model( );
-      const TModel& model( ) const;
+      virtual void register_options(
+        boost::program_options::options_description& opt
+        );
 
       template< class _TInputX, class _TInputY >
       void set_data(
@@ -71,24 +63,16 @@ namespace ivqML
         const Eigen::EigenBase< _TInputY >& iY
         );
 
-      void set_debugger( TDebugger d );
-      void unset_debugger( );
-
-      virtual void fit( ) = 0;
+      virtual void fit( TModel& model ) = 0;
 
     private:
       Base( const Self& ) = delete;
       Self& operator=( const Self& ) = delete;
 
     protected:
-      TModel* m_Model { nullptr };
-      bool m_ManagedModel { false };
-
+      TMat m_X;
+      TMat m_Y;
       std::vector< TCost > m_Costs;
-
-      boost::program_options::options_description m_Options { "Options." };
-
-      TDebugger m_Debugger;
     };
   } // end namespace
 } // end namespace

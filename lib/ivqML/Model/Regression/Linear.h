@@ -14,15 +14,15 @@ namespace ivqML
     {
       /**
        */
-      template< class _TScalar >
+      template< class _TScl >
       class Linear
-        : public ivqML::Model::Base< _TScalar >
+        : public ivqML::Model::Base< _TScl >
       {
       public:
         using Self       = Linear;
-        using Superclass = ivqML::Model::Base< _TScalar >;
-        using TScalar    = typename Superclass::TScalar;
-        using TNatural   = typename Superclass::TNatural;
+        using Superclass = ivqML::Model::Base< _TScl >;
+        using TScl       = typename Superclass::TScl;
+        using TNat       = typename Superclass::TNat;
         using TMat       = typename Superclass::TMat;
         using TCol       = typename Superclass::TCol;
         using TRow       = typename Superclass::TRow;
@@ -34,13 +34,14 @@ namespace ivqML
         using TRowCMap   = typename Superclass::TRowCMap;
 
       public:
-        Linear( const TNatural& n = 0 );
+        Linear( const TNat& n = 0 );
         virtual ~Linear( ) override = default;
 
-        virtual TNatural number_of_inputs( ) const override;
-        virtual void set_number_of_inputs( const TNatural& p ) override;
+        virtual void set_number_of_parameters( const TNat& p ) override;
+        virtual TNat number_of_inputs( ) const override;
+        virtual void set_number_of_inputs( const TNat& p ) override;
 
-        virtual TNatural number_of_outputs( ) const override;
+        virtual TNat number_of_outputs( ) const override;
 
         template< class _TInputX >
         auto eval( const Eigen::EigenBase< _TInputX >& iX ) const;
@@ -48,11 +49,11 @@ namespace ivqML
         /* TODO
            template< class _TInputX, class _TInputY >
            void cost(
-           TScalar* bG,
+           TScl* bG,
            const Eigen::EigenBase< _TInputX >& iX,
            const Eigen::EigenBase< _TInputY >& iY,
-           TScalar* J = nullptr,
-           TScalar* buffer = nullptr
+           TScl* J = nullptr,
+           TScl* buffer = nullptr
            ) const;
         */
 
@@ -60,8 +61,15 @@ namespace ivqML
         void fit(
           const Eigen::EigenBase< _TInputX >& iX,
           const Eigen::EigenBase< _TInputY >& iY,
-          const TScalar& l = 0
+          const TScl& lambda = 0
           );
+
+      private:
+        Linear( const Self& ) = delete;
+        Self& operator=( const Self& ) = delete;
+
+      protected:
+        TRowMap m_T { nullptr, 0, 0 };
       };
     } // end namespace
   } // end namespace

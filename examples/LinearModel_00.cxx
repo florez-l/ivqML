@@ -31,15 +31,15 @@ int main( int argc, char** argv )
   std::cout << Y << std::endl;
 
   std::cout << "-------------- COST --------------" << std::endl;
-  TModel model_for_cost = model;
+  TModel model_for_cost( model.number_of_inputs( ) );
   model_for_cost.random_fill( );
 
-  TCost J( model_for_cost );
-  J.set_data( X, Y );
+  TCost J;
+  J.set_data( X.data( ), Y.data( ), m, n, 1 );
 
   TModel::TRow G( model_for_cost.number_of_parameters( ) );
   std::cout << "Model for cost: " << model_for_cost << std::endl;
-  std::cout << "Cost = " << J( G.data( ) ) << std::endl;
+  std::cout << "Cost = " << J( model_for_cost, G.data( ) ) << std::endl;
   std::cout << "Gradient = " << G << std::endl;
 
   return( EXIT_SUCCESS );

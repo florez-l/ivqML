@@ -16,8 +16,8 @@ namespace ivqML
     public:
       using Self     = Base;
       using TModel   = _TModel;
-      using TScalar  = typename TModel::TScalar;
-      using TNatural = typename TModel::TNatural;
+      using TScl     = typename TModel::TScl;
+      using TNat     = typename TModel::TNat;
       using TMat     = typename TModel::TMat;
       using TCol     = typename TModel::TCol;
       using TRow     = typename TModel::TRow;
@@ -29,23 +29,24 @@ namespace ivqML
       using TRowCMap = typename TModel::TRowCMap;
 
     public:
-      Base( _TModel& m );
+      Base( );
       virtual ~Base( );
 
-      template< class _TInputX, class _TInputY >
-      void set_data(
-        const Eigen::EigenBase< _TInputX >& iX,
-        const Eigen::EigenBase< _TInputY >& iY
+      virtual void set_data(
+        TScl* X, TScl* Y, const TNat& m, const TNat& n, const TNat& p
         );
 
-      virtual TScalar operator()( TScalar* G = nullptr ) const = 0;
+      virtual TScl operator()(
+        const TModel& model, TScl* G = nullptr
+        ) const = 0;
 
     protected:
-      TModel* m_M;
-      TMat m_X;
-      TMat m_Y;
+      TMatMap m_X { nullptr, 0, 0 };
+      TMatMap m_Y { nullptr, 0, 0 };
 
-      mutable TScalar* m_B { nullptr };
+      /* TODO
+         mutable TScl* m_B { nullptr };
+      */
     };
   } // end namespace
 } // end namespace

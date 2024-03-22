@@ -5,35 +5,47 @@
 #include <ivqML/Model/Regression/Linear.h>
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-ivqML::Model::Regression::Linear< _TScalar >::
-Linear( const TNatural& n )
-  : Superclass( TNatural( 0 ) )
+template< class _TScl >
+ivqML::Model::Regression::Linear< _TScl >::
+Linear( const TNat& n )
+  : Superclass( TNat( 0 ) )
 {
   this->set_number_of_parameters( n + 1 );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-typename ivqML::Model::Regression::Linear< _TScalar >::
-TNatural ivqML::Model::Regression::Linear< _TScalar >::
+template< class _TScl >
+void ivqML::Model::Regression::Linear< _TScl >::
+set_number_of_parameters( const TNat& p )
+{
+  this->Superclass::set_number_of_parameters( p );
+  if( p > 0 )
+    new ( &this->m_T ) TRowMap( &( this->operator[]( 1 ) ), 1, p - 1 );
+  else
+    new ( &this->m_T ) TRowMap( nullptr, 0, 0 );
+}
+
+// -------------------------------------------------------------------------
+template< class _TScl >
+typename ivqML::Model::Regression::Linear< _TScl >::
+TNat ivqML::Model::Regression::Linear< _TScl >::
 number_of_inputs( ) const
 {
   return( this->number_of_parameters( ) - 1 );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-void ivqML::Model::Regression::Linear< _TScalar >::
-set_number_of_inputs( const TNatural& i )
+template< class _TScl >
+void ivqML::Model::Regression::Linear< _TScl >::
+set_number_of_inputs( const TNat& i )
 {
   this->set_number_of_parameters( i + 1 );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScalar >
-typename ivqML::Model::Regression::Linear< _TScalar >::
-TNatural ivqML::Model::Regression::Linear< _TScalar >::
+template< class _TScl >
+typename ivqML::Model::Regression::Linear< _TScl >::
+TNat ivqML::Model::Regression::Linear< _TScl >::
 number_of_outputs( ) const
 {
   return( 1 );

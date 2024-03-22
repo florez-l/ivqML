@@ -21,15 +21,15 @@ namespace ivqML
     {
       /**
        */
-      template< class _TScalar >
+      template< class _TScl >
       class FeedForward
-        : public ivqML::Model::Base< _TScalar >
+        : public ivqML::Model::Base< _TScl >
       {
       public:
         using Self       = FeedForward;
-        using Superclass = ivqML::Model::Base< _TScalar >;
-        using TScalar    = typename Superclass::TScalar;
-        using TNatural   = typename Superclass::TNatural;
+        using Superclass = ivqML::Model::Base< _TScl >;
+        using TScl       = typename Superclass::TScl;
+        using TNat       = typename Superclass::TNat;
         using TMat       = typename Superclass::TMat;
         using TCol       = typename Superclass::TCol;
         using TRow       = typename Superclass::TRow;
@@ -51,31 +51,33 @@ namespace ivqML
 
         virtual bool has_backpropagation( ) const override;
 
-        virtual TNatural number_of_inputs( ) const override;
-        virtual void set_number_of_inputs( const TNatural& p ) override;
-        virtual TNatural number_of_outputs( ) const override;
+        virtual TNat number_of_inputs( ) const override;
+        virtual void set_number_of_inputs( const TNat& p ) override;
+        virtual TNat number_of_outputs( ) const override;
 
-        virtual TNatural buffer_size( ) const override;
-        virtual void set_number_of_parameters( const TNatural& p ) final;
+        virtual TNat buffer_size( ) const override;
+        virtual void set_number_of_parameters( const TNat& p ) final;
 
-        void add_layer( const TNatural& i );
-        void add_layer( const TNatural& o, const std::string& a );
-        TNatural number_of_layers( ) const;
+        void add_layer( const TNat& i );
+        void add_layer( const TNat& o, const std::string& a );
+        TNat number_of_layers( ) const;
         void init( );
 
-        TMatMap W( const TNatural& l );
-        TMatCMap W( const TNatural& l ) const;
+        /* TODO
+           TMatMap W( const TNat& l );
+           TMatCMap W( const TNat& l ) const;
 
-        TColMap B( const TNatural& l );
-        TColCMap B( const TNatural& l ) const;
+           TColMap B( const TNat& l );
+           TColCMap B( const TNat& l ) const;
+        */
 
         template< class _TInputX >
         auto eval( const Eigen::EigenBase< _TInputX >& iX ) const;
 
         template< class _TInputX, class _TInputY >
         void backpropagation(
-          TScalar* G,
-          TScalar* B,
+          TScl* G,
+          TScl* B,
           const Eigen::EigenBase< _TInputX >& iX,
           const Eigen::EigenBase< _TInputY >& iY
           ) const;
@@ -89,27 +91,36 @@ namespace ivqML
 
            template< class _TInputX, class _TInputY >
            void cost(
-           TScalar* bG,
+           TScl* bG,
            const Eigen::EigenBase< _TInputX >& iX,
            const Eigen::EigenBase< _TInputY >& iY,
-           TScalar* J = nullptr,
-           TScalar* iB = nullptr
+           TScl* J = nullptr,
+           TScl* iB = nullptr
            ) const;
         */
 
       protected:
         template< class _TInputX >
         void _eval(
-          const Eigen::EigenBase< _TInputX >& iX, TScalar* buffer
+          const Eigen::EigenBase< _TInputX >& iX, TScl* buffer
           ) const;
 
         virtual void _from_stream( std::istream& i ) override;
         virtual void _to_stream( std::ostream& o ) const override;
 
-      protected:
-        std::vector< TNatural > m_S;
-        std::vector< TNatural > m_O;
-        std::vector< std::pair< std::string, TActivation > > m_A;
+      private:
+        FeedForward( const Self& ) = delete;
+        Self& operator=( const Self& ) = delete;
+
+      private:
+        std::vector< TNat >     m_L;
+        std::vector< TMatCMap > m_W;
+        std::vector< TColCMap > m_B;
+
+        /* TODO
+           std::vector< TNat > m_O;
+           std::vector< std::pair< std::string, TActivation > > m_A;
+        */
 
         /* TODO
            bool m_IsLabeling { true }; // TODO: detect this

@@ -14,10 +14,10 @@ typename ivqML::Model::NeuralNetwork::ActivationFactory< _M >::
 TActivation ivqML::Model::NeuralNetwork::ActivationFactory< _M >::
 New( const std::string& n )
 {
-  static const TScalar _0 { TScalar( 0 ) };
-  static const TScalar _1 { TScalar( 1 ) };
-  static const TScalar _E { TTraits::epsilon( ) };
-  static const TScalar _L = std::log( _1 - _E ) - std::log( _E );
+  static const TScl _0 { TScl( 0 ) };
+  static const TScl _1 { TScl( 1 ) };
+  static const TScl _E { TTraits::epsilon( ) };
+  static const TScl _L = std::log( _1 - _E ) - std::log( _E );
 
   std::string rn = n;
   std::transform(
@@ -30,7 +30,7 @@ New( const std::string& n )
       []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
-          [&d]( const TScalar& z ) -> TScalar
+          [&d]( const TScl& z ) -> TScl
           {
             return( ( z < _0 )? _0: ( d? _1: z ) );
           }
@@ -42,12 +42,12 @@ New( const std::string& n )
       []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
-          [&d]( const TScalar& z ) -> TScalar
+          [&d]( const TScl& z ) -> TScl
           {
             return(
               ( z < _0 )
               ?
-              ( d? TScalar( 1e-2 ): z * TScalar( 1e-2 ) )
+              ( d? TScl( 1e-2 ): z * TScl( 1e-2 ) )
               :
               ( d? _1: z )
               );
@@ -60,9 +60,9 @@ New( const std::string& n )
       []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
-          [&d]( const TScalar& z ) -> TScalar
+          [&d]( const TScl& z ) -> TScl
           {
-            TScalar t = std::tanh( z );
+            TScl t = std::tanh( z );
             return( d? ( _1 - ( t * t ) ): t );
           }
           );
@@ -73,9 +73,9 @@ New( const std::string& n )
       []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
-          [&]( const TScalar& z ) -> TScalar
+          [&]( const TScl& z ) -> TScl
           {
-            TScalar a;
+            TScl a;
             if     ( z <= -_L ) a = _0;
             else if( z >=  _L ) a = _1;
             else                a = _1 / ( _1 + std::exp( -z ) );
@@ -97,7 +97,7 @@ New( const std::string& n )
       []( TMatMap& A, const TMatMap& Z, bool d ) -> void
       {
         A = Z.unaryExpr(
-          [&d]( const TScalar& z ) -> TScalar
+          [&d]( const TScl& z ) -> TScl
           {
             return( d? _1: z );
           }

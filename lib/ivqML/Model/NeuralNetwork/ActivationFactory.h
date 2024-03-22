@@ -21,8 +21,8 @@ namespace ivqML
       public:
         using Self        = ActivationFactory;
         using TModel      = _M;
-        using TScalar     = typename TModel::TScalar;
-        using TNatural    = typename TModel::TNatural;
+        using TScl        = typename TModel::TScl;
+        using TNat        = typename TModel::TNat;
         using TMat        = typename TModel::TMat;
         using TCol        = typename TModel::TCol;
         using TRow        = typename TModel::TRow;
@@ -33,7 +33,7 @@ namespace ivqML
         using TColCMap    = typename TModel::TColCMap;
         using TRowCMap    = typename TModel::TRowCMap;
         using TActivation = typename TModel::TActivation;
-        using TTraits     = std::numeric_limits< TScalar >;
+        using TTraits     = std::numeric_limits< TScl >;
 
       public:
         static TActivation New( const std::string& n );

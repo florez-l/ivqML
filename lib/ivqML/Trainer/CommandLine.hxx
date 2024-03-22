@@ -29,8 +29,8 @@ CommandLine( )
 template< class _TOptimizer >
 bool ivqML::Trainer::CommandLine< _TOptimizer >::
 debugger(
-  const TScalar& J, const TScalar& G,
-  const TModel* m, const TNatural& i, bool d
+  const TScl& J, const TScl& G,
+  const TModel* m, const TNat& i, bool d
   )
 {
   if( d )

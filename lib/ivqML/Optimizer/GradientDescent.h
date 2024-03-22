@@ -17,12 +17,12 @@ namespace ivqML
       : public ivqML::Optimizer::Base< _TCost >
     {
     public:
+      using TCost      = _TCost;
       using Self       = GradientDescent;
-      using Superclass = ivqML::Optimizer::Base< _TCost >;
-      using TCost      = typename Superclass::TCost;
+      using Superclass = ivqML::Optimizer::Base< TCost >;
       using TModel     = typename Superclass::TModel;
-      using TScalar    = typename Superclass::TScalar;
-      using TNatural   = typename Superclass::TNatural;
+      using TScl       = typename Superclass::TScl;
+      using TNat       = typename Superclass::TNat;
       using TMat       = typename Superclass::TMat;
       using TCol       = typename Superclass::TCol;
       using TRow       = typename Superclass::TRow;
@@ -34,13 +34,17 @@ namespace ivqML
       using TRowCMap   = typename Superclass::TRowCMap;
 
     public:
-      ivqMLAttributeMacro( learning_rate, TScalar, 1e-2 );
+      ivqMLAttributeMacro( alpha, TScl, 1e-4 );
 
     public:
       GradientDescent( );
-      virtual ~GradientDescent( ) = default;
+      virtual ~GradientDescent( );
 
-      virtual void fit( ) override;
+      virtual void register_options(
+        boost::program_options::options_description& opt
+        ) override;
+
+      virtual void fit( TModel& model ) override;
 
     private:
       GradientDescent( const Self& ) = delete;
