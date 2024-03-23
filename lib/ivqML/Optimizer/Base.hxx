@@ -51,35 +51,31 @@ set_data(
   this->m_X = iX.derived( ).template cast< TScl >( );
   this->m_Y = iY.derived( ).template cast< TScl >( );
 
-#error ACA VOY
-
   TNat m = this->m_X.cols( );
+  TNat n = this->m_X.rows( );
+  TNat p = this->m_Y.rows( );
   TNat b = ( this->m_batch_size > 0 )? this->m_batch_size: m;
-  TNat n = m / b;
+  TNat s = m / b;
   TNat l = m % b;
 
   this->m_Costs.clear( );
-  this->m_Costs.resize( n + ( ( l > 0 )? 1: 0 ) );
+  this->m_Costs.resize( s + ( ( l > 0 )? 1: 0 ) );
   this->m_Costs.shrink_to_fit( );
-  for( TNat i = 0; i < n; ++i )
+  for( TNat i = 0; i < s; ++i )
   {
     this->m_Costs[ i ].set_data(
-      this->m_X.data( ), this->m_Y.data( ),
-      m, this->m_X.rows( ), this->m_Y.rows( )
+      this->m_X.data( ) + ( n * b * i ),
+      this->m_Y.data( ) + ( p * b * i ),
+      b, n, p
       );
 
-    /* TODO
-       this->m_Costs[ i ].set_data(
-       X.block( 0, b * i, X.rows( ), b ), Y.block( 0, b * i, Y.rows( ), b )
-       );
-    */
   } // end for
-  /* TODO
-     if( l > 0 )
-     this->m_Costs.back( ).set_data(
-     X.block( 0, b * n, X.rows( ), l ), Y.block( 0, b * n, Y.rows( ), l )
-     );
-  */
+  if( l > 0 )
+    this->m_Costs.back( ).set_data(
+      this->m_X.data( ) + ( n * b * s ),
+      this->m_Y.data( ) + ( p * b * s ),
+      l, n, p
+      );
 }
 
 #endif // __ivqML__Optimizer__Base__hxx__
