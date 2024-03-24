@@ -42,6 +42,8 @@ namespace ivqML
       using TMatCMap = typename TCost::TMatCMap;
       using TColCMap = typename TCost::TColCMap;
       using TRowCMap = typename TCost::TRowCMap;
+      using TDebug   =
+        std::function< bool( const TModel*, const TScl&, const TNat&, const TCost* ) >;
 
     public:
       ivqMLAttributeMacro( batch_size, TNat, 0 );
@@ -63,6 +65,7 @@ namespace ivqML
         const Eigen::EigenBase< _TInputY >& iY
         );
 
+      virtual void unset_debug( );
       virtual void fit( TModel& model ) = 0;
 
     private:
@@ -70,9 +73,20 @@ namespace ivqML
       Self& operator=( const Self& ) = delete;
 
     protected:
-      TMat m_X;
-      TMat m_Y;
+
+      /* TODO
+         TMat m_X;
+         TMat m_Y;
+      */
+      TScl* m_D { nullptr };
+      TNat  m_M { 0 };
+      TNat  m_N { 0 };
+      TNat  m_P { 0 };
+
+      TCost m_CostFromCompleteData;
       std::vector< TCost > m_Costs;
+
+      TDebug m_Debug;
     };
   } // end namespace
 } // end namespace

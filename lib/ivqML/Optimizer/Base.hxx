@@ -5,13 +5,14 @@
 #define __ivqML__Optimizer__Base__hxx__
 
 #include <cmath>
+#include <cstdlib>
 
 // -------------------------------------------------------------------------
 template< class _TCost >
 ivqML::Optimizer::Base< _TCost >::
 Base( )
 {
-  // TODO: this->unset_debugger( );
+  this->unset_debug( );
   this->m_epsilon
     =
     std::pow(
@@ -25,6 +26,8 @@ template< class _TCost >
 ivqML::Optimizer::Base< _TCost >::
 ~Base( )
 {
+  if( this->m_D != nullptr )
+    std::free( this->m_D );
 }
 
 // -------------------------------------------------------------------------
@@ -48,15 +51,34 @@ set_data(
   const Eigen::EigenBase< _TInputY >& iY
   )
 {
-  this->m_X = iX.derived( ).template cast< TScl >( );
-  this->m_Y = iY.derived( ).template cast< TScl >( );
+  this->m_M = iX.cols( );
+  this->m_N = iX.rows( );
+  this->m_P = iY.rows( );
+  TNat b = ( this->m_batch_size > 0 )? this->m_batch_size: this->m_M;
+  TNat s = this->m_M / b;
+  TNat l = this->m_M % b;
 
-  TNat m = this->m_X.cols( );
-  TNat n = this->m_X.rows( );
-  TNat p = this->m_Y.rows( );
-  TNat b = ( this->m_batch_size > 0 )? this->m_batch_size: m;
-  TNat s = m / b;
-  TNat l = m % b;
+  // Memory management
+  if( this->m_D != nullptr )
+    std::free( this->m_D );
+  this->m_D =
+    reinterpret_cast< TScl* >(
+      std::calloc(
+        ( this->m_N + this->m_P ) * this->m_M,
+        sizeof( TScl )
+        )
+      );
+  TScl* X = this->m_D;
+  TScl* Y = this->m_D + ( this->m_N * this->m_M );
+
+  // Cast and copy input data
+  TMatMap( X, this->m_N, this->m_M ) = iX.derived( ).template cast< TScl >( );
+  TMatMap( Y, this->m_P, this->m_M ) = iY.derived( ).template cast< TScl >( );
+
+  // A cost function that process all data
+  this->m_CostFromCompleteData.set_data(
+    X, Y, this->m_M, this->m_N, this->m_P
+    );
 
   this->m_Costs.clear( );
   this->m_Costs.resize( s + ( ( l > 0 )? 1: 0 ) );
@@ -64,18 +86,32 @@ set_data(
   for( TNat i = 0; i < s; ++i )
   {
     this->m_Costs[ i ].set_data(
-      this->m_X.data( ) + ( n * b * i ),
-      this->m_Y.data( ) + ( p * b * i ),
-      b, n, p
+      X + ( this->m_N * b * i ),
+      Y + ( this->m_P * b * i ),
+      b, this->m_N, this->m_P
       );
 
   } // end for
   if( l > 0 )
     this->m_Costs.back( ).set_data(
-      this->m_X.data( ) + ( n * b * s ),
-      this->m_Y.data( ) + ( p * b * s ),
-      l, n, p
+      X + ( this->m_N * b * s ),
+      Y + ( this->m_P * b * s ),
+      l, this->m_N, this->m_P
       );
+}
+
+// -------------------------------------------------------------------------
+template< class _TCost >
+void ivqML::Optimizer::Base< _TCost >::
+unset_debug( )
+{
+  this->m_Debug =
+    []( const TModel* m, const TScl& n, const TNat& i, const TCost* c )
+    ->
+    bool
+    {
+      return( false );
+    };
 }
 
 #endif // __ivqML__Optimizer__Base__hxx__

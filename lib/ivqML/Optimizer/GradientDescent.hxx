@@ -34,10 +34,6 @@ template< class _TCost >
 void ivqML::Optimizer::GradientDescent< _TCost >::
 fit( TModel& model )
 {
-  // Associate model to every batch
-  for( TCost& cost: this->m_Costs )
-    cost.set_model( &model );
-
   // Initialize
   TNat p = model.number_of_parameters( );
   TRowMap mp = model.row( p );
@@ -51,7 +47,7 @@ fit( TModel& model )
     // Update function
     for( TNat c = 0; c < this->m_Costs.size( ); ++c )
     {
-      this->m_Costs[ c ]( G.data( ) );
+      this->m_Costs[ c ]( model, G.data( ) );
       mp -= G * this->m_alpha;
 
       if( c == 0 ) D  = G;
@@ -63,22 +59,7 @@ fit( TModel& model )
     stop  = ( dn < this->m_epsilon );
     stop |= ( std::isnan( dn ) || std::isinf( dn ) );
     stop |= ( ++i >= this->m_max_iter );
-    /* TODO
-       stop |= this->m_Debugger( &model, dn, i );
-    */
-
-    /* TODO
-       std::cerr << i << " " << dn << " " << this->m_epsilon << std::endl;
-    */
-
-    // Process debug information
-    /* TODO
-       stop |=
-       this->m_Debugger(
-       J, dn, this->m_Model, i,
-       stop || i == 1 || i % this->m_debug_iterations == 0
-       );
-    */
+    stop |= this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ) );
   } // end while
 }
 

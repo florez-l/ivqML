@@ -66,6 +66,14 @@ fit( TModel& model )
      stop  = ( dn < this->m_epsilon );
      stop |= ( std::isnan( dn ) || std::isinf( dn ) );
      stop |= ( ++i >= this->m_max_iter );
+
+
+     // Check stop
+     TScl dn = D.norm( );
+     stop  = ( dn < this->m_epsilon );
+     stop |= ( std::isnan( dn ) || std::isinf( dn ) );
+     stop |= ( ++i >= this->m_max_iter );
+     stop |= this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ) );
      } // end while
   */
 }
