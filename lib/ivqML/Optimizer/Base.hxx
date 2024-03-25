@@ -106,7 +106,7 @@ void ivqML::Optimizer::Base< _TCost >::
 unset_debug( )
 {
   this->m_Debug =
-    []( const TModel* m, const TScl& n, const TNat& i, const TCost* c )
+    []( const TModel* m, const TScl& n, const TNat& i, const TCost* c, bool f )
     ->
     bool
     {

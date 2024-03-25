@@ -32,19 +32,26 @@ namespace ivqML
       using TRowCMap   = typename Superclass::TRowCMap;
 
     public:
+      ivqMLAttributeMacro( debug_step, TNat, 100 );
+
+    public:
       CommandLine( );
       virtual ~CommandLine( ) = default;
 
+      virtual void register_options(
+        boost::program_options::options_description& opt
+        ) override;
+
       static bool debugger(
-        const TScl& J,
-        const TScl& G,
-        const TModel* m,
-        const TNat& i,
-        bool d
+        const TModel* model,
+        const TScl& norm, const TNat& iter,
+        const TCost* cost,
+        bool force
         );
 
     protected:
       static bool s_Stop;
+      static TNat m_DebugStep;
     };
   } // end namespace
 } // end namespace

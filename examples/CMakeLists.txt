@@ -13,13 +13,13 @@ target_link_libraries(ivqML_example_Sandbox Eigen3::Eigen)
 
 set(
   _simple_examples
-  FeedForwardNetwork_00
-  FeedForwardNetwork_01
+  # FeedForwardNetwork_00
+  # FeedForwardNetwork_01
   LinearModel_00
   LinearModel_AnalyticalFit_CSV
   LinearModel_ADAMFit_00
   LinearModel_GradientDescentFit_00
-  LogisticModel_00
+  # LogisticModel_00
 
   #  ExtractSamplesFrom2DImage
   #  

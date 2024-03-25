@@ -40,6 +40,7 @@ fit( TModel& model )
   TRow G( p ), D( p );
   bool stop = false;
   TNat i = 0;
+  TScl dn = std::numeric_limits< TScl >::max( );
 
   // Main loop
   while( !stop )
@@ -55,12 +56,14 @@ fit( TModel& model )
     } // end for
 
     // Check stop
-    TScl dn = D.norm( );
+    dn = D.norm( );
     stop  = ( dn < this->m_epsilon );
     stop |= ( std::isnan( dn ) || std::isinf( dn ) );
     stop |= ( ++i >= this->m_max_iter );
-    stop |= this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ) );
+    stop |=
+      this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ), false );
   } // end while
+  this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ), true );
 }
 
 #endif // __ivqML__Optimizer__GradientDescent__hxx__

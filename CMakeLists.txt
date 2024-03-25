@@ -23,6 +23,7 @@ if (OPENMP_FOUND)
 endif()
 
 ## -- Subdirs
-subdirs(bash lib examples)
+subdirs(lib examples)
+# subdirs(bash lib examples)
 
 ## eof - $RCSfile$

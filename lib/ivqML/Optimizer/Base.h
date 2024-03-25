@@ -43,7 +43,7 @@ namespace ivqML
       using TColCMap = typename TCost::TColCMap;
       using TRowCMap = typename TCost::TRowCMap;
       using TDebug   =
-        std::function< bool( const TModel*, const TScl&, const TNat&, const TCost* ) >;
+        std::function< bool( const TModel*, const TScl&, const TNat&, const TCost*, bool ) >;
 
     public:
       ivqMLAttributeMacro( batch_size, TNat, 0 );

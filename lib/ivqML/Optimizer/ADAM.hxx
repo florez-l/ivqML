@@ -36,46 +36,60 @@ template< class _TCost >
 void ivqML::Optimizer::ADAM< _TCost >::
 fit( TModel& model )
 {
-  // Associate model to every batch
-  /* TODO
-     for( TCost& cost: this->m_Costs )
-     cost.set_model( &model );
+  // Initialize
+  TNat p = model.number_of_parameters( );
+  TRowMap mp = model.row( p );
+  TRow G( p ), D( p );
+  bool stop = false;
+  TNat i = 0;
+  TScl dn = std::numeric_limits< TScl >::max( );
 
-     // Initialize
-     TNat p = model.number_of_parameters( );
-     TRowMap mp = model.row( p );
-     TRow G( p ), D( p );
-     bool stop = false;
-     TNat i = 0;
+  TScl b1t = this->m_beta1;
+  TScl b2t = this->m_beta2;
+  TScl b1 = TScl( 1 ) - this->m_beta1;
+  TScl b2 = TScl( 1 ) - this->m_beta2;
+  TRow M = TRow::Zero( p );
+  TRow V = TRow::Zero( p );
+  TRow M2 = M;
+  TRow V2 = V;
 
-     // Main loop
-     while( !stop )
-     {
-     // Update function
-     for( TNat c = 0; c < this->m_Costs.size( ); ++c )
-     {
-     this->m_Costs[ c ]( G.data( ) );
-     mp -= G * this->m_alpha;
+  // Main loop
+  while( !stop )
+  {
+    // Update function
+    M *= this->m_beta1;
+    V *= this->m_beta2;
+    for( TNat c = 0; c < this->m_Costs.size( ); ++c )
+    {
+      /* TODO
+         TScl J = this->m_Costs[ 0 ]( G.data( ) );
+         M2 = ( M + ( G * b1 ) ) / ( _1 - b1t );
+         V2 =
+         ( ( V.array( ) + ( G.array( ).pow( 2 ) * b2 ) ) / ( _1 - b2t ) )
+         .sqrt( );
+         G.array( ) = M2.array( ) / ( V2.array( ) + e );
+         mp -= G * this->m_alpha;
+         M = M2;
+         V = V2;
 
-     if( c == 0 ) D  = G;
-     else         D += G;
-     } // end for
+         // this->m_Costs[ c ]( G.data( ) );
+         // mp -= G * this->m_alpha;
+         */
+      if( c == 0 ) D  = G;
+      else         D += G;
+    } // end for
+   b1t *= this->m_beta1;
+   b2t *= this->m_beta2;
 
-     // Check stop
-     TScl dn = D.norm( );
-     stop  = ( dn < this->m_epsilon );
-     stop |= ( std::isnan( dn ) || std::isinf( dn ) );
-     stop |= ( ++i >= this->m_max_iter );
-
-
-     // Check stop
-     TScl dn = D.norm( );
-     stop  = ( dn < this->m_epsilon );
-     stop |= ( std::isnan( dn ) || std::isinf( dn ) );
-     stop |= ( ++i >= this->m_max_iter );
-     stop |= this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ) );
-     } // end while
-  */
+    // Check stop
+    dn = D.norm( );
+    stop  = ( dn < this->m_epsilon );
+    stop |= ( std::isnan( dn ) || std::isinf( dn ) );
+    stop |= ( ++i >= this->m_max_iter );
+    stop |=
+      this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ), false );
+  } // end while
+  this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ), true );
 }
 
 #endif // __ivqML__Optimizer__ADAM__hxx__
@@ -142,7 +156,3 @@ fit( TModel& model )
    stop || i == 1 || i % this->m_debug_iterations == 0
    );
 */
-
-#endif // __ivqML__Optimizer__ADAM__hxx__
-
-// eof - $RCSfile$

@@ -6,9 +6,7 @@
 #include <ivqML/Model/Regression/Linear.h>
 #include <ivqML/Cost/MeanSquareError.h>
 #include <ivqML/Optimizer/GradientDescent.h>
-/* TODO
-   #include <ivqML/Trainer/CommandLine.h>
-*/
+#include <ivqML/Trainer/CommandLine.h>
 
 #include <boost/program_options.hpp>
 
@@ -24,7 +22,7 @@ int main( int argc, char** argv )
   unsigned int M = 100;
 
   // Initial optimizer
-  TOptimizer optimizer;
+  ivqML::Trainer::CommandLine< TOptimizer > optimizer;
 
   // Command line arguments
   namespace bpo = boost::program_options;
