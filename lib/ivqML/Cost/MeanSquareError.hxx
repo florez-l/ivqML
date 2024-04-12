@@ -18,16 +18,16 @@ typename ivqML::Cost::MeanSquareError< _TModel >::
 TScl ivqML::Cost::MeanSquareError< _TModel >::
 operator()( const TModel& model, TScl* G ) const
 {
-  this->m_Z = model.eval( this->m_X ) - this->m_Y.array( );
+  TMat Z = model.eval( this->m_X ) - this->m_Y.array( );
   if( G != nullptr )
   {
     TNat n = this->m_X.rows( );
 
-    *G = this->m_Z.mean( ) * TScl( 2 );
+    *G = Z.mean( ) * TScl( 2 );
     TColMap( G + 1, n, 1 ) =
-      ( this->m_X * this->m_Z.transpose( ) ) * ( TScl( 2 ) / TScl( n ) );
+      ( this->m_X * Z.transpose( ) ) * ( TScl( 2 ) / TScl( n ) );
   } // end if
-  return( this->m_Z.array( ).pow( 2 ).mean( ) );
+  return( Z.array( ).pow( 2 ).mean( ) );
 }
 
 #endif // __ivqML__Cost__MeanSquareError__hxx__

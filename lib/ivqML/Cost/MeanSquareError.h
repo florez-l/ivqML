@@ -39,9 +39,6 @@ namespace ivqML
       virtual TScl operator()(
         const TModel& model, TScl* G = nullptr
         ) const override;
-
-    protected:
-      mutable TMat m_Z;
     };
   } // end namespace
 } // end namespace

@@ -29,9 +29,9 @@ public:
   using TRow     = Eigen::Matrix< TReal, 1, Eigen::Dynamic >;
 
 public:
-  Base( const TNatural& n )
+  Base( )
     {
-      this->_allocate( n );
+      // TODO: this->_allocate( n );
     }
   virtual ~Base( )
     {
@@ -91,7 +91,6 @@ public:
 
 public:
   Linear( const TNatural& n = 0 )
-    : Superclass( n + 1 )
     {
       this->_allocate( n + 1 );
     }
@@ -100,25 +99,36 @@ public:
   template< class _TInputX >
   auto eval( const Eigen::EigenBase< _TInputX >& iX ) const
     {
-      return( ( this->m_P * iX.derived( ).template cast< TReal >( ) ).array( ) + *( this->m_Buffer ) );
-    }
-
-protected:
-  virtual void _allocate( const TNatural& s ) override
-    {
-      this->Superclass::_allocate( s );
-      if( this->m_Size > 1 )
-        new( &( this->m_P ) ) Eigen::Map< TRow >( this->m_Buffer + 1, 1, this->m_Size - 1 );
-      else
-        new( &( this->m_P ) ) Eigen::Map< TRow >( nullptr, 0, 0 );
+      return( ( Eigen::Map< TRow >( this->m_Buffer + 1, 1, this->m_Size - 1 ) * iX.derived( ).template cast< TReal >( ) ).array( ) + *( this->m_Buffer ) );
     }
 
 private:
   Linear( const Self& ) = delete;
   Self& operator=( const Self& ) = delete;
+};
 
-protected:
-  Eigen::Map< TRow > m_P { nullptr, 0, 0 };
+template< class _TModel >
+struct SCost
+{
+  using TModel = _TModel;
+  ivqML_TypesFromModel( TModel, typename );
+
+  template< class _TInputX, class _TInputY >
+  TReal operator()( TReal* G, const TModel& m, const Eigen::EigenBase< _TInputX >& iX, const Eigen::EigenBase< _TInputY >& iY )
+    {
+      auto X = iX.derived( ).template cast< TReal >( );
+      auto Y = iY.derived( ).template cast< TReal >( );
+
+      /* TODO
+         TMat Z = m.eval( X ) - Y;
+
+         *G = Z.mean( ) * TReal( 2 );
+         Eigen::Map< TCol >( G + 1, iX.cols( ),  1 ) = ( X * Z.transpose( ) ) * ( TReal( 2 ) / TReal( iX.cols( ) ) );
+
+         return( Z.array( ).pow( 2 ).mean( ) );
+      */
+      return( 0 );
+    }
 };
 
 int main( int arc, char** argv )
@@ -132,8 +142,8 @@ int main( int arc, char** argv )
 
   std::cout << "Number of threads = " << Eigen::nbThreads( ) << std::endl;
 
-  TNatural N = 1000;
-  TNatural M = 1000000;
+  TNatural N = 768;
+  TNatural M = 60000;
 
   // Regression random model
   TModel model( N );
@@ -162,19 +172,23 @@ int main( int arc, char** argv )
   cost_model.fill_random( );
 
   TReal* G = reinterpret_cast< TReal* >( std::calloc( N + 1, sizeof( TReal ) ) );
+  SCost< TModel > cost;
 
   ts = std::chrono::high_resolution_clock::now( );
-  TMat Z = cost_model.eval( X ) - Y;
-
-  *G = Z.mean( ) * TReal( 2 );
-  Eigen::Map< TCol >( G + 1, N,  1 ) = ( X * Z.transpose( ) ) * ( TReal( 2 ) / TReal( N ) );
-
-  TReal J = Z.array( ).pow( 2 ).mean( );
+  TReal J = cost( G, cost_model, X, Y );
   te = std::chrono::high_resolution_clock::now( );
   t = std::chrono::duration_cast< std::chrono::nanoseconds >( te - ts ).count( );
+  std::cout << "Cost time = " << ( t * 1e-9 ) << " s" << std::endl;
 
-  std::cout << "Z size = " << Z.size( ) << " (" << ( t * 1e-9 ) << " s)" << std::endl;
-  std::cout << "Z type = _Z" << typeid( Z ).name( ) << std::endl;
+  /* TODO
+
+     te = std::chrono::high_resolution_clock::now( );
+     t = std::chrono::duration_cast< std::chrono::nanoseconds >( te - ts ).count( );
+
+     std::cout << "Z size = " << Z.size( ) << " (" << ( t * 1e-9 ) << " s)" << std::endl;
+     std::cout << "Z type = _Z" << typeid( Z ).name( ) << std::endl;
+  */
+  std::free( G );
 
   return( EXIT_SUCCESS );
 }
