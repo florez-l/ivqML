@@ -8,7 +8,7 @@ include_directories(
   )
 
 add_executable(ivqML_example_Sandbox Sandbox.cxx)
-target_link_libraries(ivqML_example_Sandbox Eigen3::Eigen)
+target_link_libraries(ivqML_example_Sandbox ivqML)
 
 
 set(

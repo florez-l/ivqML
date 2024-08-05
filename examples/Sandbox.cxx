@@ -1,183 +1,82 @@
+// =========================================================================
+// @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
+// =========================================================================
 
-#include <chrono>
-#include <cmath>
-#include <cstdlib>
 #include <iostream>
-#include <random>
-#include <Eigen/Core>
 
-template< class _TScl >
-class Logistic
-{
-public:
-  using Self = Logistic;
-  using TScl = _TScl;
+#include <itkImageFileWriter.h>
+#include <itkVectorImage.h>
+#include <ivq/ITK/ColorImageToChannelsImageFilter.h>
+#include <ivq/ITK/EigenUtils.h>
+#include <ivq/ITK/ImageFileReader.h>
 
-  using TNat = unsigned long long;
-
-  using TMat = Eigen::Matrix< TScl, Eigen::Dynamic, Eigen::Dynamic >;
-  using TCol = Eigen::Matrix< TScl, Eigen::Dynamic, 1 >;
-  using TRow = Eigen::Matrix< TScl, 1, Eigen::Dynamic >;
-
-public:
-  Logistic( const TNat& n = 1 )
-    {
-      this->set_number_of_inputs( n );
-    }
-  virtual ~Logistic( )
-    {
-      if( this->m_P != nullptr )
-        std::free( this->m_P );
-    }
-
-  void random_fill( )
-    {
-      std::random_device r;
-      std::mt19937 g( r( ) );
-      std::uniform_real_distribution< TScl > d( -1, 1 );
-      for( TNat i = 0; i < this->m_S; ++i )
-        this->m_P[ i ] = d( g );
-    }
-
-  void set_number_of_inputs( const TNat& n )
-    {
-      if( this->m_P != nullptr )
-        delete this->m_P;
-      this->m_S = n + 1;
-      this->m_P =
-        reinterpret_cast< TScl* >( std::calloc( this->m_S, sizeof( TScl ) ) );
-    }
-
-  template< class _TX >
-  auto eval( const Eigen::EigenBase< _TX >& iX ) const
-    {
-      return(
-        (
-          (
-            Eigen::Map< const TRow >( this->m_P + 1, 1, this->m_S - 1 )
-            *
-            iX.derived( ).template cast< TScl >( )
-            ).array( ) + *( this->m_P )
-          ).unaryExpr(
-            []( const TScl& z ) -> TScl
-            {
-              if     ( z < -TScl( 40 ) ) return( 0 );
-              else if(  TScl( 40 ) < z ) return( 1 );
-              else return( TScl( 1 ) / ( TScl( 1 ) + std::exp( -z ) ) );
-            }
-            )
-        );
-
-
-      /* TODO
-         (
-         (
-         Eigen::Map< _R >( P + 1, 1, N )
-         *
-         iX.derived( ).template cast< TScl >( )
-         ).array( ) + *P
-         ).unaryExpr(
-         []( const _S& z ) -> _S
-         {
-         if( z < -_S( 40 ) )
-         {
-         return( 0 );
-         }
-         else if( _S( 40 ) < z )
-         {
-         return( 1 );
-         }
-         else
-         {
-         return( _S( 1 ) / ( _S( 1 ) + std::exp( -z ) ) );
-         } // end if
-         }
-         );
-      */
-    }
-
-private:
-  TScl* m_P { nullptr };
-  TNat  m_S { 0 };
-};
-
-using TModel = Logistic< long double >;
+const unsigned int Dim = 2;
+using TReal = float;
+using TPixel = unsigned char;
+using TImage = ::itk::VectorImage< TPixel, Dim >;
 
 int main( int argc, char** argv )
 {
-  unsigned long long N = 200;
-  unsigned long long M = 100000;
+  if( argc < 3 )
+  {
+    std::cerr
+      << "Usage: " << argv[ 0 ]  << " input_image output_image"
+      << std::endl;
+    return( EXIT_FAILURE );
+  } // end if
+  std::string input_image = argv[ 1 ];
+  std::string output_image = argv[ 2 ];
 
-  TModel::TMat X( N, M );
-  X.setRandom( );
+  auto reader = ivq::ITK::ImageFileReader< TImage >::New( );
+  reader->SetFileName( input_image );
+  reader->Update( );
 
-  TModel model( N );
-  model.random_fill( );
+  unsigned int c = reader->GetOutput( )->GetNumberOfComponentsPerPixel( );
+  if( c != 3 && c != 4 )
+  {
+    std::cerr
+      << "Input image does not have color information "
+      << "(number_of_channels=" << c << ")" << std::endl;
+    return( EXIT_FAILURE );
+  } // end if
 
-  std::cout << "Processing... ";
-  std::cout.flush( );
+  auto filter =
+    ivq::ITK::ColorImageToChannelsImageFilter< TImage, TReal >::New( );
+  filter->SetInput( reader->GetOutput( ) );
+  if( argc > 3 )
+  {
+    for( int i = 3; i < argc; ++i )
+      filter->UseChannel( argv[ i ] );
+  }
+  else
+    filter->UseAllChannels( );
 
-  auto start = std::chrono::high_resolution_clock::now( );
-  TModel::TRow Y = model.eval( X );
-  auto stop = std::chrono::high_resolution_clock::now( );
-  auto duration = std::chrono::duration_cast< std::chrono::nanoseconds >( stop - start );
+  filter->Update( );
 
-  std::cout << "done in " << duration.count( ) * 1e-9 << "s!" << std::endl;
+  auto X = ivq::ITK::ImageToMatrix( filter->GetOutput( ) );
+  auto m = X.rowwise( ).mean( ).eval( );
+  auto C = X.colwise( ) - m;
+  auto S = ( C * C.transpose( ) ) / TReal( X.cols( ) - 1 );
+
+  std::cout << S << std::endl;
 
   /* TODO
-     std::cout << "Threads: " << Eigen::nbThreads( ) << std::endl;
-
-     using _S = long double;
-     using _R = Eigen::Matrix< _S, 1, Eigen::Dynamic >;
-     using _C = Eigen::Matrix< _S, Eigen::Dynamic, 1 >;
-     using _M = Eigen::Matrix< _S, Eigen::Dynamic, Eigen::Dynamic >;
-
-
-     _S* P = reinterpret_cast< _S* >( std::calloc( N + 1, sizeof( _S ) ) );
-     _S* X = reinterpret_cast< _S* >( std::calloc( N * M, sizeof( _S ) ) );
-     _S* Y = reinterpret_cast< _S* >( std::calloc( M, sizeof( _S ) ) );
-
-     Eigen::Map< _R >( P, 1, N + 1 ).setRandom( );
-     Eigen::Map< _M >( X, N, M ).setRandom( );
-
-     std::cout << "Processing... ";
-     std::cout.flush( );
-
-     auto start = std::chrono::high_resolution_clock::now( );
-     Eigen::Map< _M >( Y, 1, M ) =
-     (
-     (
-     Eigen::Map< _R >( P + 1, 1, N )
-     *
-     Eigen::Map< _M >( X, N, M )
-     ).array( ) + *P
-     ).unaryExpr(
-     []( const _S& z ) -> _S
+     auto writer =
+     itk::ImageFileWriter< decltype( filter )::ObjectType::TOutImage >::New( );
+     writer->SetInput( filter->GetOutput( ) );
+     writer->SetFileName( output_image );
+     writer->UseCompressionOn( );
+     try
      {
-     if( z < -_S( 40 ) )
-     {
-     return( 0 );
+     writer->Update( );
      }
-     else if( _S( 40 ) < z )
+     catch( std::exception& err )
      {
-     return( 1 );
-     }
-     else
-     {
-     return( _S( 1 ) / ( _S( 1 ) + std::exp( -z ) ) );
-     } // end if
-     }
-     );
-     auto stop = std::chrono::high_resolution_clock::now( );
-     auto duration = std::chrono::duration_cast< std::chrono::nanoseconds >( stop - start );
-
-     std::cout << "done in " << duration.count( ) * 1e-9 << " ns!" << std::endl;
-
-     std::free( P );
-     std::free( X );
+     std::cerr << "Error caught: " << err.what( ) << std::endl;
+     return( EXIT_FAILURE );
+     } // end try
   */
-
   return( EXIT_SUCCESS );
 }
 
-// eof
+// eof - $RCSfile$
