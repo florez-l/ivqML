@@ -4,6 +4,8 @@
 #ifndef __ivqML__Common__ImageHelpers__h__
 #define __ivqML__Common__ImageHelpers__h__
 
+#include <ivq/ITK/EigenUtils.h>
+
 namespace ivqML
 {
   namespace Common

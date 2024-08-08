@@ -4,8 +4,6 @@
 #ifndef __ivqML__Common__ImageHelpers__hxx__
 #define __ivqML__Common__ImageHelpers__hxx__
 
-#include <ivq/ITK/EigenUtils.h>
-
 // -------------------------------------------------------------------------
 template< class _I, class _M >
 _M ivqML::Common::ImageHelpers::meshgrid( const _I* image )

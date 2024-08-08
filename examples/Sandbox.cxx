@@ -4,19 +4,16 @@
 
 #include <iostream>
 
-#include <Eigen/SVD>
-
 #include <itkImageFileWriter.h>
 #include <itkVectorImage.h>
 #include <ivq/ITK/ColorImageToChannelsImageFilter.h>
-#include <ivq/ITK/EigenUtils.h>
 #include <ivq/ITK/ImageFileReader.h>
-
+#include <ivqML/Common/PCA.h>
 
 const unsigned int Dim = 2;
 using TReal = float;
 using TPixel = unsigned char;
-using TImage = ::itk::VectorImage< TPixel, Dim >;
+using TImage = itk::VectorImage< TPixel, Dim >;
 
 int main( int argc, char** argv )
 {
@@ -57,39 +54,17 @@ int main( int argc, char** argv )
   filter->Update( );
 
   auto X = ivq::ITK::ImageToMatrix( filter->GetOutput( ) );
-  auto m = X.rowwise( ).mean( ).eval( );
-  auto C = X.colwise( ) - m;
-  auto S = ( ( C * C.transpose( ) ) / TReal( X.cols( ) - 1 ) ).eval( );
+  auto R = ivqML::Common::PCA( X.transpose( ), 0.95 );
 
-  Eigen::BDCSVD< decltype( S ) > E;
-  E.compute( S, Eigen::ComputeFullV );
-
-  auto M = E.matrixV( );
-  auto V = E.singularValues( );
-  V.array( ) /= V.sum( );
-  auto P = V;
-  std::partial_sum( V.data( ), V.data( ) + V.size( ), P.data( ) );
-  unsigned int l = std::distance(
-    P.data( ),
-    std::find_if_not(
-      P.data( ), P.data( ) + P.size( ),
-      []( const TReal& v )
-      {
-        return( v < 0.95 );
-      }
-      )
-    );
-
-  std::cout << "---------------------------------------" << std::endl;
-  std::cout << V.transpose( ) << std::endl;
-  std::cout << "---------------------------------------" << std::endl;
-  std::cout << P.transpose( ) << std::endl;
-  std::cout << "---------------------------------------" << std::endl;
-  std::cout << l << std::endl;
-  std::cout << "---------------------------------------" << std::endl;
-  std::cout << M << std::endl;
-  std::cout << "---------------------------------------" << std::endl;
-
+  auto out = TImage::New( );
+  out->SetRegions( filter->GetOutput( )->GetRequestedRegion( ) );
+  out->SetBufferedRegion( filter->GetOutput( )->GetBufferedRegion( ) );
+  out->SetOrigin( filter->GetOutput( )->GetOrigin( ) );
+  out->SetSpacing( filter->GetOutput( )->GetSpacing( ) );
+  out->SetDirection( filter->GetOutput( )->GetDirection( ) );
+  out->SetNumberOfComponentsPerPixel( R.second.cols( ) );
+  out->Allocate( );
+  ivq::ITK::ImageToMatrix( out.GetPointer( ) ) = R.second.transpose( );
 
   /* TODO
      auto writer =
