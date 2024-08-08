@@ -14,6 +14,7 @@ const unsigned int Dim = 2;
 using TReal = float;
 using TPixel = unsigned char;
 using TImage = itk::VectorImage< TPixel, Dim >;
+using TOutImage = itk::VectorImage< TReal, Dim >;
 
 int main( int argc, char** argv )
 {
@@ -56,7 +57,7 @@ int main( int argc, char** argv )
   auto X = ivq::ITK::ImageToMatrix( filter->GetOutput( ) );
   auto R = ivqML::Common::PCA( X.transpose( ), 0.95 );
 
-  auto out = TImage::New( );
+  auto out = TOutImage::New( );
   out->SetRegions( filter->GetOutput( )->GetRequestedRegion( ) );
   out->SetBufferedRegion( filter->GetOutput( )->GetBufferedRegion( ) );
   out->SetOrigin( filter->GetOutput( )->GetOrigin( ) );
@@ -64,24 +65,23 @@ int main( int argc, char** argv )
   out->SetDirection( filter->GetOutput( )->GetDirection( ) );
   out->SetNumberOfComponentsPerPixel( R.second.cols( ) );
   out->Allocate( );
-  ivq::ITK::ImageToMatrix( out.GetPointer( ) ) = R.second.transpose( );
+  auto O = ivq::ITK::ImageToMatrix( out.GetPointer( ) );
+  O = R.second.transpose( ).template cast< TReal >( );
 
-  /* TODO
-     auto writer =
-     itk::ImageFileWriter< decltype( filter )::ObjectType::TOutImage >::New( );
-     writer->SetInput( filter->GetOutput( ) );
-     writer->SetFileName( output_image );
-     writer->UseCompressionOn( );
-     try
-     {
-     writer->Update( );
-     }
-     catch( std::exception& err )
-     {
-     std::cerr << "Error caught: " << err.what( ) << std::endl;
-     return( EXIT_FAILURE );
-     } // end try
-  */
+  auto writer =
+    itk::ImageFileWriter< decltype( out )::ObjectType >::New( );
+  writer->SetInput( out );
+  writer->SetFileName( output_image );
+  writer->UseCompressionOn( );
+  try
+  {
+    writer->Update( );
+  }
+  catch( std::exception& err )
+  {
+    std::cerr << "Error caught: " << err.what( ) << std::endl;
+    return( EXIT_FAILURE );
+  } // end try
   return( EXIT_SUCCESS );
 }
 
