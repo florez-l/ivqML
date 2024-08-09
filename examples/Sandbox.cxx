@@ -8,13 +8,13 @@
 #include <itkVectorImage.h>
 #include <ivq/ITK/ColorImageToChannelsImageFilter.h>
 #include <ivq/ITK/ImageFileReader.h>
-#include <ivqML/Common/PCA.h>
+#include <ivqML/ITK/PCAImageFilter.h>
+
 
 const unsigned int Dim = 2;
 using TReal = float;
 using TPixel = unsigned char;
 using TImage = itk::VectorImage< TPixel, Dim >;
-using TOutImage = itk::VectorImage< TReal, Dim >;
 
 int main( int argc, char** argv )
 {
@@ -52,25 +52,14 @@ int main( int argc, char** argv )
   else
     filter->UseAllChannels( );
 
-  filter->Update( );
-
-  auto X = ivq::ITK::ImageToMatrix( filter->GetOutput( ) );
-  auto R = ivqML::Common::PCA( X.transpose( ), 0.95 );
-
-  auto out = TOutImage::New( );
-  out->SetRegions( filter->GetOutput( )->GetRequestedRegion( ) );
-  out->SetBufferedRegion( filter->GetOutput( )->GetBufferedRegion( ) );
-  out->SetOrigin( filter->GetOutput( )->GetOrigin( ) );
-  out->SetSpacing( filter->GetOutput( )->GetSpacing( ) );
-  out->SetDirection( filter->GetOutput( )->GetDirection( ) );
-  out->SetNumberOfComponentsPerPixel( R.second.cols( ) );
-  out->Allocate( );
-  auto O = ivq::ITK::ImageToMatrix( out.GetPointer( ) );
-  O = R.second.transpose( ).template cast< TReal >( );
+  auto pca =
+    ivqML::ITK::PCAImageFilter< decltype( filter )::ObjectType::TOutImage, TReal >::New( );
+  pca->SetInput( filter->GetOutput( ) );
+  // pca->Update( );
 
   auto writer =
-    itk::ImageFileWriter< decltype( out )::ObjectType >::New( );
-  writer->SetInput( out );
+    itk::ImageFileWriter< decltype( pca )::ObjectType::TOutImage >::New( );
+  writer->SetInput( pca->GetOutput( ) );
   writer->SetFileName( output_image );
   writer->UseCompressionOn( );
   try
