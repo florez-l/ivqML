@@ -55,7 +55,6 @@ int main( int argc, char** argv )
   auto pca =
     ivqML::ITK::PCAImageFilter< decltype( filter )::ObjectType::TOutImage, TReal >::New( );
   pca->SetInput( filter->GetOutput( ) );
-  // pca->Update( );
 
   auto writer =
     itk::ImageFileWriter< decltype( pca )::ObjectType::TOutImage >::New( );
