@@ -13,12 +13,13 @@ target_link_libraries(ivqML_example_Sandbox ivqML)
 
 set(
   _simple_examples
+  AnalyzeImageTexture
   # FeedForwardNetwork_00
   # FeedForwardNetwork_01
-  LinearModel_00
-  LinearModel_AnalyticalFit_CSV
-  LinearModel_ADAMFit_00
-  LinearModel_GradientDescentFit_00
+  # LinearModel_00
+  # LinearModel_AnalyticalFit_CSV
+  # LinearModel_ADAMFit_00
+  # LinearModel_GradientDescentFit_00
   # LogisticModel_00
 
   #  ExtractSamplesFrom2DImage
@@ -36,7 +37,7 @@ set(
   #  LogisticModel_ADAMFit_CSV
   #  LogisticModel_GradientDescentFit_CSV
   #  MNIST_FeedForwardNetwork_Train
-  #  Sandbox
+  #  
   )
 foreach(_e ${_simple_examples})
   add_executable(ivqML_example_${_e} ${_e}.cxx)
