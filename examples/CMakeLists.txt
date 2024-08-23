@@ -14,6 +14,8 @@ target_link_libraries(ivqML_example_Sandbox ivqML)
 set(
   _simple_examples
   AnalyzeImageTexture
+  PCAImageFilter
+
   # FeedForwardNetwork_00
   # FeedForwardNetwork_01
   # LinearModel_00
