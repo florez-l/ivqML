@@ -2,74 +2,89 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+#include <algorithm>
 #include <iostream>
+#include <numeric>
+#include <random>
 
 #include <itkImageFileWriter.h>
 #include <itkVectorImage.h>
-#include <ivq/ITK/ColorImageToChannelsImageFilter.h>
+#include <ivq/ITK/EigenUtils.h>
 #include <ivq/ITK/ImageFileReader.h>
-#include <ivqML/ITK/PCAImageFilter.h>
-
 
 const unsigned int Dim = 2;
 using TReal = float;
-using TPixel = unsigned char;
-using TImage = itk::VectorImage< TPixel, Dim >;
+using TImage = itk::VectorImage< TReal, Dim >;
 
 int main( int argc, char** argv )
 {
-  if( argc < 3 )
+  if( argc < 2 )
   {
     std::cerr
-      << "Usage: " << argv[ 0 ]  << " input_image output_image"
+      << "Usage: " << argv[ 0 ]  << " input_image"
       << std::endl;
     return( EXIT_FAILURE );
   } // end if
   std::string input_image = argv[ 1 ];
-  std::string output_image = argv[ 2 ];
 
   auto reader = ivq::ITK::ImageFileReader< TImage >::New( );
   reader->SetFileName( input_image );
   reader->Update( );
 
-  unsigned int c = reader->GetOutput( )->GetNumberOfComponentsPerPixel( );
-  if( c != 3 && c != 4 )
+  auto I = ivq::ITK::ImageToMatrix( reader->GetOutput( ) );
+  auto out = TImage::New( );
+  out->SetLargestPossibleRegion( reader->GetOutput( )->GetLargestPossibleRegion( ) );
+  out->SetRequestedRegion( reader->GetOutput( )->GetRequestedRegion( ) );
+  out->SetBufferedRegion( reader->GetOutput( )->GetBufferedRegion( ) );
+  out->SetSpacing( reader->GetOutput( )->GetSpacing( ) );
+  out->SetOrigin( reader->GetOutput( )->GetOrigin( ) );
+  out->SetDirection( reader->GetOutput( )->GetDirection( ) );
+  out->SetNumberOfComponentsPerPixel( 1 );
+  out->Allocate( );
+  auto L = ivq::ITK::ImageToMatrix( out.GetPointer( ) );
+
+  std::vector< unsigned long long > idx( I.cols( ) );
+  std::iota( idx.begin( ), idx.end( ), 0 );
+  unsigned long long seed
+    =
+    std::chrono::system_clock::now( ).time_since_epoch( ).count( );
+  std::shuffle( idx.begin( ), idx.end( ), std::default_random_engine( seed ) );
+
+  using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
+  TMatrix centers = I( ivq_EIGEN_ALL, { idx[ 0 ], idx[ 1 ], idx[ 2 ] } );
+
+  unsigned long long nLabels = centers.cols( );
+  TMatrix D( nLabels, I.cols( ) );
+
+  for( unsigned long long l = 0; l < nLabels; ++l )
   {
-    std::cerr
-      << "Input image does not have color information "
-      << "(number_of_channels=" << c << ")" << std::endl;
-    return( EXIT_FAILURE );
+    D.row( l ) =
+      ( I.colwise( ) - centers.col( l ) ).array( )
+      .pow( 2 ).colwise( ).sum( ).sqrt( );
   } // end if
 
-  auto filter =
-    ivq::ITK::ColorImageToChannelsImageFilter< TImage, TReal >::New( );
-  filter->SetInput( reader->GetOutput( ) );
-  if( argc > 3 )
-  {
-    for( int i = 3; i < argc; ++i )
-      filter->UseChannel( argv[ i ] );
-  }
-  else
-    filter->UseAllChannels( );
+  for( unsigned long long c = 0; c < L.cols( ); ++c )
+    D.col( c ).minCoeff( &L( 0, c ) );
 
-  auto pca =
-    ivqML::ITK::PCAImageFilter< decltype( filter )::ObjectType::TOutImage, TReal >::New( );
-  pca->SetInput( filter->GetOutput( ) );
+  for( unsigned long long l = 0; l < nLabels; ++l )
+  {
+    auto J = ( L.array( ) == l ).template cast< unsigned long long >( ).eval( );
+    std::cout << J.select( I, 0 ).rows( ) << " " << J.select( I, 0 ).cols( ) << std::endl;
+    std::cout << "---------------------" << std::endl;
+  } // end if
+  std::cout << I.cols( ) << std::endl;
 
-  auto writer =
-    itk::ImageFileWriter< decltype( pca )::ObjectType::TOutImage >::New( );
-  writer->SetInput( pca->GetOutput( ) );
-  writer->SetFileName( output_image );
-  writer->UseCompressionOn( );
-  try
-  {
-    writer->Update( );
-  }
-  catch( std::exception& err )
-  {
-    std::cerr << "Error caught: " << err.what( ) << std::endl;
-    return( EXIT_FAILURE );
-  } // end try
+  /* TODO
+     .select( I, 0 ).eval( );
+     std::cout << J.rowwise( ).sum( ) << std::endl;
+     std::cout << "_Z" << typeid( J ).name( ) << std::endl;
+  */
+
+  auto writer = itk::ImageFileWriter< TImage >::New( );
+  writer->SetInput( out );
+  writer->SetFileName( "labels.mha" );
+  writer->Update( );
+
   return( EXIT_SUCCESS );
 }
 
