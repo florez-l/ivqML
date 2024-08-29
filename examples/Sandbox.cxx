@@ -31,7 +31,7 @@ int main( int argc, char** argv )
   reader->SetFileName( input_image );
   reader->Update( );
 
-  auto I = ivq::ITK::ImageToMatrix( reader->GetOutput( ) );
+  auto I = ivq::ITK::ImageToMatrix( reader->GetOutput( ) ).transpose( );
   auto out = TImage::New( );
   out->SetLargestPossibleRegion( reader->GetOutput( )->GetLargestPossibleRegion( ) );
   out->SetRequestedRegion( reader->GetOutput( )->GetRequestedRegion( ) );
@@ -41,7 +41,7 @@ int main( int argc, char** argv )
   out->SetDirection( reader->GetOutput( )->GetDirection( ) );
   out->SetNumberOfComponentsPerPixel( 1 );
   out->Allocate( );
-  auto L = ivq::ITK::ImageToMatrix( out.GetPointer( ) );
+  auto L = ivq::ITK::ImageToMatrix( out.GetPointer( ) ).transpose( );
 
   std::vector< unsigned long long > idx( I.cols( ) );
   std::iota( idx.begin( ), idx.end( ), 0 );
@@ -51,28 +51,55 @@ int main( int argc, char** argv )
   std::shuffle( idx.begin( ), idx.end( ), std::default_random_engine( seed ) );
 
   using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
-  TMatrix centers = I( ivq_EIGEN_ALL, { idx[ 0 ], idx[ 1 ], idx[ 2 ] } );
+  TMatrix M[ 2 ];
+  M[ 0 ] = I( { idx[ 0 ], idx[ 1 ], idx[ 2 ] }, ivq_EIGEN_ALL );
+  M[ 1 ] = TMatrix::Zero( M[ 0 ].rows( ), M[ 0 ].cols( ) );
+  unsigned long long K = M[ 0 ].rows( );
 
-  unsigned long long nLabels = centers.cols( );
-  TMatrix D( nLabels, I.cols( ) );
+  std::cout << M[ 0 ] << std::endl;
+  std::cout << K << std::endl;
 
-  for( unsigned long long l = 0; l < nLabels; ++l )
+  // Update distances
+  TMatrix D( I.rows( ), K );
+  for( unsigned long long k = 0; k < K; ++k )
   {
-    D.row( l ) =
-      ( I.colwise( ) - centers.col( l ) ).array( )
-      .pow( 2 ).colwise( ).sum( ).sqrt( );
+    D.col( k )
+      =
+      ( I.rowwise( ) - M[ 0 ].row( k ) ).array( ).
+      pow( 2 ).rowwise( ).sum( ).sqrt( );
   } // end if
 
-  for( unsigned long long c = 0; c < L.cols( ); ++c )
-    D.col( c ).minCoeff( &L( 0, c ) );
+  // Update labels
+  for( unsigned long long s = 0; s < L.rows( ); ++s )
+    D.row( s ).minCoeff( &L( s, 0 ) );
 
-  for( unsigned long long l = 0; l < nLabels; ++l )
+  // Update means
+  TMatrix J( I.rows( ), 1 );
+  for( unsigned long long k = 0; k < K; ++k )
   {
-    auto J = ( L.array( ) == l ).template cast< unsigned long long >( ).eval( );
-    std::cout << J.select( I, 0 ).rows( ) << " " << J.select( I, 0 ).cols( ) << std::endl;
-    std::cout << "---------------------" << std::endl;
-  } // end if
-  std::cout << I.cols( ) << std::endl;
+    J = ( L.array( ) == k ).template cast< TReal >( );
+    M[ 1 ].row( k )
+      =
+      ( I.array( ).colwise( ) * J.col( 0 ).array( ) ).colwise( ).sum( )
+      /
+      TReal( J.sum( ) );
+  } // end for
+
+  std::cout << "-------------------" << std::endl;
+  std::cout << M[ 1 ] << std::endl;
+  std::cout << "-------------------" << std::endl;
+  std::cout << ( M[ 0 ] - M[ 1 ] ).array( ).pow( 2 ).rowwise( ).sum( ).mean( ) << std::endl;
+  /* TODO
+
+
+     for( unsigned long long l = 0; l < k; ++l )
+     {
+     auto J = ( L.array( ) == l ).template cast< unsigned long long >( ).eval( );
+     std::cout << J.select( I, 0 ).rows( ) << " " << J.select( I, 0 ).cols( ) << std::endl;
+     std::cout << "---------------------" << std::endl;
+     } // end if
+     std::cout << I.cols( ) << std::endl;
+  */
 
   /* TODO
      .select( I, 0 ).eval( );
@@ -80,10 +107,12 @@ int main( int argc, char** argv )
      std::cout << "_Z" << typeid( J ).name( ) << std::endl;
   */
 
-  auto writer = itk::ImageFileWriter< TImage >::New( );
-  writer->SetInput( out );
-  writer->SetFileName( "labels.mha" );
-  writer->Update( );
+  /* TODO
+     auto writer = itk::ImageFileWriter< TImage >::New( );
+     writer->SetInput( out );
+     writer->SetFileName( "labels.mha" );
+     writer->Update( );
+  */
 
   return( EXIT_SUCCESS );
 }
