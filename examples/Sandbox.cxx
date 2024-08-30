@@ -64,7 +64,7 @@ int main( int argc, char** argv )
 
   auto writer = itk::ImageFileWriter< decltype( kmeans )::ObjectType::TOutImage >::New( );
   writer->SetInput( kmeans->GetOutput( ) );
-  writer->SetFileName( "labels.mha" );
+  writer->SetFileName( "labels.png" );
   writer->Update( );
 
   return( EXIT_SUCCESS );
