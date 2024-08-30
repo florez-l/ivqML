@@ -3,6 +3,7 @@
 // =========================================================================
 
 #include <iostream>
+#include <sstream>
 
 #include <itkImageFileWriter.h>
 #include <itkVectorImage.h>
@@ -15,15 +16,17 @@ using TImage = itk::VectorImage< TReal, Dim >;
 
 int main( int argc, char** argv )
 {
-  if( argc < 2 )
+  if( argc < 3 )
   {
     std::cerr
-      << "Usage: " << argv[ 0 ]  << " input_image"
+      << "Usage: " << argv[ 0 ]  << " input_image output_image [K=2]"
       << std::endl;
     return( EXIT_FAILURE );
   } // end if
   std::string input_image = argv[ 1 ];
-  unsigned long long K = 3;
+  std::string output_image = argv[ 2 ];
+  unsigned long long K = 2;
+  if( argc > 3 ) std::istringstream( argv[ 3 ] ) >> K;
 
   auto reader = ivq::ITK::ImageFileReader< TImage >::New( );
   reader->SetFileName( input_image );
@@ -31,41 +34,28 @@ int main( int argc, char** argv )
   auto kmeans = ivqML::ITK::KMeansImageFilter< TImage >::New( );
   kmeans->SetInput( reader->GetOutput( ) );
   kmeans->SetNumberOfMeans( K );
+  kmeans->SetDebug(
+    []( const TReal& mse ) -> bool
+    {
+      std::cout << "MSE = " << mse << std::endl;
+      return( false );
+    }
+    );
 
-  /* TODO
-     reader->Update( );
-
-     auto I = ivq::ITK::ImageToMatrix( reader->GetOutput( ) ).transpose( );
-     auto out = TImage::New( );
-     out->SetLargestPossibleRegion( reader->GetOutput( )->GetLargestPossibleRegion( ) );
-     out->SetRequestedRegion( reader->GetOutput( )->GetRequestedRegion( ) );
-     out->SetBufferedRegion( reader->GetOutput( )->GetBufferedRegion( ) );
-     out->SetSpacing( reader->GetOutput( )->GetSpacing( ) );
-     out->SetOrigin( reader->GetOutput( )->GetOrigin( ) );
-     out->SetDirection( reader->GetOutput( )->GetDirection( ) );
-     out->SetNumberOfComponentsPerPixel( 1 );
-     out->Allocate( );
-     auto L = ivq::ITK::ImageToMatrix( out.GetPointer( ) ).transpose( );
-
-     ivqML::Common::KMeans< TReal > model;
-     model.init_random( I, K );
-     // model.init_XX( I, K );
-     // model.init_Forgy( I, K );
-     model.set_debug(
-     []( const TReal& mse ) -> bool
-     {
-     std::cout << "MSE = " << mse << std::endl;
-     return( false );
-     }
-     );
-     model.fit( I );
-     model.label( L, I );
-  */
-
-  auto writer = itk::ImageFileWriter< decltype( kmeans )::ObjectType::TOutImage >::New( );
+  auto writer
+    =
+    itk::ImageFileWriter< decltype( kmeans )::ObjectType::TOutImage >::New( );
   writer->SetInput( kmeans->GetOutput( ) );
-  writer->SetFileName( "labels.png" );
-  writer->Update( );
+  writer->SetFileName( output_image );
+  try
+  {
+    writer->Update( );
+  }
+  catch( const std::exception& err )
+  {
+    std::cerr << "Error caught: " << err.what( ) << std::endl;
+    return( EXIT_FAILURE );
+  } // end try
 
   return( EXIT_SUCCESS );
 }

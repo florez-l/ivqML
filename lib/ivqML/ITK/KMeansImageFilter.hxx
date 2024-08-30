@@ -9,10 +9,19 @@
 
 // -------------------------------------------------------------------------
 template< class _TInImage, class _TLabel, class _TReal >
+void ivqML::ITK::KMeansImageFilter< _TInImage, _TLabel, _TReal >::
+SetDebug( TDebug d )
+{
+  this->m_Debug = d;
+}
+
+// -------------------------------------------------------------------------
+template< class _TInImage, class _TLabel, class _TReal >
 ivqML::ITK::KMeansImageFilter< _TInImage, _TLabel, _TReal >::
 KMeansImageFilter( )
   : Superclass( )
 {
+  this->m_Debug = []( const TReal& mse ) -> bool { return( false ); };
 }
 
 // -------------------------------------------------------------------------
@@ -21,10 +30,17 @@ void ivqML::ITK::KMeansImageFilter< _TInImage, _TLabel, _TReal >::
 GenerateData( )
 {
   this->AllocateOutputs( );
-  /* TODO
-     unsigned long long m_NumberOfMeans { 2 };
-     TMatrix m_Means;
-  */
+  auto I
+    =
+    ivq::ITK::ImageToMatrix( this->GetInput( ) ).
+    template cast< TReal >( ).transpose( );
+  auto O = ivq::ITK::ImageToMatrix( this->GetOutput( ) ).transpose( );
+
+  ivqML::Common::KMeans< TReal > model;
+  model.init_random( I, this->m_NumberOfMeans );
+  model.set_debug( this->m_Debug );
+  model.fit( I );
+  model.label( O, I );
 }
 
 #endif // __ivqML__ITK__KMeansImageFilter__hxx__

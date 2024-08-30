@@ -4,6 +4,7 @@
 #ifndef __ivqML__ITK__KMeansImageFilter__h__
 #define __ivqML__ITK__KMeansImageFilter__h__
 
+#include <functional>
 #include <itkImage.h>
 #include <itkImageToImageFilter.h>
 
@@ -29,6 +30,7 @@ namespace ivqML
       using ConstPointer = itk::SmartPointer< const Self >;
 
       using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
+      using TDebug = std::function< bool( const TReal& ) >;
 
     public:
       itkNewMacro( Self );
@@ -40,6 +42,9 @@ namespace ivqML
       itkSetMacro( NumberOfMeans, unsigned long long );
 
       itkGetConstMacro( Means, TMatrix );
+
+    public:
+      void SetDebug( TDebug d );
 
     protected:
       KMeansImageFilter( );
@@ -54,6 +59,8 @@ namespace ivqML
     protected:
       unsigned long long m_NumberOfMeans { 2 };
       TMatrix m_Means;
+
+      TDebug m_Debug;
     };
   } // end namespace
 } // end namespace
