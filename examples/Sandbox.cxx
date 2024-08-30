@@ -6,9 +6,8 @@
 
 #include <itkImageFileWriter.h>
 #include <itkVectorImage.h>
-#include <ivq/ITK/EigenUtils.h>
 #include <ivq/ITK/ImageFileReader.h>
-#include <ivqML/Common/KMeans.h>
+#include <ivqML/ITK/KMeansImageFilter.h>
 
 const unsigned int Dim = 2;
 using TReal = float;
@@ -24,40 +23,47 @@ int main( int argc, char** argv )
     return( EXIT_FAILURE );
   } // end if
   std::string input_image = argv[ 1 ];
+  unsigned long long K = 3;
 
   auto reader = ivq::ITK::ImageFileReader< TImage >::New( );
   reader->SetFileName( input_image );
-  reader->Update( );
 
-  auto I = ivq::ITK::ImageToMatrix( reader->GetOutput( ) ).transpose( );
-  auto out = TImage::New( );
-  out->SetLargestPossibleRegion( reader->GetOutput( )->GetLargestPossibleRegion( ) );
-  out->SetRequestedRegion( reader->GetOutput( )->GetRequestedRegion( ) );
-  out->SetBufferedRegion( reader->GetOutput( )->GetBufferedRegion( ) );
-  out->SetSpacing( reader->GetOutput( )->GetSpacing( ) );
-  out->SetOrigin( reader->GetOutput( )->GetOrigin( ) );
-  out->SetDirection( reader->GetOutput( )->GetDirection( ) );
-  out->SetNumberOfComponentsPerPixel( 1 );
-  out->Allocate( );
-  auto L = ivq::ITK::ImageToMatrix( out.GetPointer( ) ).transpose( );
+  auto kmeans = ivqML::ITK::KMeansImageFilter< TImage >::New( );
+  kmeans->SetInput( reader->GetOutput( ) );
+  kmeans->SetNumberOfMeans( K );
 
-  unsigned long long K = 4;
-  ivqML::Common::KMeans< TReal > model;
-  model.init_random( I, K );
-  // model.init_XX( I, K );
-  // model.init_Forgy( I, K );
-  model.set_debug(
-    []( const TReal& mse ) -> bool
-    {
-      std::cout << "MSE = " << mse << std::endl;
-      return( false );
-    }
-    );
-  model.fit( I );
-  model.label( L, I );
+  /* TODO
+     reader->Update( );
 
-  auto writer = itk::ImageFileWriter< TImage >::New( );
-  writer->SetInput( out );
+     auto I = ivq::ITK::ImageToMatrix( reader->GetOutput( ) ).transpose( );
+     auto out = TImage::New( );
+     out->SetLargestPossibleRegion( reader->GetOutput( )->GetLargestPossibleRegion( ) );
+     out->SetRequestedRegion( reader->GetOutput( )->GetRequestedRegion( ) );
+     out->SetBufferedRegion( reader->GetOutput( )->GetBufferedRegion( ) );
+     out->SetSpacing( reader->GetOutput( )->GetSpacing( ) );
+     out->SetOrigin( reader->GetOutput( )->GetOrigin( ) );
+     out->SetDirection( reader->GetOutput( )->GetDirection( ) );
+     out->SetNumberOfComponentsPerPixel( 1 );
+     out->Allocate( );
+     auto L = ivq::ITK::ImageToMatrix( out.GetPointer( ) ).transpose( );
+
+     ivqML::Common::KMeans< TReal > model;
+     model.init_random( I, K );
+     // model.init_XX( I, K );
+     // model.init_Forgy( I, K );
+     model.set_debug(
+     []( const TReal& mse ) -> bool
+     {
+     std::cout << "MSE = " << mse << std::endl;
+     return( false );
+     }
+     );
+     model.fit( I );
+     model.label( L, I );
+  */
+
+  auto writer = itk::ImageFileWriter< decltype( kmeans )::ObjectType::TOutImage >::New( );
+  writer->SetInput( kmeans->GetOutput( ) );
   writer->SetFileName( "labels.mha" );
   writer->Update( );
 
