@@ -1,8 +1,8 @@
 // =========================================================================
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
-#ifndef __ivqML__Common__KMeans__h__
-#define __ivqML__Common__KMeans__h__
+#ifndef __ivqML__Common__MixtureOfGaussians__h__
+#define __ivqML__Common__MixtureOfGaussians__h__
 
 #include <functional>
 #include <limits>
@@ -15,18 +15,18 @@ namespace ivqML
     /**
      */
     template< class _TReal >
-    class KMeans
+    class MixtureOfGaussians
     {
     public:
-      using Self  = KMeans;
+      using Self  = MixtureOfGaussians;
       using TReal = _TReal;
       using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
 
       using TDebug = std::function< bool( const TReal& ) >;
 
     public:
-      KMeans( );
-      virtual ~KMeans( ) = default;
+      MixtureOfGaussians( );
+      virtual ~MixtureOfGaussians( ) = default;
 
       void set_debug( TDebug d );
 
@@ -58,9 +58,18 @@ namespace ivqML
         );
 
     protected:
+      template< class _TInput >
+      void _init_COVs( const Eigen::EigenBase< _TInput >& Ib );
+ 
+      template< class _TInput >
+      void _PDF( const Eigen::EigenBase< _TInput >& Ib, TMatrix& R );
+
+    protected:
       TReal m_EPS { std::numeric_limits< TReal >::epsilon( ) };
 
-      TMatrix        m_Means[ 2 ];
+      TMatrix        m_Means;
+      TMatrix        m_COVs;
+      TMatrix        m_Weights;
       unsigned short m_ActiveMean;
 
       TDebug m_Debug;
@@ -68,8 +77,8 @@ namespace ivqML
   } // end namespace
 } // end namespace
 
-#include <ivqML/Common/KMeans.hxx>
+#include <ivqML/Common/MixtureOfGaussians.hxx>
 
-#endif // __ivqML__Common__KMeans__h__
+#endif // __ivqML__Common__MixtureOfGaussians__h__
 
 // eof - $RCSfile$

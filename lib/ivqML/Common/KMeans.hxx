@@ -127,7 +127,7 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
 // -------------------------------------------------------------------------
 template< class _TReal >
 template< class _TOutput, class _TInput >
-auto ivqML::Common::KMeans< _TReal >::
+void ivqML::Common::KMeans< _TReal >::
 label(
   Eigen::EigenBase< _TOutput >& Lb,
   const Eigen::EigenBase< _TInput >& Ib

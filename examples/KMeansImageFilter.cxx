@@ -6,10 +6,9 @@
 #include <sstream>
 
 #include <itkImageFileWriter.h>
-#include <itkRescaleIntensityImageFilter.h>
 #include <itkVectorImage.h>
 #include <ivq/ITK/ImageFileReader.h>
-#include <ivqML/ITK/MixtureOfGaussiansImageFilter.h>
+#include <ivqML/ITK/KMeansImageFilter.h>
 
 const unsigned int Dim = 2;
 using TReal = float;
@@ -32,10 +31,10 @@ int main( int argc, char** argv )
   auto reader = ivq::ITK::ImageFileReader< TImage >::New( );
   reader->SetFileName( input_image );
 
-  auto mog = ivqML::ITK::MixtureOfGaussiansImageFilter< TImage >::New( );
-  mog->SetInput( reader->GetOutput( ) );
-  mog->SetNumberOfMeans( K );
-  mog->SetDebug(
+  auto kmeans = ivqML::ITK::KMeansImageFilter< TImage >::New( );
+  kmeans->SetInput( reader->GetOutput( ) );
+  kmeans->SetNumberOfMeans( K );
+  kmeans->SetDebug(
     []( const TReal& mse ) -> bool
     {
       std::cout << "MSE = " << mse << std::endl;
@@ -43,16 +42,10 @@ int main( int argc, char** argv )
     }
     );
 
-  using TLabels = decltype( mog )::ObjectType::TOutImage;
-  using TLabel = itk::NumericTraits< TLabels::PixelType >::ValueType;
-
-  auto rescaler = itk::RescaleIntensityImageFilter< TLabels, TLabels >::New( );
-  rescaler->SetInput( mog->GetOutput( ) );
-  rescaler->SetOutputMinimum( std::numeric_limits< TLabel >::min( ) );
-  rescaler->SetOutputMaximum( std::numeric_limits< TLabel >::max( ) );
-
-  auto writer = itk::ImageFileWriter< TLabels >::New( );
-  writer->SetInput( rescaler->GetOutput( ) );
+  auto writer
+    =
+    itk::ImageFileWriter< decltype( kmeans )::ObjectType::TOutImage >::New( );
+  writer->SetInput( kmeans->GetOutput( ) );
   writer->SetFileName( output_image );
   try
   {
