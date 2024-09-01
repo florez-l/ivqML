@@ -20,6 +20,7 @@ namespace ivqML
     public:
       using Self  = MixtureOfGaussians;
       using TReal = _TReal;
+      using TInt  = short;
       using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
 
       using TDebug = std::function< bool( const TReal& ) >;
@@ -59,10 +60,13 @@ namespace ivqML
 
     protected:
       template< class _TInput >
-      void _init_COVs( const Eigen::EigenBase< _TInput >& Ib );
+      void _iC( const _TInput& I );
  
       template< class _TInput >
-      void _PDF( const Eigen::EigenBase< _TInput >& Ib, TMatrix& R );
+      _TReal _R( TMatrix& R, const _TInput& I ) const;
+
+      template< class _TOutput >
+      void _L( _TOutput& L, const TMatrix& R ) const;
 
     protected:
       TReal m_EPS { std::numeric_limits< TReal >::epsilon( ) };

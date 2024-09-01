@@ -45,13 +45,7 @@ init_random(
 
   std::vector< unsigned long long > means( idx.data( ), idx.data( ) + K );
   this->m_Means = I( means, ivq_EIGEN_ALL );
-  /* TODO
-     this->m_Means[ 1 ]
-     =
-     TMatrix::Zero( this->m_Means[ 0 ].rows( ), this->m_Means[ 0 ].cols( ) );
-     this->m_ActiveMean = 0;
-  */
-  this->_init_COVs( I );
+  this->_iC( I );
 }
 
 // -------------------------------------------------------------------------
@@ -85,31 +79,34 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
   auto I = Ib.derived( ).template cast< TReal >( );
   unsigned long long K = this->m_Means.rows( );
   unsigned long long F = I.cols( );
-  TMatrix R( I.rows( ), K );
 
+  // Prepare iteration-related values
+  TMatrix R( I.rows( ), K );
+  using _TLabels = Eigen::Matrix< TInt, Eigen::Dynamic, 1 >;
+  _TLabels L[ 2 ];
+  L[ 0 ] = L[ 1 ] = _TLabels::Zero( I.rows( ) );
+  unsigned long long iter = 0;
+  TReal pl = std::numeric_limits< TReal >::max( );
   bool stop = false;
-  TReal prev_likelihood = std::numeric_limits< TReal >::lowest( );
+
+  // Go!
   while( !stop )
   {
     // E-step: compute responsibilities
-    this->_PDF( Ib, R );
-    TReal likelihood = ( R.colwise( ).maxCoeff( ).array( ) + this->m_EPS ).log( ).sum( );
-    // stop = prev_likelihood - likelihood;
+    TReal ll = this->_R( R, I );
 
-    std::cout << likelihood << std::endl;
-    prev_likelihood = likelihood;
-
-    R.array( ).colwise( ) /= R.array( ).rowwise( ).sum( );
-
-    // M-step: update parameters
+    // M-step: update weights with a ***PARANOIAC PONDERATION!***
     this->m_Weights = R.colwise( ).mean( );
-    this->m_Weights.array( ) /= this->m_Weights.sum( ); // PARANOIAC PONDERATION!
+    this->m_Weights.array( ) /= this->m_Weights.sum( );
+
+    // M-step: update means
     this->m_Means
       =
       ( R.transpose( ) * I ).array( ).colwise( )
       /
       R.colwise( ).sum( ).transpose( ).array( );
 
+    // M-step: update covariances
     for( unsigned long long k = 0; k < K; ++k )
     {
       auto c
@@ -123,52 +120,18 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
         =
         ( c.transpose( ) * c ) / R.col( k ).sum( );
     } // end for
-  } // end while
 
-  /* TODO
-  TMatrix D( I.rows( ), K ), J( I.rows( ), 1 );
-  Eigen::Matrix< unsigned long long, Eigen::Dynamic, 1 > L( I.rows( ) );
-
-  unsigned short e = 0;
-  TReal mse = std::numeric_limits< TReal >::infinity( );
-  bool stop = false;
-  while( !stop )
-  {
-    // Update distances
-    for( unsigned long long k = 0; k < K; ++k )
-      D.col( k )
-        =
-        ( I.rowwise( ) - this->m_Means[ this->m_ActiveMean ].row( k ) ).
-        array( ).pow( 2 ).rowwise( ).sum( ).sqrt( );
-
-    // Update labels
-    for( unsigned long long s = 0; s < L.rows( ); ++s )
-      D.row( s ).minCoeff( &L( s, 0 ) );
-
-    // Update means
-    for( unsigned long long k = 0; k < K; ++k )
-    {
-      J = ( L.array( ) == k ).template cast< TReal >( );
-      this->m_Means[ ( this->m_ActiveMean + 1 ) % 2 ].row( k )
-        =
-        ( I.array( ).colwise( ) * J.col( 0 ).array( ) ).colwise( ).sum( )
-        /
-        TReal( J.sum( ) );
-    } // end for
-
-    // Update error
-    mse
+    // Stop criteria
+    this->_L( L[ ( iter + 1 ) % 2 ], R );
+    unsigned long long count
       =
-      (
-        this->m_Means[ this->m_ActiveMean ]
-        -
-        this->m_Means[ ( this->m_ActiveMean + 1 ) % 2 ]
-        ).array( ).pow( 2 ).rowwise( ).sum( ).mean( );
-    this->m_ActiveMean = ( this->m_ActiveMean + 1 ) % 2;
-
-    stop = ( this->m_Debug( mse ) || !( this->m_EPS < mse ) );
+      ( L[ 0 ].array( ) != L[ 1 ].array( ) ).
+      template cast< unsigned long long >( ).sum( );
+    stop = ( count == 0 );
+    this->m_Debug( pl - ll );
+    pl = ll;
+    iter++;
   } // end while
-  */
 }
 
 // -------------------------------------------------------------------------
@@ -180,24 +143,20 @@ label(
   const Eigen::EigenBase< _TInput >& Ib
   )
 {
-  // Responsibilities
-  TMatrix R( Ib.rows( ), this->m_Means.rows( ) );
-  this->_PDF( Ib, R );
-  R.array( ).colwise( ) /= R.array( ).rowwise( ).sum( );
+  const _TInput& I = Ib.derived( );
+  _TOutput& L = Lb.derived( );
 
-  // Compute labels
-  auto L = Lb.derived( );
-  for( unsigned long long s = 0; s < L.rows( ); ++s )
-    R.row( s ).maxCoeff( &L( s, 0 ) );
+  TMatrix R( I.rows( ), this->m_Means.rows( ) );
+  this->_R( R, I );
+  this->_L( L, R );
 }
 
 // -------------------------------------------------------------------------
 template< class _TReal >
 template< class _TInput >
 void ivqML::Common::MixtureOfGaussians< _TReal >::
-_init_COVs( const Eigen::EigenBase< _TInput >& Ib )
+_iC( const _TInput& I )
 {
-  auto I = Ib.derived( ).template cast< TReal >( );
   unsigned long long K = this->m_Means.rows( );
   unsigned long long F = I.cols( );
   TMatrix D( I.rows( ), K ), J( I.rows( ), 1 );
@@ -237,10 +196,9 @@ _init_COVs( const Eigen::EigenBase< _TInput >& Ib )
 // -------------------------------------------------------------------------
 template< class _TReal >
 template< class _TInput >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
-_PDF( const Eigen::EigenBase< _TInput >& Ib, TMatrix& R )
+_TReal ivqML::Common::MixtureOfGaussians< _TReal >::
+_R( TMatrix& R, const _TInput& I ) const
 {
-  auto I = Ib.derived( ).template cast< TReal >( );
   unsigned long long K = this->m_Means.rows( );
   unsigned long long F = I.cols( );
   TReal d = std::pow( TReal( 8 ) * std::atan( TReal( 1 ) ), F );
@@ -259,6 +217,25 @@ _PDF( const Eigen::EigenBase< _TInput >& Ib, TMatrix& R )
       *
       ( this->m_Weights( 0, k ) / std::sqrt( d * C.determinant( ) ) );
   } // end for
+
+  TReal log_likelihood =
+    ( R.rowwise( ).maxCoeff( ).array( ) + this->m_EPS ).log( ).sum( );
+  R.array( ).colwise( ) /= R.array( ).rowwise( ).sum( );
+  return( -log_likelihood );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal >
+template< class _TOutput >
+void ivqML::Common::MixtureOfGaussians< _TReal >::
+_L( _TOutput& L, const TMatrix& R ) const
+{
+  Eigen::Index i;
+  for( unsigned long long s = 0; s < L.rows( ); ++s )
+  {
+    R.row( s ).maxCoeff( &i );
+    L( s ) = i;
+  } // end for
 }
 
 #endif // __ivqML__Common__MixtureOfGaussians__hxx__
@@ -271,21 +248,21 @@ _PDF( const Eigen::EigenBase< _TInput >& Ib, TMatrix& R )
 // ... (rest of the GaussianMixtureModel class)
 
 /* TODO
-double log_likelihood(const Eigen::MatrixXd& X) const {
-    int N = X.rows();
-    double log_likelihood = 0.0;
+   double log_likelihood(const Eigen::MatrixXd& X) const {
+   int N = X.rows();
+   double log_likelihood = 0.0;
 
-    for (int i = 0; i < N; ++i) {
-        double max_component_prob = -std::numeric_limits<double>::max();
-        for (int k = 0; k < n_components; ++k) {
-            double component_prob = weights(k) * multivariate_normal_pdf(X.row(i), means.row(k), covariances.block<n_features, n_features>(k, 0));
-            max_component_prob = std::max(max_component_prob, component_prob);
-        }
+   for (int i = 0; i < N; ++i) {
+   double max_component_prob = -std::numeric_limits<double>::max();
+   for (int k = 0; k < n_components; ++k) {
+   double component_prob = weights(k) * multivariate_normal_pdf(X.row(i), means.row(k), covariances.block<n_features, n_features>(k, 0));
+   max_component_prob = std::max(max_component_prob, component_prob);
+   }
 
-        log_likelihood += std::log(max_component_prob);
-    }
+   log_likelihood += std::log(max_component_prob);
+   }
 
-    return log_likelihood;
-}
+   return log_likelihood;
+   }
 
 */
