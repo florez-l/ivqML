@@ -21,7 +21,9 @@ namespace ivqML
       using Self  = MixtureOfGaussians;
       using TReal = _TReal;
       using TInt  = short;
+      using TBuffer = Eigen::Matrix< TReal, 1, Eigen::Dynamic >;
       using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
+      using MMatrix = Eigen::Map< TMatrix >;
 
       using TDebug = std::function< bool( const TReal& ) >;
 
@@ -59,8 +61,10 @@ namespace ivqML
         );
 
     protected:
+      void _reserve( const TInt& F, const TInt& K );
+
       template< class _TInput >
-      void _iC( const _TInput& I );
+      void _C( const _TInput& I );
  
       template< class _TInput >
       _TReal _R( TMatrix& R, const _TInput& I ) const;
@@ -71,10 +75,10 @@ namespace ivqML
     protected:
       TReal m_EPS { std::numeric_limits< TReal >::epsilon( ) };
 
-      TMatrix        m_Means;
-      TMatrix        m_COVs;
-      TMatrix        m_Weights;
-      unsigned short m_ActiveMean;
+      TBuffer m_Parameters;
+      MMatrix m_Weights { nullptr, 0, 0 };
+      MMatrix m_Means   { nullptr, 0, 0 };
+      MMatrix m_COVs    { nullptr, 0, 0 };
 
       TDebug m_Debug;
     };
