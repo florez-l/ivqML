@@ -63,6 +63,57 @@ namespace ivqML
     protected:
       void _reserve( const TInt& F, const TInt& K );
 
+      virtual TReal _E( TBuffer& p ) const
+        {
+          unsigned int K = this->m_Means.rows( );
+          unsigned int F = this->m_Means.cols( );
+          unsigned long long KF = K * F;
+
+          TReal* d = p.data( );
+          MMatrix W( d, 1, K );
+          MMatrix M( d + K, K, F );
+          MMatrix C( d + ( K + KF ), KF, F );
+
+          TMatrix EPS = Eigen::Diagonal< TMatrix >::Ones( F, F ) * this->m_EPS;
+          std::cout << EPS << std::endl;
+          std::exit( 1 );
+
+          /* TODO
+             M -= this->m_Means;
+             C += this->m_COVs;
+             C.array( ) *= TReal( 0.5 );
+          */
+
+          TReal e = 0;
+          for( unsigned int k = 0; k < K; ++k )
+          {
+            TMatrix m1 = this->m_Means.row( k );
+            TMatrix m2 = M.row( k );
+            TMatrix C1 = this->m_COVs.block( k * F, 0, F, F ).array( ) + this->m_EPS;
+            TMatrix C2 = C.block( k * F, 0, F, F ).array( ) + this->m_EPS;
+            TReal d1 = C1.determinant( );
+            TReal d2 = C2.determinant( );
+            TMatrix iC = ( C1 + C2 ) / TReal( 2 );
+
+            TReal le
+              =
+              (
+                ( ( m1 - m2 ) * iC.inverse( ) * ( m1 - m2 ).transpose( ) )
+                /
+                TReal( 8 )
+                )( 0, 0 )
+              +
+              (
+                std::log( iC.determinant( ) / std::sqrt( d1 * d2 ) )
+                /
+                TReal( 2 )
+                );
+            e += le * le;
+
+          } // end for
+          return( e / TReal( K ) );
+        }
+
       template< class _TInput >
       void _C( const _TInput& I );
  

@@ -80,13 +80,55 @@ template< class _TInput >
 void ivqML::Common::MixtureOfGaussians< _TReal >::
 fit( const Eigen::EigenBase< _TInput >& Ib )
 {
-  /* TODO
-     auto I = Ib.derived( ).template cast< TReal >( );
-     unsigned long long K = this->m_Means.rows( );
-     unsigned long long F = I.cols( );
+  auto I = Ib.derived( ).template cast< TReal >( );
+  unsigned long long K = this->m_Means.rows( );
+  unsigned long long F = I.cols( );
 
-     // Prepare iteration-related values
-     TMatrix R( I.rows( ), K );
+  // Prepare iteration-related values
+  TMatrix R( I.rows( ), K );
+  TBuffer pp = TBuffer::Zero( this->m_Parameters.size( ) );
+  bool stop = false;
+
+  // Go!
+  while( !stop )
+  {
+    // E-step: compute responsibilities
+    this->_R( R, I );
+
+    // M-step: update weights with a ***PARANOIAC PONDERATION!***
+    this->m_Weights = R.colwise( ).mean( );
+    this->m_Weights.array( ) /= this->m_Weights.sum( );
+
+    // M-step: update means
+    this->m_Means
+      =
+      ( R.transpose( ) * I ).array( ).colwise( )
+      /
+      R.colwise( ).sum( ).transpose( ).array( );
+
+    // M-step: update covariances
+    for( unsigned long long k = 0; k < K; ++k )
+    {
+      auto c
+        =
+        (
+          ( I.rowwise( ) - this->m_Means.row( k ) ).array( ).colwise( )
+          *
+          R.col( k ).array( )
+          ).matrix( );
+      this->m_COVs.block( k * F, 0, F, F )
+        =
+        ( c.transpose( ) * c ) / R.col( k ).sum( );
+    } // end for
+
+    // Stop criteria
+    TReal e = this->_E( pp );
+    std::cout << e << std::endl;
+    std::cout << "------------------------" << std::endl;
+    pp = this->m_Parameters;
+  } // end while
+
+  /* TODO
      using _TLabels = Eigen::Matrix< TInt, Eigen::Dynamic, 1 >;
      _TLabels L[ 2 ];
      L[ 0 ] = L[ 1 ] = _TLabels::Zero( I.rows( ) );
@@ -97,37 +139,7 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
      // Go!
      while( !stop )
      {
-     // E-step: compute responsibilities
-     TReal ll = this->_R( R, I );
-
-     // M-step: update weights with a ***PARANOIAC PONDERATION!***
-     this->m_Weights = R.colwise( ).mean( );
-     this->m_Weights.array( ) /= this->m_Weights.sum( );
-
-     // M-step: update means
-     this->m_Means
-     =
-     ( R.transpose( ) * I ).array( ).colwise( )
-     /
-     R.colwise( ).sum( ).transpose( ).array( );
-
-     // M-step: update covariances
-     for( unsigned long long k = 0; k < K; ++k )
-     {
-     auto c
-     =
-     (
-     ( I.rowwise( ) - this->m_Means.row( k ) ).array( ).colwise( )
-     *
-     R.col( k ).array( )
-     ).matrix( );
-     this->m_COVs.block( k * F, 0, F, F )
-     =
-     ( c.transpose( ) * c ) / R.col( k ).sum( );
-     } // end for
-
-     // Stop criteria
-     this->_L( L[ ( iter + 1 ) % 2 ], R );
+       this->_L( L[ ( iter + 1 ) % 2 ], R );
      unsigned long long count
      =
      ( L[ 0 ].array( ) != L[ 1 ].array( ) ).
