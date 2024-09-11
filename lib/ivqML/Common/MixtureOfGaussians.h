@@ -75,8 +75,8 @@ namespace ivqML
           MMatrix C( d + ( K + KF ), KF, F );
 
           TMatrix EPS = Eigen::Diagonal< TMatrix >::Ones( F, F ) * this->m_EPS;
-          std::cout << EPS << std::endl;
-          std::exit( 1 );
+          // TODO: std::cout << EPS << std::endl;
+          // TODO: std::exit( 1 );
 
           /* TODO
              M -= this->m_Means;

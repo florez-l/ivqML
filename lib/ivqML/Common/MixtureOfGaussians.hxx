@@ -123,8 +123,10 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
 
     // Stop criteria
     TReal e = this->_E( pp );
-    std::cout << e << std::endl;
-    std::cout << "------------------------" << std::endl;
+    /* TODO
+       std::cout << e << std::endl;
+       std::cout << "------------------------" << std::endl;
+    */
     pp = this->m_Parameters;
   } // end while
 
@@ -232,22 +234,28 @@ _TReal ivqML::Common::MixtureOfGaussians< _TReal >::
 _R( TMatrix& R, const _TInput& I ) const
 {
   unsigned long long K = this->m_Means.rows( );
-  unsigned long long F = I.cols( );
+  unsigned long long F = this->m_Means.cols( );
   TReal d = std::pow( TReal( 8 ) * std::atan( TReal( 1 ) ), F );
 
   for( unsigned long long k = 0; k < K; ++k )
   {
     auto C = this->m_COVs.block( k * F, 0, F, F );
-    auto c = I.rowwise( ) - this->m_Means.row( k );
-    R.col( k )
-      =
-      (
-        ( c * C.inverse( ) * c.transpose( ) ).diagonal( ).array( )
+    TReal D = C.determinant( );
+    if( D != TReal( 0 ) )
+    {
+      auto c = I.rowwise( ) - this->m_Means.row( k );
+      R.col( k )
+        =
+        (
+          ( c * C.inverse( ) * c.transpose( ) ).diagonal( ).array( )
+          *
+          TReal( -0.5 )
+          ).array( ).exp( )
         *
-        TReal( -0.5 )
-        ).array( ).exp( )
-      *
-      ( this->m_Weights( 0, k ) / std::sqrt( d * C.determinant( ) ) );
+        ( this->m_Weights( 0, k ) / std::sqrt( d * C.determinant( ) ) );
+    }
+    else
+      R.col( k ).array( ) *= TReal( 0 );
   } // end for
 
   TReal log_likelihood =
