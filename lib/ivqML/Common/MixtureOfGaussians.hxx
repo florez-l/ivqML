@@ -199,6 +199,12 @@ _C( const _TInput& I )
   // Initial weights
   this->m_Weights = TBuffer::Ones( K ) / TReal( K );
 
+  // Initialize covariances
+  this->m_COVs = TMatrix::Zero( F * K, F );
+  for( unsigned long long k = 0; k < K; ++k )
+    this->m_COVs.block( k * F, 0, F, F ) = TMatrix::Identity( F, F );
+
+  /* TODO
   // Compute distances
   for( unsigned long long k = 0; k < K; ++k )
     D.col( k )
@@ -225,6 +231,7 @@ _C( const _TInput& I )
       =
       ( S.transpose( ) * S ) / TReal( a - 1 );
   } // end for
+  */
 }
 
 // -------------------------------------------------------------------------
@@ -241,21 +248,16 @@ _R( TMatrix& R, const _TInput& I ) const
   {
     auto C = this->m_COVs.block( k * F, 0, F, F );
     TReal D = C.determinant( );
-    if( D != TReal( 0 ) )
-    {
-      auto c = I.rowwise( ) - this->m_Means.row( k );
-      R.col( k )
-        =
-        (
-          ( c * C.inverse( ) * c.transpose( ) ).diagonal( ).array( )
-          *
-          TReal( -0.5 )
-          ).array( ).exp( )
+    auto c = I.rowwise( ) - this->m_Means.row( k );
+    R.col( k )
+      =
+      (
+        ( c * C.inverse( ) * c.transpose( ) ).diagonal( ).array( )
         *
-        ( this->m_Weights( 0, k ) / std::sqrt( d * C.determinant( ) ) );
-    }
-    else
-      R.col( k ).array( ) *= TReal( 0 );
+        TReal( -0.5 )
+        ).array( ).exp( )
+      *
+      ( this->m_Weights( 0, k ) / std::sqrt( d * C.determinant( ) ) );
   } // end for
 
   TReal log_likelihood =
