@@ -82,7 +82,7 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
 {
   auto I = Ib.derived( ).template cast< TReal >( );
   unsigned long long K = this->m_Means.rows( );
-  unsigned long long F = I.cols( );
+  unsigned long long F = this->m_Means.cols( );
 
   // Prepare iteration-related values
   TMatrix R( I.rows( ), K );
@@ -120,6 +120,16 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
         =
         ( c.transpose( ) * c ) / R.col( k ).sum( );
     } // end for
+
+    std::cout << this->m_Weights << std::endl;
+    std::cout << "......................" << std::endl;
+    std::cout << this->m_Means << std::endl;
+    std::cout << "......................" << std::endl;
+    std::cout << this->m_COVs << std::endl;
+
+    std::exit( 1 );
+
+
 
     // Stop criteria
     TReal e = this->_E( pp );
@@ -240,29 +250,37 @@ template< class _TInput >
 _TReal ivqML::Common::MixtureOfGaussians< _TReal >::
 _R( TMatrix& R, const _TInput& I ) const
 {
+  static const TReal _2pi = TReal( 8 ) * std::atan( TReal( 1 ) );
   unsigned long long K = this->m_Means.rows( );
   unsigned long long F = this->m_Means.cols( );
-  TReal d = std::pow( TReal( 8 ) * std::atan( TReal( 1 ) ), F );
+  TReal d = std::pow( _2pi, TReal( F ) * TReal( -0.5 ) );
 
   for( unsigned long long k = 0; k < K; ++k )
   {
     auto C = this->m_COVs.block( k * F, 0, F, F );
     TReal D = C.determinant( );
-    auto c = I.rowwise( ) - this->m_Means.row( k );
-    R.col( k )
-      =
-      (
-        ( c * C.inverse( ) * c.transpose( ) ).diagonal( ).array( )
+
+    if( D != TReal( 0 ) )
+    {
+      auto c = I.rowwise( ) - this->m_Means.row( k );
+      R.col( k )
+        =
+        (
+          ( ( c * C.inverse( ) ).array( ) * c.array( ) ).rowwise( ).sum( )
+          *
+          TReal( -0.5 )
+          ).exp( )
         *
-        TReal( -0.5 )
-        ).array( ).exp( )
-      *
-      ( this->m_Weights( 0, k ) / std::sqrt( d * C.determinant( ) ) );
+        ( this->m_Weights( 0, k ) * d / std::sqrt( D ) );
+    }
+    else
+      R.col( k ).array( ) *= TReal( 0 );
   } // end for
 
   TReal log_likelihood =
     ( R.rowwise( ).maxCoeff( ).array( ) + this->m_EPS ).log( ).sum( );
-  R.array( ).colwise( ) /= R.array( ).rowwise( ).sum( );
+  auto s = R.array( ).rowwise( ).sum( );
+  R.array( ).colwise( ) /= ( s == 0 ).select( 1, s );
   return( -log_likelihood );
 }
 
