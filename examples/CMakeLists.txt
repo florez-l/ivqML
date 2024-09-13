@@ -9,7 +9,10 @@ include_directories(
 
 add_executable(ivqML_example_Sandbox Sandbox.cxx)
 target_link_libraries(ivqML_example_Sandbox ivqML)
-
+vtk_module_autoinit(
+  TARGETS ivqML_example_Sandbox
+  MODULES ${VTK_LIBRARIES}
+  )
 
 set(
   _simple_examples

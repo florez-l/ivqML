@@ -116,27 +116,16 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
           *
           R.col( k ).array( )
           ).matrix( );
-      this->m_COVs.block( k * F, 0, F, F )
-        =
-        ( c.transpose( ) * c ) / R.col( k ).sum( );
+      this->m_COVs.block( k * F, 0, F, F ) = c.transpose( ) * c;
+
+      TReal sR = R.col( k ).sum( );
+      if( sR != TReal( 0 ) )
+        this->m_COVs.block( k * F, 0, F, F ).array( ) /= sR;
     } // end for
-
-    std::cout << this->m_Weights << std::endl;
-    std::cout << "......................" << std::endl;
-    std::cout << this->m_Means << std::endl;
-    std::cout << "......................" << std::endl;
-    std::cout << this->m_COVs << std::endl;
-
-    std::exit( 1 );
-
-
 
     // Stop criteria
     TReal e = this->_E( pp );
-    /* TODO
-       std::cout << e << std::endl;
-       std::cout << "------------------------" << std::endl;
-    */
+    std::cout << e << std::endl;
     pp = this->m_Parameters;
   } // end while
 
@@ -254,13 +243,16 @@ _R( TMatrix& R, const _TInput& I ) const
   unsigned long long K = this->m_Means.rows( );
   unsigned long long F = this->m_Means.cols( );
   TReal d = std::pow( _2pi, TReal( F ) * TReal( -0.5 ) );
+  TMatrix E
+    =
+    TMatrix::Identity( F, F ) * std::numeric_limits< TReal >::epsilon( );
 
   for( unsigned long long k = 0; k < K; ++k )
   {
-    auto C = this->m_COVs.block( k * F, 0, F, F );
+    auto C = this->m_COVs.block( k * F, 0, F, F ) + E;
     TReal D = C.determinant( );
 
-    if( D != TReal( 0 ) )
+    if( D > TReal( 0 ) )
     {
       auto c = I.rowwise( ) - this->m_Means.row( k );
       R.col( k )
