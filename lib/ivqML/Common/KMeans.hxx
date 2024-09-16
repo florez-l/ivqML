@@ -6,7 +6,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <functional>
 #include <numeric>
 #include <random>
 #include <vector>
@@ -106,6 +105,7 @@ Fit(
   using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
   using _L = Eigen::Matrix< unsigned short, Eigen::Dynamic, 1 >;
 
+  // Some auxiliary variables
   static const _R eps = std::numeric_limits< _R >::epsilon( );
   const auto& X = _X.derived( ).template cast< _R >( );
   auto& m = _m.derived( );
@@ -115,6 +115,7 @@ Fit(
   _M D( N, K ), J( N, 1 ), P = m;
   _L L( N );
 
+  // Go!
   unsigned long long iter = 0;
   bool stop = false;
   while( !stop )

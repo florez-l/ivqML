@@ -5,15 +5,138 @@
 #define __ivqML__Common__MixtureOfGaussians__h__
 
 #include <functional>
-#include <limits>
+#include <string>
 #include <ivq/eigen/Config.h>
 
 namespace ivqML
 {
   namespace Common
   {
-    /**
-     */
+    namespace MixtureOfGaussians
+    {
+      /**
+       */
+      template< class _TM, class _TX >
+      void RandomInit(
+        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X
+        );
+
+      /**
+       */
+      template< class _TM, class _TX >
+      void ForgyInit(
+        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X
+        );
+
+      /**
+       */
+      template< class _TM, class _TX >
+      void XXInit(
+        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X
+        );
+
+      /**
+       */
+      template< class _TM, class _TX >
+      void Init(
+        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X,
+        const std::string& method = "++"
+        );
+
+      /**
+       */
+      template< class _TM, class _TC, class _TX >
+      void Fit(
+        Eigen::EigenBase< _TM >& _m, Eigen::EigenBase< _TC >& _C,
+        const Eigen::EigenBase< _TX >& _X,
+        std::function<
+          bool( const typename _TM::Scalar&, const unsigned long long& )
+          >
+        debug
+        =
+        []( const typename _TM::Scalar&, const unsigned long long& )
+        ->
+        bool
+        {
+          return( false );
+        }
+        );
+
+      /**
+       */
+      template< class _TL, class _TX, class _TM, class _TC >
+      void Label(
+        Eigen::EigenBase< _TL >& _L,
+        const Eigen::EigenBase< _TX >& _X,
+        const Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TC >& _C
+        );
+
+      /**
+       */
+      template< class _TR, class _TX, class _TW, class _TM, class _TC >
+      void _Responsibilities(
+        Eigen::EigenBase< _TR >& _r,
+        const Eigen::EigenBase< _TX >& _X,
+        const Eigen::EigenBase< _TW >& _W,
+        const Eigen::EigenBase< _TM >& _m,
+        const Eigen::EigenBase< _TC >& _C
+        );
+    } // end namespace
+  } // end namespace
+} // end namespace
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* TODO
+   #include <functional>
+   #include <limits>
+   #include <ivq/eigen/Config.h>
+
+namespace ivqML
+{
+  namespace Common
+  {
     template< class _TReal >
     class MixtureOfGaussians
     {
@@ -107,7 +230,7 @@ namespace ivqML
 
       template< class _TInput >
       void _C( const _TInput& I );
- 
+
       template< class _TInput >
       _TReal _R( TMatrix& R, const _TInput& I ) const;
 
@@ -126,6 +249,7 @@ namespace ivqML
     };
   } // end namespace
 } // end namespace
+*/
 
 #include <ivqML/Common/MixtureOfGaussians.hxx>
 

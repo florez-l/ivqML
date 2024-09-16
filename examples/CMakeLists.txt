@@ -48,6 +48,7 @@ set(
 set(
   _examples_with_vtk
   2DKMeansFromCSV
+  2DMixtureOfGaussiansFromCSV
   )
 
 foreach(_e ${_examples})

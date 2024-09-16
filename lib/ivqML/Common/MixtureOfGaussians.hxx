@@ -4,96 +4,105 @@
 #ifndef __ivqML__Common__MixtureOfGaussians__hxx__
 #define __ivqML__Common__MixtureOfGaussians__hxx__
 
-#include <algorithm>
 #include <cmath>
-#include <numeric>
-#include <random>
+#include <ivqML/Common/KMeans.h>
 
 // -------------------------------------------------------------------------
-template< class _TReal >
-ivqML::Common::MixtureOfGaussians< _TReal >::
-MixtureOfGaussians( )
+template< class _TM, class _TX >
+void ivqML::Common::MixtureOfGaussians::
+RandomInit( Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X )
 {
-  this->m_Debug = []( const TReal& mse ) -> bool { return( false ); };
+  ivqML::Common::KMeans::RandomInit( _m, _X );
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
-set_debug( TDebug d )
+template< class _TM, class _TX >
+void ivqML::Common::MixtureOfGaussians::
+ForgyInit( Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X )
 {
-  this->m_Debug = d;
+  ivqML::Common::KMeans::ForgyInit( _m, _X );
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
-init_random(
-  const Eigen::EigenBase< _TInput >& Ib, const unsigned long long& K
+template< class _TM, class _TX >
+void ivqML::Common::MixtureOfGaussians::
+XXInit( Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X )
+{
+  ivqML::Common::KMeans::XXInit( _m, _X );
+}
+
+// -------------------------------------------------------------------------
+template< class _TM, class _TX >
+void ivqML::Common::MixtureOfGaussians::
+Init(
+  Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X,
+  const std::string& method
   )
 {
-  this->_reserve( Ib.cols( ), K );
-
-  auto I = Ib.derived( ).template cast< TReal >( );
-  std::vector< unsigned long long > idx( I.rows( ) );
-  std::iota( idx.begin( ), idx.end( ), 0 );
-  std::shuffle(
-    idx.begin( ), idx.end( ),
-    std::default_random_engine(
-      std::chrono::system_clock::now( ).time_since_epoch( ).count( )
-      )
-    );
-  idx.erase( idx.begin( ) + K, idx.end( ) );
-
-  this->m_Means = I( idx, ivq_EIGEN_ALL );
-  this->_C( I );
+  ivqML::Common::KMeans::Init( _m, _X, method );
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
-init_XX(
-  const Eigen::EigenBase< _TInput >& Ib,
-  const unsigned long long& K
+template< class _TM, class _TC, class _TX >
+void ivqML::Common::MixtureOfGaussians::
+Fit(
+  Eigen::EigenBase< _TM >& _m, Eigen::EigenBase< _TC >& _C,
+  const Eigen::EigenBase< _TX >& _X,
+  std::function< bool( const typename _TM::Scalar&, const unsigned long long& ) > debug
   )
 {
-  this->_reserve( Ib.cols( ), K );
-}
+  using _R = typename _TM::Scalar;
+  using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
 
-// -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
-init_Forgy(
-  const Eigen::EigenBase< _TInput >& Ib,
-  const unsigned long long& K
-  )
-{
-  this->_reserve( Ib.cols( ), K );
-}
+  const auto& X = _X.derived( ).template cast< _R >( );
+  auto& m = _m.derived( );
+  auto& C = _C.derived( );
+  unsigned long long F = m.cols( );
+  unsigned long long K = m.rows( );
+  unsigned long long N = X.rows( );
 
-// -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
-fit( const Eigen::EigenBase< _TInput >& Ib )
-{
-  auto I = Ib.derived( ).template cast< TReal >( );
-  unsigned long long K = this->m_Means.rows( );
-  unsigned long long F = this->m_Means.cols( );
+  // Init covariances
+  C = _M::Zero( K * F, F );
+  for( unsigned long long k = 0; k < K; ++k )
+    C.block( k * F, 0, F, F ) = _M::Identity( F, F );
 
-  // Prepare iteration-related values
-  TMatrix R( I.rows( ), K );
-  TBuffer pp = TBuffer::Zero( this->m_Parameters.size( ) );
-  bool stop = false;
+  // Some auxiliary variables
+  _M R( N, K ), Pm = m, PC = C;
+  _M W = _M::Ones( 1, K ) * ( _R( 1 ) / _R( K ) );
 
   // Go!
+  unsigned long long iter = 0;
+  bool stop = false;
   while( !stop )
   {
     // E-step: compute responsibilities
-    this->_R( R, I );
+    ivqML::Common::MixtureOfGaussians::_Responsibilities( R, X, W, m, C );
+
+    // M-step: update weights with a ***PARANOIAC PONDERATION!***
+    W = R.colwise( ).mean( );
+    W.array( ) /= W.sum( );
+
+    std::cout << W << std::endl;
+    std::cout << W.sum( ) << std::endl;
+    std::exit( 1 );
+
+  } // end while
+
+  /* TODO
+     auto I = Ib.derived( ).template cast< _R >( );
+     unsigned long long K = this->m_Means.rows( );
+     unsigned long long F = this->m_Means.cols( );
+
+     // Prepare iteration-related values
+     TMatrix R( I.rows( ), K );
+     TBuffer pp = TBuffer::Zero( this->m_Parameters.size( ) );
+     bool stop = false;
+
+     // Go!
+     while( !stop )
+     {
+     // E-step: compute responsibilities
+     this->_R( R, I );
 
     // M-step: update weights with a ***PARANOIAC PONDERATION!***
     this->m_Weights = R.colwise( ).mean( );
@@ -118,23 +127,24 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
           ).matrix( );
       this->m_COVs.block( k * F, 0, F, F ) = c.transpose( ) * c;
 
-      TReal sR = R.col( k ).sum( );
-      if( sR != TReal( 0 ) )
+      _R sR = R.col( k ).sum( );
+      if( sR != _R( 0 ) )
         this->m_COVs.block( k * F, 0, F, F ).array( ) /= sR;
     } // end for
 
     // Stop criteria
-    TReal e = this->_E( pp );
+    _R e = this->_E( pp );
     std::cout << e << std::endl;
     pp = this->m_Parameters;
   } // end while
+  */
 
   /* TODO
      using _TLabels = Eigen::Matrix< TInt, Eigen::Dynamic, 1 >;
      _TLabels L[ 2 ];
      L[ 0 ] = L[ 1 ] = _TLabels::Zero( I.rows( ) );
      unsigned long long iter = 0;
-     TReal pl = std::numeric_limits< TReal >::max( );
+     _R pl = std::numeric_limits< _R >::max( );
      bool stop = false;
 
      // Go!
@@ -154,132 +164,134 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TOutput, class _TInput >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
-label(
-  Eigen::EigenBase< _TOutput >& Lb,
-  const Eigen::EigenBase< _TInput >& Ib
+template< class _TL, class _TX, class _TM, class _TC >
+void ivqML::Common::MixtureOfGaussians::
+Label(
+  Eigen::EigenBase< _TL >& _L,
+  const Eigen::EigenBase< _TX >& _X,
+  const Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TC >& _C
   )
 {
-  const _TInput& I = Ib.derived( );
-  _TOutput& L = Lb.derived( );
-
-  TMatrix R( I.rows( ), this->m_Means.rows( ) );
-  this->_R( R, I );
-  this->_L( L, R );
-}
-
-// -------------------------------------------------------------------------
-template< class _TReal >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
-_reserve( const TInt& F, const TInt& K )
-{
-  unsigned long long KF = K * F;
-  this->m_Parameters = TBuffer::Zero( K + ( KF * ( 1 + F ) ) );
-
-  TReal* d = this->m_Parameters.data( );
-  new ( &( this->m_Weights ) ) MMatrix( d, 1, K );
-  new ( &( this->m_Means ) )   MMatrix( d + K, K, F );
-  new ( &( this->m_COVs ) )    MMatrix( d + ( K + KF ), KF, F );
-}
-
-// -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
-_C( const _TInput& I )
-{
-  unsigned long long K = this->m_Means.rows( );
-  unsigned long long F = I.cols( );
-  TMatrix D( I.rows( ), K ), J( I.rows( ), 1 );
-  Eigen::Matrix< unsigned long long, Eigen::Dynamic, 1 > L( I.rows( ) );
-
-  // Initial weights
-  this->m_Weights = TBuffer::Ones( K ) / TReal( K );
-
-  // Initialize covariances
-  this->m_COVs = TMatrix::Zero( F * K, F );
-  for( unsigned long long k = 0; k < K; ++k )
-    this->m_COVs.block( k * F, 0, F, F ) = TMatrix::Identity( F, F );
-
   /* TODO
-  // Compute distances
-  for( unsigned long long k = 0; k < K; ++k )
-    D.col( k )
-      =
-      ( I.rowwise( ) - this->m_Means.row( k ) ).
-      array( ).pow( 2 ).rowwise( ).sum( ).sqrt( );
+     const _TInput& I = Ib.derived( );
+     _TOutput& L = Lb.derived( );
 
-  // Compute labels
-  for( unsigned long long s = 0; s < L.rows( ); ++s )
-    D.row( s ).minCoeff( &L( s ) );
-
-  // Update means and initialize covariances
-  this->m_COVs = TMatrix::Zero( F * K, F );
-  for( unsigned long long k = 0; k < K; ++k )
-  {
-    J = ( L.array( ) == k ).template cast< TReal >( );
-    auto P = ( I.array( ).colwise( ) * J.col( 0 ).array( ) ).eval( );
-
-    unsigned long long a = J.sum( );
-    this->m_Means.row( k ) = P.colwise( ).sum( ) / TReal( a );
-
-    auto S = P.matrix( ).rowwise( ) - this->m_Means.row( k );
-    this->m_COVs.block( k * F, 0, F, F )
-      =
-      ( S.transpose( ) * S ) / TReal( a - 1 );
-  } // end for
+     TMatrix R( I.rows( ), this->m_Means.rows( ) );
+     this->_R( R, I );
+     this->_L( L, R );
   */
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-_TReal ivqML::Common::MixtureOfGaussians< _TReal >::
-_R( TMatrix& R, const _TInput& I ) const
+template< class _TR, class _TX, class _TW, class _TM, class _TC >
+void ivqML::Common::MixtureOfGaussians::
+_Responsibilities(
+  Eigen::EigenBase< _TR >& _r,
+  const Eigen::EigenBase< _TX >& _X,
+  const Eigen::EigenBase< _TW >& _W,
+  const Eigen::EigenBase< _TM >& _m,
+  const Eigen::EigenBase< _TC >& _C
+  )
 {
-  static const TReal _2pi = TReal( 8 ) * std::atan( TReal( 1 ) );
-  unsigned long long K = this->m_Means.rows( );
-  unsigned long long F = this->m_Means.cols( );
-  TReal d = std::pow( _2pi, TReal( F ) * TReal( -0.5 ) );
-  TMatrix E
-    =
-    TMatrix::Identity( F, F ) * std::numeric_limits< TReal >::epsilon( );
+  using _R = typename _TM::Scalar;
+  using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
+
+  auto& r = _r.derived( );
+  const auto& X = _X.derived( );
+  const auto& W = _W.derived( );
+  const auto& m = _m.derived( );
+  const auto& C = _C.derived( );
+
+  // Some auxiliary values
+  static const _R _2pi = _R( 8 ) * std::atan( _R( 1 ) );
+  unsigned long long K = m.rows( );
+  unsigned long long F = m.cols( );
+  _R d = std::pow( _2pi, _R( F ) * _R( -0.5 ) );
+  _M E = _M::Identity( F, F ) * std::numeric_limits< _R >::epsilon( );
 
   for( unsigned long long k = 0; k < K; ++k )
   {
-    auto C = this->m_COVs.block( k * F, 0, F, F ) + E;
-    TReal D = C.determinant( );
-
-    if( D > TReal( 0 ) )
+    auto S = C.block( k * F, 0, F, F ) + E;
+    _R D = S.determinant( );
+    if( D > _R( 0 ) )
     {
-      auto c = I.rowwise( ) - this->m_Means.row( k );
-      R.col( k )
+      auto c = X.rowwise( ) - m.row( k );
+      r.col( k )
         =
         (
-          ( ( c * C.inverse( ) ).array( ) * c.array( ) ).rowwise( ).sum( )
+          ( ( c * S.inverse( ) ).array( ) * c.array( ) ).rowwise( ).sum( )
           *
-          TReal( -0.5 )
+          _R( -0.5 )
           ).exp( )
         *
-        ( this->m_Weights( 0, k ) * d / std::sqrt( D ) );
+        ( W( 0, k ) * d / std::sqrt( D ) );
     }
     else
-      R.col( k ).array( ) *= TReal( 0 );
+      r.col( k ).array( ) *= _R( 0 );
   } // end for
 
-  TReal log_likelihood =
-    ( R.rowwise( ).maxCoeff( ).array( ) + this->m_EPS ).log( ).sum( );
-  auto s = R.array( ).rowwise( ).sum( );
-  R.array( ).colwise( ) /= ( s == 0 ).select( 1, s );
-  return( -log_likelihood );
+  auto s = r.array( ).rowwise( ).sum( );
+  r.array( ).colwise( ) /= ( s == 0 ).select( 1, s );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// -------------------------------------------------------------------------
+/* TODO
+template< class __R >
+template< class _TInput >
+__R ivqML::Common::MixtureOfGaussians< __R >::
+_R( TMatrix& R, const _TInput& I ) const
+{
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal >
+template< class __R >
 template< class _TOutput >
-void ivqML::Common::MixtureOfGaussians< _TReal >::
+void ivqML::Common::MixtureOfGaussians< __R >::
 _L( _TOutput& L, const TMatrix& R ) const
 {
   Eigen::Index i;
@@ -289,6 +301,7 @@ _L( _TOutput& L, const TMatrix& R ) const
     L( s ) = i;
   } // end for
 }
+*/
 
 #endif // __ivqML__Common__MixtureOfGaussians__hxx__
 
