@@ -2,16 +2,13 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+#include <chrono>
 #include <iostream>
 #include <string>
-#include <ivq/eigen/Config.h>
+#include <thread>
+
+#include <ivqML/Common/KMeans.h>
 #include <ivqML/IO/CSV.h>
-
-
-#include <algorithm>
-#include <functional>
-#include <numeric>
-#include <random>
 
 #include <vtkChartXY.h>
 #include <vtkContextView.h>
@@ -24,112 +21,35 @@
 #include <vtkRenderer.h>
 #include <vtkTable.h>
 
-
-
-
-namespace ivqML
-{
-  namespace Common
-  {
-    namespace KMeans
-    {
-      /**
-       */
-      template< class _TM, class _TX >
-      void RandomInit(
-        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X
-        )
-      {
-        using _R = typename _TM::Scalar;
-
-        std::vector< unsigned long long > I( _X.rows( ) );
-        std::iota( I.begin( ), I.end( ), 0 );
-        std::shuffle(
-          I.begin( ), I.end( ),
-          std::default_random_engine(
-            std::chrono::system_clock::now( ).time_since_epoch( ).count( )
-            )
-          );
-        I.erase( I.begin( ) + _m.rows( ), I.end( ) );
-        _m.derived( ) = _X.derived( )( I, ivq_EIGEN_ALL ).template cast< _R >( );
-      }
-
-      /**
-       */
-      template< class _TM, class _TX >
-      void Fit(
-        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X,
-        std::function< bool( const typename _TM::Scalar&, const unsigned long long& ) > debug
-        =
-        []( const typename _TM::Scalar&, const unsigned long long& ) -> bool { return( false ); }
-        )
-      {
-        using _R = typename _TM::Scalar;
-        using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
-        using _L = Eigen::Matrix< unsigned short, Eigen::Dynamic, 1 >;
-
-        static const _R eps = std::numeric_limits< _R >::epsilon( );
-
-        auto X = _X.derived( ).template cast< _R >( );
-        auto& m = _m.derived( );
-        unsigned long long F = m.cols( );
-        unsigned long long K = m.rows( );
-        unsigned long long N = X.rows( );
-
-        _M D( N, K ), J( N, 1 ), P = m;
-        _L L( N );
-
-        unsigned long long iter = 0;
-        bool stop = false;
-        while( !stop )
-        {
-          // Update distances
-          for( unsigned long long k = 0; k < K; ++k )
-            D.col( k ) = ( X.rowwise( ) - m.row( k ) ).array( ).pow( 2 ).rowwise( ).sum( ).sqrt( );
-
-          // Update labels
-          for( unsigned long long n = 0; n < N; ++n )
-            D.row( n ).minCoeff( &L( n ) );
-
-          // Update means
-          for( unsigned long long k = 0; k < K; ++k )
-          {
-            J = ( L.array( ) == k ).template cast< _R >( );
-            unsigned long long j = J.sum( );
-            if( j > 0 )
-              m.row( k ) = ( X.array( ).colwise( ) * J.col( 0 ).array( ) ).colwise( ).sum( ) / _R( j );
-            else
-              m.row( k ).array( ) *= _R( 0 );
-          } // end for
-
-          // Stop criterion
-          iter++;
-          _R mse = ( P - m ).array( ).pow( 2 ).rowwise( ).mean( ).mean( );
-          stop = debug( mse, iter ) || !( eps < mse );
-          P = m;
-        } // end while
-      }
-    } // end namespace
-  } // end namespace
-} // end namespace
-
 using TReal = float;
 using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
 
 int main( int argc, char** argv )
 {
-  std::string input_fn = argv[ 1 ];
+  // Input arguments
+  if( argc < 2 )
+  {
+    std::cerr
+      << "Usage: " << argv[ 0 ]
+      << " input_csv [K=3] [init_method=\"xx\"]"
+      << std::endl;
+    return( EXIT_FAILURE );
+  } // end if
+  std::string input_csv = argv[ 1 ];
   unsigned int K = 3;
+  std::string init_method = "++";
+  if( argc > 2 ) std::istringstream( argv[ 2 ] ) >> K;
+  if( argc > 3 ) init_method = argv[ 3 ];
 
   TMatrix D;
-  if( !ivqML::IO::CSV::Read( D, input_fn, 1, ',' ) )
+  if( !ivqML::IO::CSV::Read( D, input_csv, 1, ',' ) )
   {
-    std::cerr << "Error reading \"" << input_fn << "\"" << std::endl;
+    std::cerr << "Error reading \"" << input_csv << "\"" << std::endl;
     return( EXIT_FAILURE );
   } // end if
   auto X = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
   TMatrix means( K, X.cols( ) );
-  ivqML::Common::KMeans::RandomInit( means, X );
+  ivqML::Common::KMeans::Init( means, X, init_method );
 
   // Create a table with some points in it
   vtkNew< vtkFloatArray > arrX, arrY, meansX, meansY;
@@ -180,24 +100,38 @@ int main( int argc, char** argv )
   dynamic_cast< vtkPlotPoints* >( points )->SetMarkerStyle( vtkPlotPoints::CIRCLE );
 
   // Finally render the scene.
-  view->GetRenderWindow( )->SetMultiSamples( 0 );
   view->GetRenderWindow( )->Render( );
   view->GetInteractor( )->Initialize( );
+  view->GetInteractor( )->Start( );
 
+  std::cout << "---- INIT ----" << std::endl;
+  std::cout << means << std::endl;
+  std::cout << "--------------" << std::endl;
 
-  /* TODO
-     ivqML::Common::KMeans::Fit(
-     means, X,
-     [&means]( const TReal& err, const unsigned long long& iter ) -> bool
-     {
-     std::cout << iter << " " << err << std::endl;
-     return( false );
-     }
-     );
-  */
+  ivqML::Common::KMeans::Fit(
+    means, X,
+    [&]( const TReal& err, const unsigned long long& iter ) -> bool
+    {
+      std::cout << iter << " " << err << std::endl;
+      meansX->Modified( );
+      meansY->Modified( );
+      tableMeans->Modified( );
+      points->Modified( );
+      chart->Modified( );
+      view->Modified( );
 
+      points->Update( );
+      chart->Update( );
+      view->Update( );
 
-
+      view->Render( );
+      std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
+      return( false );
+    }
+    );
+  std::cout << "---- FITTED ----" << std::endl;
+  std::cout << means << std::endl;
+  std::cout << "----------------" << std::endl;
 
   view->GetInteractor( )->Start( );
 
@@ -205,11 +139,11 @@ int main( int argc, char** argv )
 
 
   /* TODO
-     std::string input_fn = argv[ 1 ];
+     std::string input_csv = argv[ 1 ];
      unsigned int K = 3;
 
      TMatrix D;
-     if( ivqML::IO::CSV::Read( D, input_fn, 1, ',' ) )
+     if( ivqML::IO::CSV::Read( D, input_csv, 1, ',' ) )
      {
      auto X = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
 
@@ -234,7 +168,7 @@ int main( int argc, char** argv )
      }
      else
      {
-     std::cerr << "Error reading \"" << input_fn << "\"" << std::endl;
+     std::cerr << "Error reading \"" << input_csv << "\"" << std::endl;
      return( EXIT_FAILURE );
      } // end if
   */

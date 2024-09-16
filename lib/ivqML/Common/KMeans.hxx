@@ -5,86 +5,117 @@
 #define __ivqML__Common__KMeans__hxx__
 
 #include <algorithm>
+#include <cctype>
+#include <functional>
 #include <numeric>
 #include <random>
+#include <vector>
 
 // -------------------------------------------------------------------------
-template< class _TReal >
-ivqML::Common::KMeans< _TReal >::
-KMeans( )
+template< class _TM, class _TX >
+void ivqML::Common::KMeans::
+RandomInit( Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X )
 {
-  this->m_Debug = []( const TReal& mse ) -> bool { return( false ); };
-}
+  using _R = typename _TM::Scalar;
 
-// -------------------------------------------------------------------------
-template< class _TReal >
-void ivqML::Common::KMeans< _TReal >::
-set_debug( TDebug d )
-{
-  this->m_Debug = d;
-}
-
-// -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-void ivqML::Common::KMeans< _TReal >::
-init_random(
-  const Eigen::EigenBase< _TInput >& Ib, const unsigned long long& K
-  )
-{
-  auto I = Ib.derived( ).template cast< TReal >( );
-  std::vector< unsigned long long > idx( I.cols( ) );
-  std::iota( idx.begin( ), idx.end( ), 0 );
+  std::vector< unsigned long long > I( _X.rows( ) );
+  std::iota( I.begin( ), I.end( ), 0 );
   std::shuffle(
-    idx.begin( ), idx.end( ),
+    I.begin( ), I.end( ),
     std::default_random_engine(
       std::chrono::system_clock::now( ).time_since_epoch( ).count( )
       )
     );
+  I.erase( I.begin( ) + _m.rows( ), I.end( ) );
+  _m.derived( ) = _X.derived( )( I, ivq_EIGEN_ALL ).template cast< _R >( );
+}
 
-  std::vector< unsigned long long > means( idx.data( ), idx.data( ) + K );
-  this->m_Means[ 0 ] = I( means, ivq_EIGEN_ALL );
-  this->m_Means[ 1 ]
+// -------------------------------------------------------------------------
+template< class _TM, class _TX >
+void ivqML::Common::KMeans::
+ForgyInit( Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X )
+{
+  ivqML::Common::KMeans::XXInit( _m, _X );
+}
+
+// -------------------------------------------------------------------------
+template< class _TM, class _TX >
+void ivqML::Common::KMeans::
+XXInit( Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X )
+{
+  using _R = typename _TM::Scalar;
+  using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
+
+  const auto& X = _X.derived( ).template cast< _R >( );
+  auto& m = _m.derived( );
+
+  auto eng
     =
-    TMatrix::Zero( this->m_Means[ 0 ].rows( ), this->m_Means[ 0 ].cols( ) );
-  this->m_ActiveMean = 0;
+    std::default_random_engine(
+      std::chrono::system_clock::now( ).time_since_epoch( ).count( )
+      );
+  std::uniform_int_distribution< unsigned long long > dis( 0, X.rows( ) - 1 );
+  m.row( 0 ) = X.row( dis( eng ) );
+
+  unsigned long long K = m.rows( );
+  for( unsigned long long k = 1; k < K; ++k )
+  {
+    // Distances
+    _M D( _X.rows( ), k );
+    for( unsigned long long j = 0; j < k; ++j )
+      D.col( j )
+        =
+        ( X.rowwise( ) - m.row( j ) )
+        .array( ).pow( 2 ).rowwise( ).sum( ).sqrt( );
+
+    // Next candidate
+    unsigned long long idx;
+    D.rowwise( ).minCoeff( ).maxCoeff( &idx );
+    m.row( k ) = X.row( idx );
+  } // end for
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-void ivqML::Common::KMeans< _TReal >::
-init_XX(
-  const Eigen::EigenBase< _TInput >& Ib,
-  const unsigned long long& K
+template< class _TM, class _TX >
+void ivqML::Common::KMeans::
+Init(
+  Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X,
+  const std::string& method
   )
 {
+  std::string n;
+  std::transform(
+    method.begin( ), method.end( ), std::back_inserter( n ),
+    []( unsigned char c ) -> unsigned char { return( std::tolower( c ) ); }
+    );
+
+  if     ( n == "random" ) ivqML::Common::KMeans::RandomInit( _m, _X );
+  else if( n == "forgy" )  ivqML::Common::KMeans::ForgyInit( _m, _X );
+  else                     ivqML::Common::KMeans::XXInit( _m, _X );
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-void ivqML::Common::KMeans< _TReal >::
-init_Forgy(
-  const Eigen::EigenBase< _TInput >& Ib,
-  const unsigned long long& K
+template< class _TM, class _TX >
+void ivqML::Common::KMeans::
+Fit(
+  Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X,
+  std::function< bool( const typename _TM::Scalar&, const unsigned long long& ) > debug
   )
 {
-}
+  using _R = typename _TM::Scalar;
+  using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
+  using _L = Eigen::Matrix< unsigned short, Eigen::Dynamic, 1 >;
 
-// -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TInput >
-void ivqML::Common::KMeans< _TReal >::
-fit( const Eigen::EigenBase< _TInput >& Ib )
-{
-  auto I = Ib.derived( ).template cast< TReal >( );
-  unsigned long long K = this->m_Means[ this->m_ActiveMean ].rows( );
-  TMatrix D( I.rows( ), K ), J( I.rows( ), 1 );
-  Eigen::Matrix< unsigned long long, Eigen::Dynamic, 1 > L( I.rows( ) );
+  static const _R eps = std::numeric_limits< _R >::epsilon( );
+  const auto& X = _X.derived( ).template cast< _R >( );
+  auto& m = _m.derived( );
+  unsigned long long F = m.cols( );
+  unsigned long long K = m.rows( );
+  unsigned long long N = X.rows( );
+  _M D( N, K ), J( N, 1 ), P = m;
+  _L L( N );
 
-  unsigned short e = 0;
-  TReal mse = std::numeric_limits< TReal >::infinity( );
+  unsigned long long iter = 0;
   bool stop = false;
   while( !stop )
   {
@@ -92,62 +123,34 @@ fit( const Eigen::EigenBase< _TInput >& Ib )
     for( unsigned long long k = 0; k < K; ++k )
       D.col( k )
         =
-        ( I.rowwise( ) - this->m_Means[ this->m_ActiveMean ].row( k ) ).
-        array( ).pow( 2 ).rowwise( ).sum( ).sqrt( );
+        ( X.rowwise( ) - m.row( k ) )
+        .array( ).pow( 2 ).rowwise( ).sum( ).sqrt( );
 
     // Update labels
-    for( unsigned long long s = 0; s < L.rows( ); ++s )
-      D.row( s ).minCoeff( &L( s, 0 ) );
+    for( unsigned long long n = 0; n < N; ++n )
+      D.row( n ).minCoeff( &L( n ) );
 
     // Update means
     for( unsigned long long k = 0; k < K; ++k )
     {
-      J = ( L.array( ) == k ).template cast< TReal >( );
-      this->m_Means[ ( this->m_ActiveMean + 1 ) % 2 ].row( k )
-        =
-        ( I.array( ).colwise( ) * J.col( 0 ).array( ) ).colwise( ).sum( )
-        /
-        TReal( J.sum( ) );
+      J = ( L.array( ) == k ).template cast< _R >( );
+      unsigned long long j = J.sum( );
+      if( j > 0 )
+        m.row( k )
+          =
+          ( X.array( ).colwise( ) * J.col( 0 ).array( ) ).colwise( ).sum( )
+          /
+          _R( j );
+      else
+        m.row( k ).array( ) *= _R( 0 );
     } // end for
 
-    // Update error
-    mse
-      =
-      (
-        this->m_Means[ this->m_ActiveMean ]
-        -
-        this->m_Means[ ( this->m_ActiveMean + 1 ) % 2 ]
-        ).array( ).pow( 2 ).rowwise( ).sum( ).mean( );
-    this->m_ActiveMean = ( this->m_ActiveMean + 1 ) % 2;
-
-    stop = ( this->m_Debug( mse ) || !( this->m_EPS < mse ) );
+    // Stop criterion
+    iter++;
+    _R mse = ( P - m ).array( ).pow( 2 ).rowwise( ).mean( ).mean( );
+    stop = debug( mse, iter ) || !( eps < mse );
+    P = m;
   } // end while
-}
-
-// -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TOutput, class _TInput >
-void ivqML::Common::KMeans< _TReal >::
-label(
-  Eigen::EigenBase< _TOutput >& Lb,
-  const Eigen::EigenBase< _TInput >& Ib
-  )
-{
-  auto I = Ib.derived( ).template cast< TReal >( );
-  auto L = Lb.derived( );
-  unsigned long long K = this->m_Means[ this->m_ActiveMean ].rows( );
-  TMatrix D( I.rows( ), K ), J( I.rows( ), 1 );
-
-  // Compute distances
-  for( unsigned long long k = 0; k < K; ++k )
-    D.col( k )
-      =
-      ( I.rowwise( ) - this->m_Means[ this->m_ActiveMean ].row( k ) ).
-      array( ).pow( 2 ).rowwise( ).sum( ).sqrt( );
-
-  // Update labels
-  for( unsigned long long s = 0; s < L.rows( ); ++s )
-    D.row( s ).minCoeff( &L( s, 0 ) );
 }
 
 #endif // __ivqML__Common__KMeans__hxx__

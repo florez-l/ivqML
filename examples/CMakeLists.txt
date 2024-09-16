@@ -15,7 +15,7 @@ vtk_module_autoinit(
   )
 
 set(
-  _simple_examples
+  _examples
   AnalyzeImageTexture
   KMeansImageFilter
   PCAImageFilter
@@ -45,9 +45,21 @@ set(
   #  MNIST_FeedForwardNetwork_Train
   #  
   )
-foreach(_e ${_simple_examples})
+set(
+  _examples_with_vtk
+  2DKMeansFromCSV
+  )
+
+foreach(_e ${_examples})
   add_executable(ivqML_example_${_e} ${_e}.cxx)
   target_link_libraries(ivqML_example_${_e} ivqML)
 endforeach()
+
+foreach(_e ${_examples_with_vtk})
+  add_executable(ivqML_example_${_e} ${_e}.cxx)
+  target_link_libraries(ivqML_example_${_e} ivqML)
+  vtk_module_autoinit(TARGETS ivqML_example_${_e} MODULES ${VTK_LIBRARIES})
+endforeach()
+
 
 ## eof - $RCSfile$

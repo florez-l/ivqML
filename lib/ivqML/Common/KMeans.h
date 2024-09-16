@@ -5,66 +5,63 @@
 #define __ivqML__Common__KMeans__h__
 
 #include <functional>
-#include <limits>
+#include <string>
 #include <ivq/eigen/Config.h>
 
 namespace ivqML
 {
   namespace Common
   {
-    /**
-     */
-    template< class _TReal >
-    class KMeans
+    namespace KMeans
     {
-    public:
-      using Self  = KMeans;
-      using TReal = _TReal;
-      using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
-
-      using TDebug = std::function< bool( const TReal& ) >;
-
-    public:
-      KMeans( );
-      virtual ~KMeans( ) = default;
-
-      void set_debug( TDebug d );
-
-      template< class _TInput >
-      void init_random(
-        const Eigen::EigenBase< _TInput >& Ib,
-        const unsigned long long& K
+      /**
+       */
+      template< class _TM, class _TX >
+      void RandomInit(
+        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X
         );
 
-      template< class _TInput >
-      void init_XX(
-        const Eigen::EigenBase< _TInput >& Ib,
-        const unsigned long long& K
+      /**
+       */
+      template< class _TM, class _TX >
+      void ForgyInit(
+        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X
         );
 
-      template< class _TInput >
-      void init_Forgy(
-        const Eigen::EigenBase< _TInput >& Ib,
-        const unsigned long long& K
+      /**
+       */
+      template< class _TM, class _TX >
+      void XXInit(
+        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X
         );
 
-      template< class _TInput >
-      void fit( const Eigen::EigenBase< _TInput >& Ib );
-
-      template< class _TOutput, class _TInput >
-      void label(
-        Eigen::EigenBase< _TOutput >& Lb,
-        const Eigen::EigenBase< _TInput >& Ib
+      /**
+       */
+      template< class _TM, class _TX >
+      void Init(
+        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X,
+        const std::string& method = "++"
         );
 
-    protected:
-      TReal m_EPS { std::numeric_limits< TReal >::epsilon( ) };
+      /**
+       */
+      template< class _TM, class _TX >
+      void Fit(
+        Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TX >& _X,
+        std::function<
+          bool( const typename _TM::Scalar&, const unsigned long long& )
+          >
+        debug
+        =
+        []( const typename _TM::Scalar&, const unsigned long long& )
+        ->
+        bool
+        {
+          return( false );
+        }
+        );
 
-      TMatrix        m_Means[ 2 ];
-      unsigned short m_ActiveMean;
-
-      TDebug m_Debug;
-    };
+    } // end namespace
   } // end namespace
 } // end namespace
 
