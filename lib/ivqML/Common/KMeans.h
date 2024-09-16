@@ -61,6 +61,14 @@ namespace ivqML
         }
         );
 
+      /**
+       */
+      template< class _TL, class _TX, class _TM >
+      void Label(
+        Eigen::EigenBase< _TL >& _L,
+        const Eigen::EigenBase< _TX >& _X,
+        const Eigen::EigenBase< _TM >& _m
+        );
     } // end namespace
   } // end namespace
 } // end namespace

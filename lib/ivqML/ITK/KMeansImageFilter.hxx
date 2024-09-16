@@ -21,7 +21,14 @@ ivqML::ITK::KMeansImageFilter< _TInImage, _TLabel, _TReal >::
 KMeansImageFilter( )
   : Superclass( )
 {
-  this->m_Debug = []( const TReal& mse ) -> bool { return( false ); };
+  this->m_Debug
+    =
+    []( const TReal&, const unsigned long long& )
+    ->
+    bool
+    {
+      return( false );
+    };
 }
 
 // -------------------------------------------------------------------------
@@ -36,11 +43,10 @@ GenerateData( )
     template cast< TReal >( ).transpose( );
   auto O = ivq::ITK::ImageToMatrix( this->GetOutput( ) ).transpose( );
 
-  ivqML::Common::KMeans< TReal > model;
-  model.init_random( I, this->m_NumberOfMeans );
-  model.set_debug( this->m_Debug );
-  model.fit( I );
-  model.label( O, I );
+  this->m_Means = TMatrix::Zero( this->m_NumberOfMeans, I.cols( ) );
+  ivqML::Common::KMeans::Init( this->m_Means, I, this->m_InitMethod );
+  ivqML::Common::KMeans::Fit( this->m_Means, I, this->m_Debug );
+  ivqML::Common::KMeans::Label( O, I, this->m_Means );
 }
 
 #endif // __ivqML__ITK__KMeansImageFilter__hxx__

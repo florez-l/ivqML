@@ -153,6 +153,37 @@ Fit(
   } // end while
 }
 
+// -------------------------------------------------------------------------
+template< class _TL, class _TX, class _TM >
+void ivqML::Common::KMeans::
+Label(
+  Eigen::EigenBase< _TL >& _L,
+  const Eigen::EigenBase< _TX >& _X,
+  const Eigen::EigenBase< _TM >& _m
+  )
+{
+  using _R = typename _TM::Scalar;
+  using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
+
+  const auto& X = _X.derived( ).template cast< _R >( );
+  auto& L = _L.derived( );
+  auto& m = _m.derived( );
+  unsigned long long K = m.rows( );
+  unsigned long long N = X.rows( );
+  _M D( N, K );
+
+  // Compute distances
+  for( unsigned long long k = 0; k < K; ++k )
+    D.col( k )
+      =
+      ( X.rowwise( ) - m.row( k ) )
+      .array( ).pow( 2 ).rowwise( ).sum( ).sqrt( );
+
+  // Compute labels
+  for( unsigned long long n = 0; n < N; ++n )
+    D.row( n ).minCoeff( &L( n, 0 ) );
+}
+
 #endif // __ivqML__Common__KMeans__hxx__
 
 // eof - $RCSfile$

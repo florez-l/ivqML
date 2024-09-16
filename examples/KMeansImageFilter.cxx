@@ -34,10 +34,11 @@ int main( int argc, char** argv )
   auto kmeans = ivqML::ITK::KMeansImageFilter< TImage >::New( );
   kmeans->SetInput( reader->GetOutput( ) );
   kmeans->SetNumberOfMeans( K );
+  kmeans->SetInitMethod( "++" );
   kmeans->SetDebug(
-    []( const TReal& mse ) -> bool
+    []( const TReal& mse, const unsigned long long& iter ) -> bool
     {
-      std::cout << "MSE = " << mse << std::endl;
+      std::cout << iter << " " << mse << std::endl;
       return( false );
     }
     );
