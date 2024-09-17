@@ -18,6 +18,7 @@ set(
   _examples
   AnalyzeImageTexture
   KMeansImageFilter
+  MixtureOfGaussiansImageFilter
   PCAImageFilter
 
   # FeedForwardNetwork_00

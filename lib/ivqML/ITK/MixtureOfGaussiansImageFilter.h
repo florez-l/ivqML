@@ -30,7 +30,9 @@ namespace ivqML
       using ConstPointer = itk::SmartPointer< const Self >;
 
       using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
-      using TDebug = std::function< bool( const TReal& ) >;
+      using TDebug
+        =
+        std::function< bool( const TReal&, const unsigned long long& ) >;
 
     public:
       itkNewMacro( Self );
@@ -38,10 +40,14 @@ namespace ivqML
         ivqML::ITK::MixtureOfGaussiansImageFilter, itk::ImageToImageFilter
         );
 
+      itkGetStringMacro( InitMethod );
+      itkSetStringMacro( InitMethod );
+
       itkGetConstMacro( NumberOfMeans, unsigned long long );
       itkSetMacro( NumberOfMeans, unsigned long long );
 
       itkGetConstMacro( Means, TMatrix );
+      itkGetConstMacro( Covariances, TMatrix );
 
     public:
       void SetDebug( TDebug d );
@@ -57,8 +63,10 @@ namespace ivqML
       Self& operator=( const Self& ) = delete;
 
     protected:
+      std::string m_InitMethod { "++" };
       unsigned long long m_NumberOfMeans { 2 };
       TMatrix m_Means;
+      TMatrix m_Covariances;
 
       TDebug m_Debug;
     };

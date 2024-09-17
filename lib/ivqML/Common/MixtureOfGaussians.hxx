@@ -54,6 +54,7 @@ Fit(
   using _R = typename _TM::Scalar;
   using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
 
+  static const _R eps = std::numeric_limits< _R >::epsilon( );
   const auto& X = _X.derived( ).template cast< _R >( );
   auto& m = _m.derived( );
   auto& C = _C.derived( );
@@ -82,38 +83,13 @@ Fit(
     W = R.colwise( ).mean( );
     W.array( ) /= W.sum( );
 
-    std::cout << W << std::endl;
-    std::cout << W.sum( ) << std::endl;
-    std::exit( 1 );
-
-  } // end while
-
-  /* TODO
-     auto I = Ib.derived( ).template cast< _R >( );
-     unsigned long long K = this->m_Means.rows( );
-     unsigned long long F = this->m_Means.cols( );
-
-     // Prepare iteration-related values
-     TMatrix R( I.rows( ), K );
-     TBuffer pp = TBuffer::Zero( this->m_Parameters.size( ) );
-     bool stop = false;
-
-     // Go!
-     while( !stop )
-     {
-     // E-step: compute responsibilities
-     this->_R( R, I );
-
-    // M-step: update weights with a ***PARANOIAC PONDERATION!***
-    this->m_Weights = R.colwise( ).mean( );
-    this->m_Weights.array( ) /= this->m_Weights.sum( );
-
     // M-step: update means
-    this->m_Means
+    m
       =
-      ( R.transpose( ) * I ).array( ).colwise( )
+      ( R.transpose( ) * X ).array( ).colwise( )
       /
       R.colwise( ).sum( ).transpose( ).array( );
+
 
     // M-step: update covariances
     for( unsigned long long k = 0; k < K; ++k )
@@ -121,46 +97,29 @@ Fit(
       auto c
         =
         (
-          ( I.rowwise( ) - this->m_Means.row( k ) ).array( ).colwise( )
+          ( X.rowwise( ) - m.row( k ) ).array( ).colwise( )
           *
           R.col( k ).array( )
           ).matrix( );
-      this->m_COVs.block( k * F, 0, F, F ) = c.transpose( ) * c;
+      C.block( k * F, 0, F, F ) = c.transpose( ) * c;
 
       _R sR = R.col( k ).sum( );
       if( sR != _R( 0 ) )
-        this->m_COVs.block( k * F, 0, F, F ).array( ) /= sR;
+        C.block( k * F, 0, F, F ).array( ) /= sR;
     } // end for
 
-    // Stop criteria
-    _R e = this->_E( pp );
-    std::cout << e << std::endl;
-    pp = this->m_Parameters;
+    // Stop criterion
+    iter++;
+    _R mse
+      =
+      ( Pm - m ).array( ).pow( 2 ).sum( )
+      +
+      ( PC - C ).array( ).pow( 2 ).sum( );
+    mse /= _R( m.size( ) + C.size( ) );
+    stop = debug( mse, iter ) || !( eps < mse );
+    Pm = m;
+    PC = C;
   } // end while
-  */
-
-  /* TODO
-     using _TLabels = Eigen::Matrix< TInt, Eigen::Dynamic, 1 >;
-     _TLabels L[ 2 ];
-     L[ 0 ] = L[ 1 ] = _TLabels::Zero( I.rows( ) );
-     unsigned long long iter = 0;
-     _R pl = std::numeric_limits< _R >::max( );
-     bool stop = false;
-
-     // Go!
-     while( !stop )
-     {
-       this->_L( L[ ( iter + 1 ) % 2 ], R );
-     unsigned long long count
-     =
-     ( L[ 0 ].array( ) != L[ 1 ].array( ) ).
-     template cast< unsigned long long >( ).sum( );
-     stop = ( count == 0 );
-     this->m_Debug( pl - ll );
-     pl = ll;
-     iter++;
-     } // end while
-  */
 }
 
 // -------------------------------------------------------------------------
@@ -172,14 +131,32 @@ Label(
   const Eigen::EigenBase< _TM >& _m, const Eigen::EigenBase< _TC >& _C
   )
 {
-  /* TODO
-     const _TInput& I = Ib.derived( );
-     _TOutput& L = Lb.derived( );
+  using _R = typename _TM::Scalar;
+  using _M = Eigen::Matrix< _R, Eigen::Dynamic, Eigen::Dynamic >;
 
-     TMatrix R( I.rows( ), this->m_Means.rows( ) );
-     this->_R( R, I );
-     this->_L( L, R );
-  */
+  const auto& X = _X.derived( ).template cast< _R >( );
+  auto& L = _L.derived( );
+  const auto& m = _m.derived( );
+  const auto& C = _C.derived( );
+  unsigned long long K = m.rows( );
+  unsigned long long F = m.cols( );
+  unsigned long long N = X.rows( );
+  _M D( N, K );
+  _M E = _M::Identity( F, F ) * std::numeric_limits< _R >::epsilon( );
+
+  // Compute distances
+  for( unsigned long long k = 0; k < K; ++k )
+  {
+    auto d = X.rowwise( ) - m.row( k );
+    auto S = ( C.block( k * F, 0, F, F ) + E ).inverse( );
+    D.col( k )
+      =
+      ( ( d * S ).array( ) * d.array( ) ).rowwise( ).sum( ).sqrt( );
+  } // end if
+
+  // Compute labels
+  for( unsigned long long n = 0; n < N; ++n )
+    D.row( n ).minCoeff( &L( n, 0 ) );
 }
 
 // -------------------------------------------------------------------------

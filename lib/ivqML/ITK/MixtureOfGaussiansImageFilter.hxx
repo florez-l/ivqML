@@ -21,7 +21,14 @@ ivqML::ITK::MixtureOfGaussiansImageFilter< _TInImage, _TLabel, _TReal >::
 MixtureOfGaussiansImageFilter( )
   : Superclass( )
 {
-  this->m_Debug = []( const TReal& mse ) -> bool { return( false ); };
+  this->m_Debug
+    =
+    []( const TReal&, const unsigned long long& )
+    ->
+    bool
+    {
+      return( false );
+    };
 }
 
 // -------------------------------------------------------------------------
@@ -36,11 +43,12 @@ GenerateData( )
     template cast< TReal >( ).transpose( );
   auto O = ivq::ITK::ImageToMatrix( this->GetOutput( ) ).transpose( );
 
-  ivqML::Common::MixtureOfGaussians< TReal > model;
-  model.init_random( I, this->m_NumberOfMeans );
-  model.set_debug( this->m_Debug );
-  model.fit( I );
-  model.label( O, I );
+  this->m_Means = TMatrix::Zero( this->m_NumberOfMeans, I.cols( ) );
+
+  using namespace ivqML::Common::MixtureOfGaussians;
+  Init( this->m_Means, I, this->m_InitMethod );
+  Fit( this->m_Means, this->m_Covariances, I, this->m_Debug );
+  Label( O, I, this->m_Means, this->m_Covariances );
 }
 
 #endif // __ivqML__ITK__MixtureOfGaussiansImageFilter__hxx__

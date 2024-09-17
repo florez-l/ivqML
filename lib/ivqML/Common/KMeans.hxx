@@ -148,7 +148,7 @@ Fit(
 
     // Stop criterion
     iter++;
-    _R mse = ( P - m ).array( ).pow( 2 ).rowwise( ).mean( ).mean( );
+    _R mse = ( P - m ).array( ).pow( 2 ).mean( );
     stop = debug( mse, iter ) || !( eps < mse );
     P = m;
   } // end while
