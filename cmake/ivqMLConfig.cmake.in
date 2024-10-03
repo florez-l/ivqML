@@ -1,0 +1,31 @@
+## =========================================================================
+## @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
+## =========================================================================
+
+set(IVQML_VERSION @PROJECT_VERSION@)
+
+# -- Some variables
+set(ivqML_INSTALL_PREFIX @CMAKE_INSTALL_PREFIX@)
+
+# -- Base configurations
+set(ivq_USE_VTK @ivq_USE_VTK@)
+set(ivq_USE_Qt5 @ivq_USE_Qt5@)
+set(Eigen3_DIR "@Eigen3_DIR@")
+set(Boost_DIR "@Boost_DIR@")
+set(ITK_DIR "@ITK_DIR@")
+set(VTK_DIR "@VTK_DIR@")
+set(Qt5_DIR "@Qt5_DIR@")
+set(ivq_OLD_EIGEN @ivq_OLD_EIGEN@)
+find_package(ivq)
+
+# -- From cmake
+@PACKAGE_INIT@
+
+# -- Include targets file
+set(_targets "${CMAKE_CURRENT_LIST_DIR}/@targets_export_name@.cmake")
+if(EXISTS "${_targets}")
+  include("${_targets}")
+  check_required_components("@PROJECT_NAME@")
+endif(EXISTS "${_targets}")
+
+## eof - $RCSfile$

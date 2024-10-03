@@ -23,7 +23,7 @@ if (OPENMP_FOUND)
 endif()
 
 ## -- Subdirs
-subdirs(lib examples)
-# subdirs(bash lib examples)
+subdirs(cmake lib examples)
+include(cmake/ivqMLInstall.cmake)
 
 ## eof - $RCSfile$
