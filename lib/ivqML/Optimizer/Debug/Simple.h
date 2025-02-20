@@ -45,7 +45,7 @@ namespace ivqML
             *( this->m_Out )
               << t << " " << nG << " " << J_tr << " " << J_te
               << std::endl;
-            return( !( t < this->m_Epochs && this->m_Epsilon <= nG  ) );
+            return( !( t < this->m_Epochs /* && this->m_Epsilon <= nG */ ) );
           }
 
       protected:

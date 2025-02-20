@@ -245,6 +245,18 @@ void fit( const Args& args )
 
   // Show results
   std::cout << "Fitted model: " << m << std::endl;
+  std::cout << "Training cost: " << m.cost( X_tr, y_tr ) << std::endl;
+  if( X_te.rows( ) > 0 )
+    std::cout << "Testing cost: " << m.cost( X_te, y_te ) << std::endl;
+
+  // Confussion matrices
+  TMatrix z = m( X_tr, true );
+  TMatrix y_obs( y_tr.rows( ), 2 ), y_pre( y_tr.rows( ), 2 );
+  y_obs << TReal( 1 ) - y_tr.array( ), y_tr;
+  y_pre << TReal( 1 ) - z.array( ), z;
+
+  std::cout << ( y_obs.transpose( ) * y_pre ) << std::endl;
+
 }
 
 // eof - $RCSfile$
