@@ -14,50 +14,71 @@ namespace ivqML
     {
       /**
        */
-      template< class _TScl >
+      template< class _TReal, class _TNatural = unsigned long long >
       class Logistic
-        : public ivqML::Model::Regression::Linear< _TScl >
+        : public ivqML::Model::Regression::Linear< _TReal, _TNatural >
       {
       public:
-      public:
+        using TReal      = _TReal;
+        using TNatural   = _TNatural;
+        using Superclass
+        =
+          ivqML::Model::Regression::Linear< TReal, TNatural >;
         using Self       = Logistic;
-        using Superclass = ivqML::Model::Regression::Linear< _TScl >;
-        using TScl       = typename Superclass::TScl;
-        using TNat       = typename Superclass::TNat;
-        using TMat       = typename Superclass::TMat;
-        using TCol       = typename Superclass::TCol;
+        using TMatrix    = typename Superclass::TMatrix;
+        using TColumn    = typename Superclass::TColumn;
         using TRow       = typename Superclass::TRow;
-        using TMatMap    = typename Superclass::TMatMap;
-        using TColMap    = typename Superclass::TColMap;
-        using TRowMap    = typename Superclass::TRowMap;
-        using TMatCMap   = typename Superclass::TMatCMap;
-        using TColCMap   = typename Superclass::TColCMap;
-        using TRowCMap   = typename Superclass::TRowCMap;
+        using TMap       = typename Superclass::TMap;
+        using TConstMap  = typename Superclass::TConstMap;
+
+      protected:
+        using TIdx = Eigen::Index;
 
       public:
-        Logistic( const TNat& n = 0 );
-        virtual ~Logistic( ) = default;
+        Logistic( const TNatural& n = 1 );
+        virtual ~Logistic( ) override;
 
-        template< class _TInputX >
-        auto eval( const Eigen::EigenBase< _TInputX >& iX ) const;
+        template< class _TX >
+        auto operator()( const Eigen::EigenBase< _TX >& X, bool threshold = false ) const;
 
-        /* TODO
-           template< class _X, class _Y >
-           void cost(
-           TScl* bG,
-           const Eigen::EigenBase< _X >& iX,
-           const Eigen::EigenBase< _Y >& iY,
-           TScl* J = nullptr,
-           TScl* buffer = nullptr
-           ) const;
-        */
+        /**
+         * TODO: This method has no sense in a logistic regression
+         */
+        template< class _TX, class _Ty >
+        void fit(
+          const Eigen::EigenBase< _TX >& bX,
+          const Eigen::EigenBase< _Ty >& by,
+          const TReal& L1 = 0, const TReal& L2 = 0
+          );
 
-        template< class _TInputX >
-        auto threshold( const Eigen::EigenBase< _TInputX >& iX ) const;
+        template< class _TG, class _TX, class _Ty >
+        TReal cost_gradient(
+          Eigen::EigenBase< _TG >& G,
+          const Eigen::EigenBase< _TX >& bX,
+          const Eigen::EigenBase< _Ty >& by,
+          const TReal& L1, const TReal& L2
+          );
 
-      private:
-        Logistic( const Self& ) = delete;
-        Self& operator=( const Self& ) = delete;
+        template< class _TX, class _Ty >
+        TReal cost(
+          const Eigen::EigenBase< _TX >& X,
+          const Eigen::EigenBase< _Ty >& y
+          );
+
+      protected:
+        /**
+         */
+        struct SVisitor
+        {
+          SVisitor( const TColumn& Z );
+          void init( const TReal& y, const TIdx& i, const TIdx& j );
+          void operator()( const TReal& y, const TIdx& i, const TIdx& j );
+
+          const TColumn* Z;
+          TReal J;
+          TReal E;
+          TReal D;
+        };
       };
     } // end namespace
   } // end namespace

@@ -4,90 +4,90 @@
 #ifndef __ivqML__Model__Regression__Logistic__hxx__
 #define __ivqML__Model__Regression__Logistic__hxx__
 
-#include <cmath>
-#include <limits>
-
 // -------------------------------------------------------------------------
-template< class _TScl >
-template< class _TInputX >
-auto ivqML::Model::Regression::Logistic< _TScl >::
-eval( const Eigen::EigenBase< _TInputX >& iX ) const
+template< class _TReal, class _TNatural >
+template< class _TX >
+auto ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
+operator()( const Eigen::EigenBase< _TX >& X, bool threshold ) const
 {
-  static const TScl _0 = TScl( 0 );
-  static const TScl _1 = TScl( 1 );
-  static const TScl _E = std::numeric_limits< TScl >::epsilon( );
-  static const TScl _L = std::log( _1 - _E ) - std::log( _E );
-
-  return(
-    (
-      ( this->m_T * iX.derived( ).template cast< TScl >( ) ).array( )
-      +
-      this->operator[]( 0 )
-      )
-    .unaryExpr(
-      []( const TScl& z ) -> TScl
+  static const TReal _0  = TReal( 0 );
+  static const TReal _05 = TReal( 0.5 );
+  static const TReal _1  = TReal( 1 );
+  static const TReal _M  = std::numeric_limits< TReal >::max( );
+  static const TReal _L  = std::log( _M ) / TReal( 2 );
+  auto f = [&]( TReal z ) -> TReal
+    {
+      if     ( z >  _L ) return( _1 );
+      else if( z < -_L ) return( _0 );
+      else
       {
-        if     ( z >  _L ) return( _1 );
-        else if( z < -_L ) return( _0 );
-        else               return( _1 / ( _1 + std::exp( -z ) ) );
-      }
-      )
-    );
+        TReal s = _1 / ( _1 + std::exp( -z ) );
+        return( ( threshold )? ( ( s < _05 )? _0: _1 ): s );
+      } // end if
+    };
+
+  return( this->Superclass::operator()( X ).unaryExpr( f ) );
 }
 
 // -------------------------------------------------------------------------
-/* TODO
-   template< class _TScl >
-   template< class _TInputX, class _TInputY >
-   void ivqML::Model::Regression::Logistic< _TScl >::
-   cost(
-   TScl* bG,
-   const Eigen::EigenBase< _TInputX >& iX,
-   const Eigen::EigenBase< _TInputY >& iY,
-   TScl* J,
-   TScl* buffer
-   ) const
-   {
-   static const TScl _E = std::numeric_limits< TScl >::epsilon( );
-
-   auto X = iX.derived( ).template cast< TScl >( );
-   auto Y = iY.derived( ).template cast< TScl >( );
-   TScl m = TScl( X.cols( ) );
-
-   TMatrix Z = this->evaluate( X );
-   std::atomic< TScl > S = 0;
-   Z.noalias( )
-   =
-   Z.NullaryExpr(
-   Z.rows( ), Z.cols( ),
-   [&]( const Eigen::Index& r, const Eigen::Index& c ) -> TScl
-   {
-   TScl z = Z( r, c );
-   if( J != nullptr )
-   {
-   TScl l = ( Y( r, c ) == 0 )? ( TScl( 1 ) - z ): z;
-   S = S - ( std::log( ( _E < l )? l: _E ) / m );
-   } // end if
-   return( z - Y( r, c ) );
-   }
-   );
-
-   *bG = Z.mean( );
-   TMap( bG + 1, iX.rows( ), 1 ) = ( X * Z.transpose( ) ) / m;
-   if( J != nullptr )
-   *J = TScl( S );
-   }
-*/
+/**
+ * TODO: This method has no sense in a logistic regression
+ */
+template< class _TReal, class _TNatural >
+template< class _TX, class _Ty >
+void ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
+fit(
+  const Eigen::EigenBase< _TX >& bX,
+  const Eigen::EigenBase< _Ty >& by,
+  const TReal& L1, const TReal& L2
+  )
+{
+  /* TODO
+     if( n == 0 || m != y.rows( ) )
+     throw AssertionError( 'There is no closed solution for a logistic regression.' )
+  */
+}
 
 // -------------------------------------------------------------------------
-template< class _TScl >
-template< class _TInputX >
-auto ivqML::Model::Regression::Logistic< _TScl >::
-threshold( const Eigen::EigenBase< _TInputX >& iX ) const
+template< class _TReal, class _TNatural >
+template< class _TG, class _TX, class _Ty >
+typename ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
+TReal ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
+cost_gradient(
+  Eigen::EigenBase< _TG >& G,
+  const Eigen::EigenBase< _TX >& bX,
+  const Eigen::EigenBase< _Ty >& by,
+  const TReal& L1, const TReal& L2
+  )
 {
-  return(
-    ( this->eval( iX ) >= TScl( 0.5 ) ).template cast< TScl >( )
-    );
+  auto X = bX.derived( ).template cast< TReal >( );
+  auto y = by.derived( ).template cast< TReal >( );
+
+  TColumn z = this->operator()( X );
+  SVisitor v( z );
+  y.visit( v );
+  z -= y;
+
+  G.derived( )( 0 , 0 ) = z.mean( );
+  G.derived( ).block( 1, 0, X.cols( ), 1 )
+    =
+    ( X.array( ).colwise( ) * z.array( ) )
+    .colwise( ).mean( ).transpose( );
+
+  return( v.J / TReal( X.rows( ) ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal, class _TNatural >
+template< class _TX, class _Ty >
+typename ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
+TReal ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
+cost( const Eigen::EigenBase< _TX >& X, const Eigen::EigenBase< _Ty >& y )
+{
+  TColumn z = this->operator()( X );
+  SVisitor v( z );
+  y.derived( ).template cast< TReal >( ).visit( v );
+  return( v.J / TReal( X.rows( ) ) );
 }
 
 #endif // __ivqML__Model__Regression__Logistic__hxx__

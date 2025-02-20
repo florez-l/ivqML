@@ -7,49 +7,106 @@
 #include <Eigen/Dense>
 
 // -------------------------------------------------------------------------
-template< class _TScl >
-template< class _TInputX >
-auto ivqML::Model::Regression::Linear< _TScl >::
-eval( const Eigen::EigenBase< _TInputX >& iX ) const
+template< class _TReal, class _TNatural >
+template< class _TX >
+auto ivqML::Model::Regression::Linear< _TReal, _TNatural >::
+operator()( const Eigen::EigenBase< _TX >& X ) const
 {
   return(
-    ( this->m_T * iX.derived( ).template cast< TScl >( ) ).array( )
-    +
-    this->operator[]( 0 )
+    ( ( X.derived( ).template cast< TReal >( )
+        *
+        TMap( this->m_P + 1, this->m_S - 1, 1 ) ).array( )
+      +
+      this->m_P[ 0 ] ).matrix( )
     );
 }
 
 // -------------------------------------------------------------------------
-template< class _TScl >
-template< class _TInputY, class _TInputX >
-void ivqML::Model::Regression::Linear< _TScl >::
+/**
+ * TODO: Use of L1 regularization is not yet solved
+ */
+template< class _TReal, class _TNatural >
+template< class _TX, class _Ty >
+void ivqML::Model::Regression::Linear< _TReal, _TNatural >::
 fit(
-  const Eigen::EigenBase< _TInputX >& iX,
-  const Eigen::EigenBase< _TInputY >& iY,
-  const TScl& lambda
+  const Eigen::EigenBase< _TX >& bX,
+  const Eigen::EigenBase< _Ty >& by,
+  const TReal& L1, const TReal& L2
   )
 {
-  auto X = iX.derived( ).template cast< TScl >( );
-  auto Y = iY.derived( ).template cast< TScl >( );
+  auto X = bX.derived( ).template cast< TReal >( );
+  auto y = by.derived( ).template cast< TReal >( );
 
-  TNat m = TScl( X.cols( ) );
-  TNat n = TScl( X.rows( ) );
-  this->set_number_of_inputs( n );
+  TNatural n = X.cols( );
+  TNatural m = X.rows( );
 
-  TMat Xi( m, n + 1 );
-  Xi << TMat::Ones( m, 1 ), X.transpose( );
+  /* TODO
+     if( n == 0 || m != y.rows( ) )
+     throw AssertionError( 'Incompatible sizes.' )
+  */
 
-  this->row( n + 1 )
+  TMatrix b( 1, n + 1 );
+  b( 0 , 0 ) = y.mean( );
+  b.block( 0, 1, 1, n )
     =
+    ( X.array( ).colwise( ) * y.col( 0 ).array( ) ).colwise( ).mean( );
+
+  TMatrix A( n + 1, n + 1 );
+  A( 0 , 0 ) = 1 + L2;
+  A.block( 1, 1, n, n )
+    =
+    ( TMatrix::Identity( n, n ) * L2 ).array( )
+    +
+    ( ( X.transpose( ) * X ).array( ) / TReal( m ) );
+  A.block( 0, 1, 1, n ) = X.colwise( ).mean( );
+  A.block( 1, 0, n, 1 ) = A.block( 0, 1, 1, n ).transpose( );
+
+  this->_resize( n + 1 );
+  TMap( this->m_P, n + 1, 1 )
+    =
+    A.colPivHouseholderQr().solve( b.transpose( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal, class _TNatural >
+template< class _TG, class _TX, class _Ty >
+typename ivqML::Model::Regression::Linear< _TReal, _TNatural >::
+TReal ivqML::Model::Regression::Linear< _TReal, _TNatural >::
+cost_gradient(
+  Eigen::EigenBase< _TG >& G,
+  const Eigen::EigenBase< _TX >& bX,
+  const Eigen::EigenBase< _Ty >& by,
+  const TReal& L1, const TReal& L2
+  )
+{
+  std::cout << "uh oh" << std::endl;
+
+  auto X = bX.derived( ).template cast< TReal >( );
+  auto y = by.derived( ).template cast< TReal >( );
+
+  TColumn z = this->operator()( X ) - y;
+  G.derived( )( 0 , 0 ) = TReal( 2 ) * z.mean( );
+  G.derived( ).block( 1, 0, X.cols( ), 1 )
+    =
+    ( X.array( ).colwise( ) * z.array( ) ).colwise( ).mean( ).transpose( );
+
+  return( z.array( ).pow( 2 ).mean( ) );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal, class _TNatural >
+template< class _TX, class _Ty >
+typename ivqML::Model::Regression::Linear< _TReal, _TNatural >::
+TReal ivqML::Model::Regression::Linear< _TReal, _TNatural >::
+cost( const Eigen::EigenBase< _TX >& X, const Eigen::EigenBase< _Ty >& y )
+{
+  return(
     (
-      Y * Xi
-      *
-      (
-        ( ( Xi.transpose( ) * Xi ) / TScl( m ) )
-        +
-        ( TMat::Identity( n + 1, n + 1 ) * lambda )
-        ).inverse( )
-      ) / TScl( m );
+      this->operator()( X.derived( ).template cast< TReal >( ) )
+      -
+      y.derived( ).template cast< TReal >( )
+      ).array( ).pow( 2 ).mean( )
+    );
 }
 
 #endif // __ivqML__Model__Regression__Linear__hxx__

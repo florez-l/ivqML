@@ -15,15 +15,10 @@ include(GenerateExportHeader)
 
 # -- Find required packages
 find_package(ivq REQUIRED)
-find_package(OpenMP REQUIRED)
-if (OPENMP_FOUND)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
+find_package(Boost COMPONENTS program_options REQUIRED)
 
 ## -- Subdirs
-subdirs(cmake lib examples)
-include(cmake/ivqMLInstall.cmake)
+subdirs(bash cmake lib/ivqML)
+# TODO: include(cmake/ivqMLInstall.cmake)
 
 ## eof - $RCSfile$

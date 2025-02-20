@@ -14,62 +14,51 @@ namespace ivqML
     {
       /**
        */
-      template< class _TScl >
+      template< class _TReal, class _TNatural = unsigned long long >
       class Linear
-        : public ivqML::Model::Base< _TScl >
+        : public ivqML::Model::Base< _TReal, _TNatural >
       {
       public:
+        using TReal      = _TReal;
+        using TNatural   = _TNatural;
         using Self       = Linear;
-        using Superclass = ivqML::Model::Base< _TScl >;
-        using TScl       = typename Superclass::TScl;
-        using TNat       = typename Superclass::TNat;
-        using TMat       = typename Superclass::TMat;
-        using TCol       = typename Superclass::TCol;
+        using Superclass = ivqML::Model::Base< TReal, TNatural >;
+        using TMatrix    = typename Superclass::TMatrix;
+        using TColumn    = typename Superclass::TColumn;
         using TRow       = typename Superclass::TRow;
-        using TMatMap    = typename Superclass::TMatMap;
-        using TColMap    = typename Superclass::TColMap;
-        using TRowMap    = typename Superclass::TRowMap;
-        using TMatCMap   = typename Superclass::TMatCMap;
-        using TColCMap   = typename Superclass::TColCMap;
-        using TRowCMap   = typename Superclass::TRowCMap;
+        using TMap       = typename Superclass::TMap;
+        using TConstMap  = typename Superclass::TConstMap;
 
       public:
-        Linear( const TNat& n = 0 );
-        virtual ~Linear( ) override = default;
+        Linear( const TNatural& n = 1 );
+        virtual ~Linear( ) override;
 
-        virtual void set_number_of_parameters( const TNat& p ) override;
-        virtual TNat number_of_inputs( ) const override;
-        virtual void set_number_of_inputs( const TNat& p ) override;
+        template< class _TX >
+        auto operator()( const Eigen::EigenBase< _TX >& X ) const;
 
-        virtual TNat number_of_outputs( ) const override;
-
-        template< class _TInputX >
-        auto eval( const Eigen::EigenBase< _TInputX >& iX ) const;
-
-        /* TODO
-           template< class _TInputX, class _TInputY >
-           void cost(
-           TScl* bG,
-           const Eigen::EigenBase< _TInputX >& iX,
-           const Eigen::EigenBase< _TInputY >& iY,
-           TScl* J = nullptr,
-           TScl* buffer = nullptr
-           ) const;
-        */
-
-        template< class _TInputY, class _TInputX >
+        /**
+         * TODO: Use of L1 regularization is not yet solved
+         */
+        template< class _TX, class _Ty >
         void fit(
-          const Eigen::EigenBase< _TInputX >& iX,
-          const Eigen::EigenBase< _TInputY >& iY,
-          const TScl& lambda = 0
+          const Eigen::EigenBase< _TX >& bX,
+          const Eigen::EigenBase< _Ty >& by,
+          const TReal& L1 = 0, const TReal& L2 = 0
           );
 
-      private:
-        Linear( const Self& ) = delete;
-        Self& operator=( const Self& ) = delete;
+        template< class _TG, class _TX, class _Ty >
+        TReal cost_gradient(
+          Eigen::EigenBase< _TG >& G,
+          const Eigen::EigenBase< _TX >& bX,
+          const Eigen::EigenBase< _Ty >& by,
+          const TReal& L1, const TReal& L2
+          );
 
-      protected:
-        TRowMap m_T { nullptr, 0, 0 };
+        template< class _TX, class _Ty >
+        TReal cost(
+          const Eigen::EigenBase< _TX >& X,
+          const Eigen::EigenBase< _Ty >& y
+          );
       };
     } // end namespace
   } // end namespace

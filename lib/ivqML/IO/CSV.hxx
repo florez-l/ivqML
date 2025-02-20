@@ -9,13 +9,12 @@
 #include <sstream>
 #include <deque>
 #include <boost/algorithm/string.hpp>
-#include <Eigen/Core>
 
 // -------------------------------------------------------------------------
-template< class _M >
-bool ivqML::IO::CSV::Read(
-  Eigen::EigenBase< _M >& M,
-  const std::string& fname,
+template< class _TD >
+bool ivqML::IO::
+ReadCSV(
+  Eigen::EigenBase< _TD >& D, const std::string& fname,
   unsigned long long ignore_first_rows,
   const char& separator
   )
@@ -67,39 +66,14 @@ bool ivqML::IO::CSV::Read(
 
   // Pass to Eigen::Matrix
   unsigned long long m = lines.size( ) - ignore_first_rows;
-  M.derived( ) = _M::Zero( m, n );
+  D.derived( ) = _TD::Zero( m, n );
   for( unsigned long long r = 0; r < m; ++r )
     for( unsigned long long c = 0; c < n; ++c )
-      lines[ r + ignore_first_rows ] >> M.derived( )( r, c );
-
-  return( true );
-}
-
-// -------------------------------------------------------------------------
-template< class _M >
-bool ivqML::IO::CSV::Write(
-  const Eigen::EigenBase< _M >& M,
-  const std::string& fname,
-  const char& separator
-  )
-{
-  std::stringstream seps;
-  seps << separator;
-
-  Eigen::IOFormat f(
-    Eigen::StreamPrecision, Eigen::DontAlignCols,
-    seps.str( ), "\n", "", "", "", "\n"
-    );
-  std::ofstream ofs( fname.c_str( ) );
-  for( unsigned long long c = 0; c < M.cols( ) - 1; ++c )
-    ofs << "x_" << c << separator;
-  ofs << "y" << std::endl;
-  ofs << M.derived( ).format( f );
-  ofs.close( );
+      lines[ r + ignore_first_rows ] >> D.derived( )( r, c );
 
   return( true );
 }
 
 #endif // __ivqML__IO__CSV__hxx__
 
-// eof - $RCSfile$
+// eof - CSV.hxx

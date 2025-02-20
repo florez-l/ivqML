@@ -12,43 +12,40 @@ namespace ivqML
   {
     /**
      */
-    template< class _TCost >
+    template< class _TModel >
     class GradientDescent
-      : public ivqML::Optimizer::Base< _TCost >
+      : public ivqML::Optimizer::Base< _TModel >
     {
     public:
-      using TCost      = _TCost;
+      using TModel     = _TModel;
       using Self       = GradientDescent;
-      using Superclass = ivqML::Optimizer::Base< TCost >;
-      using TModel     = typename Superclass::TModel;
-      using TScl       = typename Superclass::TScl;
-      using TNat       = typename Superclass::TNat;
-      using TMat       = typename Superclass::TMat;
-      using TCol       = typename Superclass::TCol;
+      using Superclass = ivqML::Optimizer::Base< TModel >;
+      using TReal      = typename Superclass::TReal;
+      using TNatural   = typename Superclass::TNatural;
+      using TMatrix    = typename Superclass::TMatrix;
+      using TColumn    = typename Superclass::TColumn;
       using TRow       = typename Superclass::TRow;
-      using TMatMap    = typename Superclass::TMatMap;
-      using TColMap    = typename Superclass::TColMap;
-      using TRowMap    = typename Superclass::TRowMap;
-      using TMatCMap   = typename Superclass::TMatCMap;
-      using TColCMap   = typename Superclass::TColCMap;
-      using TRowCMap   = typename Superclass::TRowCMap;
+      using TMap       = typename Superclass::TMap;
+      using TConstMap  = typename Superclass::TConstMap;
+      using TDebug     = typename Superclass::TDebug;
 
     public:
-      ivqMLAttributeMacro( alpha, TScl, 1e-4 );
+      GradientDescent( TModel& m );
+      virtual ~GradientDescent( ) override;
 
-    public:
-      GradientDescent( );
-      virtual ~GradientDescent( );
+      const TReal& alpha( ) const;
+      void setAlpha( const TReal& a );
 
-      virtual void register_options(
-        boost::program_options::options_description& opt
-        ) override;
+      template< class _TX_tr, class _Ty_tr, class _TX_te, class _Ty_te >
+      void fit(
+        const Eigen::EigenBase< _TX_tr >& bX_train,
+        const Eigen::EigenBase< _Ty_tr >& by_train,
+        const Eigen::EigenBase< _TX_te >& bX_test,
+        const Eigen::EigenBase< _Ty_te >& by_test
+        );
 
-      virtual void fit( TModel& model ) override;
-
-    private:
-      GradientDescent( const Self& ) = delete;
-      Self& operator=( const Self& ) = delete;
+    protected:
+      TReal m_Alpha { 1e-2 };
     };
   } // end namespace
 } // end namespace

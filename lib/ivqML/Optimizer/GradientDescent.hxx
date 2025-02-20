@@ -4,66 +4,89 @@
 #ifndef __ivqML__Optimizer__GradientDescent__hxx__
 #define __ivqML__Optimizer__GradientDescent__hxx__
 
+#include <cmath>
+
 // -------------------------------------------------------------------------
-template< class _TCost >
-ivqML::Optimizer::GradientDescent< _TCost >::
-GradientDescent( )
-  : Superclass( )
+template< class _TModel >
+ivqML::Optimizer::GradientDescent< _TModel >::
+GradientDescent( TModel& m )
+  : Superclass( m )
 {
 }
 
 // -------------------------------------------------------------------------
-template< class _TCost >
-ivqML::Optimizer::GradientDescent< _TCost >::
+template< class _TModel >
+ivqML::Optimizer::GradientDescent< _TModel >::
 ~GradientDescent( )
 {
 }
 
 // -------------------------------------------------------------------------
-template< class _TCost >
-void ivqML::Optimizer::GradientDescent< _TCost >::
-register_options( boost::program_options::options_description& opt )
+template< class _TModel >
+const typename ivqML::Optimizer::GradientDescent< _TModel >::
+TReal& ivqML::Optimizer::GradientDescent< _TModel >::
+alpha( ) const
 {
-  this->Superclass::register_options( opt );
-  opt.add_options( )
-    ivqML_Optimizer_OptionMacro( alpha, "learning_rate,a" );
+  return( this->m_Alpha );
 }
 
 // -------------------------------------------------------------------------
-template< class _TCost >
-void ivqML::Optimizer::GradientDescent< _TCost >::
-fit( TModel& model )
+template< class _TModel >
+void ivqML::Optimizer::GradientDescent< _TModel >::
+setAlpha( const TReal& a )
 {
-  // Initialize
-  TNat p = model.number_of_parameters( );
-  TRowMap mp = model.row( p );
-  TRow G( p ), D( p );
-  bool stop = false;
-  TNat i = 0;
-  TScl dn = std::numeric_limits< TScl >::max( );
+  this->m_Alpha = a;
+}
 
-  // Main loop
+// -------------------------------------------------------------------------
+template< class _TModel >
+template< class _TX_tr, class _Ty_tr, class _TX_te, class _Ty_te >
+void ivqML::Optimizer::GradientDescent< _TModel >::
+fit(
+  const Eigen::EigenBase< _TX_tr >& bX_train,
+  const Eigen::EigenBase< _Ty_tr >& by_train,
+  const Eigen::EigenBase< _TX_te >& bX_test,
+  const Eigen::EigenBase< _Ty_te >& by_test
+  )
+{
+  static const TReal _0 = TReal( 0 );
+  static const TReal _1 = TReal( 1 );
+  static const TReal _M = std::numeric_limits< TReal >::max( );
+
+  auto X_tr = bX_train.derived( ).template cast< TReal >( );
+  auto y_tr = by_train.derived( ).template cast< TReal >( );
+  auto X_te = bX_test.derived( ).template cast< TReal >( );
+  auto y_te = by_test.derived( ).template cast< TReal >( );
+
+  TNatural t = 0;
+  bool stop = false;
+  TColumn G( this->m_Model->size( ) );
+
   while( !stop )
   {
-    // Update function
-    for( TNat c = 0; c < this->m_Costs.size( ); ++c )
+    t++;
+
+    TReal J_tr
+      =
+      this->m_Model->
+      cost_gradient( G, X_tr, y_tr, this->m_Lambda1, this->m_Lambda2 );
+    if( !std::isnan( J_tr ) && !std::isinf( J_tr ) )
     {
-      this->m_Costs[ c ]( model, G.data( ) );
-      mp -= G * this->m_alpha;
+      TReal J_te
+        =
+        ( 0 < X_te.rows( ) )? this->m_Model->cost( X_te, y_te ): _M;
 
-      if( c == 0 ) D  = G;
-      else         D += G;
-    } // end for
+      *( this->m_Model ) -= G * this->m_Alpha;
 
-    // Check stop
-    dn = D.norm( );
-    stop  = ( dn < this->m_epsilon );
-    stop |= ( std::isnan( dn ) || std::isinf( dn ) );
-    stop |= ( ++i >= this->m_max_iter );
-    stop |=
-      this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ), false );
+      stop
+        =
+        this->m_Debug(
+          t, std::sqrt( G.array( ).pow( 2 ).sum( ) ), J_tr, J_te
+          );
+    }
+    else
+      stop = true;
   } // end while
-  this->m_Debug( &model, dn, i, &( this->m_CostFromCompleteData ), true );
 }
 
 #endif // __ivqML__Optimizer__GradientDescent__hxx__

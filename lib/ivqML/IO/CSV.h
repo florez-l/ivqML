@@ -10,28 +10,14 @@ namespace ivqML
 {
   namespace IO
   {
-    namespace CSV
-    {
-      /**
-       */
-      template< class _M >
-      bool Read(
-        Eigen::EigenBase< _M >& M,
-        const std::string& fname,
-        unsigned long long ignore_first_rows = 0,
-        const char& separator = ','
-        );
-
-      /**
-       */
-      template< class _M >
-      bool Write(
-        const Eigen::EigenBase< _M >& M,
-        const std::string& fname,
-        const char& separator = ','
-        );
-
-    } // end namespace
+    /**
+     */
+    template< class _TD >
+    bool ReadCSV(
+      Eigen::EigenBase< _TD >& D, const std::string& fname,
+      unsigned long long ignore_first_rows = 0,
+      const char& separator = ','
+      );
   } // end namespace
 } // end namespace
 
