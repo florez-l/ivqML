@@ -201,25 +201,85 @@ void fit( const Args& args )
           if     ( v == 0 ) this->Z.push_back( r );
           else if( v == 1 ) this->O.push_back( r );
         }
-      std::vector< Eigen::Index > Z, O;
+
+      void finish( const TReal& s )
+        {
+          // Shuffle both labels
+          std::random_device rand_dev;
+          std::mt19937 rang_gen( rand_dev( ) );
+          std::shuffle( this->Z.begin( ), this->Z.end( ), rang_gen );
+          std::shuffle( this->O.begin( ), this->O.end( ), rang_gen );
+
+          // Compute sizes
+          TNatural n = std::min( this->Z.size( ), this->O.size( ) );
+          TNatural n_tr = TNatural( TReal( n ) * s );
+
+          this->Tr.clear( );
+          this->Te.clear( );
+
+          this->Tr.insert( this->Tr.end( ), this->Z.begin( ), this->Z.begin( ) + n_tr );
+          this->Tr.insert( this->Tr.end( ), this->O.begin( ), this->O.begin( ) + n_tr );
+          std::shuffle( this->Tr.begin( ), this->Tr.end( ), rang_gen );
+
+          if( n_tr < n )
+          {
+            this->Te.insert( this->Te.end( ), this->Z.begin( ) + n_tr, this->Z.begin( ) + n );
+            this->Te.insert( this->Te.end( ), this->O.begin( ) + n_tr, this->O.begin( ) + n );
+            std::shuffle( this->Te.begin( ), this->Te.end( ), rang_gen );
+          } // end if
+         
+          std::cout << n << std::endl;
+          std::cout << n_tr << std::endl;
+          std::cout << this->Tr.size( ) << std::endl;
+          std::cout << this->Te.size( ) << std::endl;
+
+        }
+
+      std::vector< Eigen::Index > Z, O, Tr, Te;
     } zo_visit;
     D.col( D.cols( ) - 1 ).visit( zo_visit );
+    zo_visit.finish( train_coeff );
 
     // Shuffle
-    std::random_device rand_dev;
-    std::mt19937 rang_gen( rand_dev( ) );
-    std::shuffle( zo_visit.Z.begin( ), zo_visit.Z.end( ), rang_gen );
-    std::shuffle( zo_visit.O.begin( ), zo_visit.O.end( ), rang_gen );
+    /* TODO
+       std::random_device rand_dev;
+       std::mt19937 rang_gen( rand_dev( ) );
+       std::shuffle( zo_visit.Z.begin( ), zo_visit.Z.end( ), rang_gen );
+       std::shuffle( zo_visit.O.begin( ), zo_visit.O.end( ), rang_gen );
 
-    TNatural n = std::min( zo_visit.Z.size( ), zo_visit.O.size( ) );
-    TNatural n_tr = TNatural( TReal( n ) * train_coeff );
-    X_tr = D.block( 0, 0, n_tr, D.cols( ) - 1 );
-    y_tr = D.block( 0, D.cols( ) - 1, n_tr, 1 );
-    if( n_tr < n )
-    {
-      X_te = D.block( n_tr, 0, n - n_tr, D.cols( ) - 1 );
-      y_te = D.block( n_tr, D.cols( ) - 1, n - n_tr, 1 );
-    } // end if
+       // Get training balanced data
+       TNatural n = std::min( zo_visit.Z.size( ), zo_visit.O.size( ) );
+       TNatural n_tr = TNatural( TReal( n ) * train_coeff );
+       X_tr.resize( n_tr << 1, D.cols( ) - 1 );
+       y_tr.resize( n_tr << 1, 1 );
+       X_tr
+       <<
+       D( zo_visit.Z, Eigen::all ).block( 0, 0, n_tr, D.cols( ) - 1 ),
+       D( zo_visit.O, Eigen::all ).block( 0, 0, n_tr, D.cols( ) - 1 );
+       y_tr << TMatrix::Zero( n_tr, 1 ), TMatrix::Ones( n_tr, 1 );
+       std::vector< Eigen::Index > idx_tr( n_tr << 1 );
+       std::iota( idx_tr.begin( ), idx_tr.end( ), 0 );
+       std::shuffle( idx_tr.begin( ), idx_tr.end( ), rang_gen );
+
+       X_tr = X_tr( idx_tr, Eigen::all ).eval( );
+       y_tr = y_tr( idx_tr, Eigen::all ).eval( );
+
+       // Get testing balanced data
+       zo_visit.Z.erase( zo_visit.Z.begin( ), zo_visit.Z.begin( ) + n_tr );
+       zo_visit.O.erase( zo_visit.O.begin( ), zo_visit.O.begin( ) + n_tr );
+       if( 0 < zo_visit.Z.size( ) && 0 < zo_visit.O.size( ) )
+       {
+       X_te.resize( ( n - n_tr ) << 1, D.cols( ) - 1 );
+       y_te.resize( ( n - n_tr ) << 1, 1 );
+       X_te
+       <<
+       D( zo_visit.Z, Eigen::all ).block( 0, 0, n - n_tr, D.cols( ) - 1 ),
+       D( zo_visit.O, Eigen::all ).block( 0, 0, n - n_tr, D.cols( ) - 1 );
+       y_te << TMatrix::Zero( n - n_tr, 1 ), TMatrix::Ones( n - n_tr, 1 );
+       } // end if
+    */
+
+    std::exit( 1 );
   }
   else
   {
