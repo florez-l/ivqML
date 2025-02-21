@@ -8,22 +8,23 @@
 template< class _TReal, class _TNatural >
 template< class _TX >
 auto ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
-operator()( const Eigen::EigenBase< _TX >& X, bool threshold ) const
+operator()( const Eigen::EigenBase< _TX >& X, const bool& threshold ) const
 {
-  static const TReal _0  = TReal( 0 );
-  static const TReal _05 = TReal( 0.5 );
-  static const TReal _1  = TReal( 1 );
-  static const TReal _M  = std::numeric_limits< TReal >::max( );
-  static const TReal _L  = std::log( _M ) / TReal( 2 );
-  auto f = [&]( TReal z ) -> TReal
+  auto f = [&threshold]( TReal z ) -> TReal
     {
-      if     ( z >  _L ) return( _1 );
-      else if( z < -_L ) return( _0 );
-      else
-      {
-        TReal s = _1 / ( _1 + std::exp( -z ) );
-        return( ( threshold )? ( ( s < _05 )? _0: _1 ): s );
-      } // end if
+      static const TReal _0  = TReal( 0 );
+      static const TReal _05 = TReal( 0.5 );
+      static const TReal _1  = TReal( 1 );
+      static const TReal _M  = std::numeric_limits< TReal >::max( );
+      static const TReal _L  = std::log( _M ) / TReal( 2 );
+
+      TReal s;
+      if     ( z >  _L ) s = _1;
+      else if( z < -_L ) s = _0;
+      else               s = _1 / ( _1 + std::exp( -z ) );
+
+      if( threshold ) return( ( s < _05 )? _0: _1 );
+      else            return( s );
     };
 
   return( this->Superclass::operator()( X ).unaryExpr( f ) );
@@ -71,8 +72,7 @@ cost_gradient(
   G.derived( )( 0 , 0 ) = z.mean( );
   G.derived( ).block( 1, 0, X.cols( ), 1 )
     =
-    ( X.array( ).colwise( ) * z.array( ) )
-    .colwise( ).mean( ).transpose( );
+    ( X.array( ).colwise( ) * z.array( ) ).colwise( ).mean( ).transpose( );
 
   return( v.J / TReal( X.rows( ) ) );
 }

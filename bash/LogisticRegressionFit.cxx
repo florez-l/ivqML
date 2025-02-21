@@ -5,11 +5,12 @@
 #include <algorithm>
 #include <cctype>
 #include <iostream>
-#include <random>
 #include <sstream>
 #include <string>
 #include <boost/program_options.hpp>
 
+#include <ivqML/Helpers/ConfussionMatrix.h>
+#include <ivqML/Helpers/SplitDatasetWithBinaryLabeling.h>
 #include <ivqML/IO/CSV.h>
 #include <ivqML/Model/Regression/Logistic.h>
 #include <ivqML/Optimizer/Adam.h>
@@ -179,107 +180,23 @@ void fit( const Args& args )
     // Read training data
     TMatrix D;
     ivqML::IO::ReadCSV( D, args.TrainFilename, 0, args.Delimiter );
+    TNatural n = D.cols( ) - 1;
 
     // Split testing data
     TReal train_coeff = std::fabs( TReal( 1 ) - std::fabs( test_coeff ) );
     if( train_coeff > 1 ) train_coeff = TReal( 1 );
 
-    struct
+    ivqML::Helpers::SplitDatasetWithBinaryLabeling< TReal > v;
+    D.col( n ).visit( v );
+    v.finish( train_coeff );
+
+    X_tr = D( v.Tr, Eigen::all ).block( 0, 0, v.Tr.size( ), n );
+    y_tr = D( v.Tr, Eigen::all ).block( 0, n, v.Tr.size( ), 1 );
+    if( v.Te.size( ) > 0 )
     {
-      void init(
-        const TReal& v, const Eigen::Index& r, const Eigen::Index& c
-        )
-        {
-          this->Z.clear( );
-          this->O.clear( );
-          this->operator()( v, r, c );
-        }
-      void operator()(
-        const TReal& v, const Eigen::Index& r, const Eigen::Index& c
-        )
-        {
-          if     ( v == 0 ) this->Z.push_back( r );
-          else if( v == 1 ) this->O.push_back( r );
-        }
-
-      void finish( const TReal& s )
-        {
-          // Shuffle both labels
-          std::random_device rand_dev;
-          std::mt19937 rang_gen( rand_dev( ) );
-          std::shuffle( this->Z.begin( ), this->Z.end( ), rang_gen );
-          std::shuffle( this->O.begin( ), this->O.end( ), rang_gen );
-
-          // Compute sizes
-          TNatural n = std::min( this->Z.size( ), this->O.size( ) );
-          TNatural n_tr = TNatural( TReal( n ) * s );
-
-          this->Tr.clear( );
-          this->Te.clear( );
-
-          this->Tr.insert( this->Tr.end( ), this->Z.begin( ), this->Z.begin( ) + n_tr );
-          this->Tr.insert( this->Tr.end( ), this->O.begin( ), this->O.begin( ) + n_tr );
-          std::shuffle( this->Tr.begin( ), this->Tr.end( ), rang_gen );
-
-          if( n_tr < n )
-          {
-            this->Te.insert( this->Te.end( ), this->Z.begin( ) + n_tr, this->Z.begin( ) + n );
-            this->Te.insert( this->Te.end( ), this->O.begin( ) + n_tr, this->O.begin( ) + n );
-            std::shuffle( this->Te.begin( ), this->Te.end( ), rang_gen );
-          } // end if
-         
-          std::cout << n << std::endl;
-          std::cout << n_tr << std::endl;
-          std::cout << this->Tr.size( ) << std::endl;
-          std::cout << this->Te.size( ) << std::endl;
-
-        }
-
-      std::vector< Eigen::Index > Z, O, Tr, Te;
-    } zo_visit;
-    D.col( D.cols( ) - 1 ).visit( zo_visit );
-    zo_visit.finish( train_coeff );
-
-    // Shuffle
-    /* TODO
-       std::random_device rand_dev;
-       std::mt19937 rang_gen( rand_dev( ) );
-       std::shuffle( zo_visit.Z.begin( ), zo_visit.Z.end( ), rang_gen );
-       std::shuffle( zo_visit.O.begin( ), zo_visit.O.end( ), rang_gen );
-
-       // Get training balanced data
-       TNatural n = std::min( zo_visit.Z.size( ), zo_visit.O.size( ) );
-       TNatural n_tr = TNatural( TReal( n ) * train_coeff );
-       X_tr.resize( n_tr << 1, D.cols( ) - 1 );
-       y_tr.resize( n_tr << 1, 1 );
-       X_tr
-       <<
-       D( zo_visit.Z, Eigen::all ).block( 0, 0, n_tr, D.cols( ) - 1 ),
-       D( zo_visit.O, Eigen::all ).block( 0, 0, n_tr, D.cols( ) - 1 );
-       y_tr << TMatrix::Zero( n_tr, 1 ), TMatrix::Ones( n_tr, 1 );
-       std::vector< Eigen::Index > idx_tr( n_tr << 1 );
-       std::iota( idx_tr.begin( ), idx_tr.end( ), 0 );
-       std::shuffle( idx_tr.begin( ), idx_tr.end( ), rang_gen );
-
-       X_tr = X_tr( idx_tr, Eigen::all ).eval( );
-       y_tr = y_tr( idx_tr, Eigen::all ).eval( );
-
-       // Get testing balanced data
-       zo_visit.Z.erase( zo_visit.Z.begin( ), zo_visit.Z.begin( ) + n_tr );
-       zo_visit.O.erase( zo_visit.O.begin( ), zo_visit.O.begin( ) + n_tr );
-       if( 0 < zo_visit.Z.size( ) && 0 < zo_visit.O.size( ) )
-       {
-       X_te.resize( ( n - n_tr ) << 1, D.cols( ) - 1 );
-       y_te.resize( ( n - n_tr ) << 1, 1 );
-       X_te
-       <<
-       D( zo_visit.Z, Eigen::all ).block( 0, 0, n - n_tr, D.cols( ) - 1 ),
-       D( zo_visit.O, Eigen::all ).block( 0, 0, n - n_tr, D.cols( ) - 1 );
-       y_te << TMatrix::Zero( n - n_tr, 1 ), TMatrix::Ones( n - n_tr, 1 );
-       } // end if
-    */
-
-    std::exit( 1 );
+      X_te = D( v.Te, Eigen::all ).block( 0, 0, v.Te.size( ), n );
+      y_te = D( v.Te, Eigen::all ).block( 0, n, v.Te.size( ), 1 );
+    } // end if
   }
   else
   {
@@ -310,13 +227,25 @@ void fit( const Args& args )
     std::cout << "Testing cost: " << m.cost( X_te, y_te ) << std::endl;
 
   // Confussion matrices
-  TMatrix z = m( X_tr, true );
-  TMatrix y_obs( y_tr.rows( ), 2 ), y_pre( y_tr.rows( ), 2 );
-  y_obs << TReal( 1 ) - y_tr.array( ), y_tr;
-  y_pre << TReal( 1 ) - z.array( ), z;
-
-  std::cout << ( y_obs.transpose( ) * y_pre ) << std::endl;
-
+  auto K_tr = ivqML::Helpers::BinaryConfussionMatrix( y_tr, m( X_tr, true ) );
+  std::cout << "========= Training confussion =========" << std::endl;
+  std::cout << "Matrix: " << std::endl << std::get< 0 >( K_tr ) << std::endl;
+  std::cout << "Sensibility = " << std::get< 1 >( K_tr ) << std::endl;
+  std::cout << "Specificity = " << std::get< 2 >( K_tr ) << std::endl;
+  std::cout << "Accuracy    = " << std::get< 3 >( K_tr ) << std::endl;
+  std::cout << "F1          = " << std::get< 4 >( K_tr ) << std::endl;
+  std::cout << "=======================================" << std::endl;
+  if( X_te.rows( ) > 0 )
+  {
+    auto K_te = ivqML::Helpers::BinaryConfussionMatrix( y_te, m( X_te, true ) );
+    std::cout << "========= Testing confussion =========" << std::endl;
+    std::cout << "Matrix: " << std::endl << std::get< 0 >( K_te ) << std::endl;
+    std::cout << "Sensibility = " << std::get< 1 >( K_te ) << std::endl;
+    std::cout << "Specificity = " << std::get< 2 >( K_te ) << std::endl;
+    std::cout << "Accuracy    = " << std::get< 3 >( K_te ) << std::endl;
+    std::cout << "F1          = " << std::get< 4 >( K_te ) << std::endl;
+    std::cout << "=======================================" << std::endl;
+  } // end if
 }
 
 // eof - $RCSfile$

@@ -39,7 +39,9 @@ namespace ivqML
         virtual ~Logistic( ) override;
 
         template< class _TX >
-        auto operator()( const Eigen::EigenBase< _TX >& X, bool threshold = false ) const;
+        auto operator()(
+          const Eigen::EigenBase< _TX >& X, const bool& threshold = false
+          ) const;
 
         /**
          * TODO: This method has no sense in a logistic regression
