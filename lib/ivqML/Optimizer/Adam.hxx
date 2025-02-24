@@ -75,8 +75,13 @@ fit(
   auto X_te = bX_test.derived( ).template cast< TReal >( );
   auto y_te = by_test.derived( ).template cast< TReal >( );
 
-  TReal b1t = this->m_Beta1;
-  TReal b2t = this->m_Beta2;
+  TReal e = this->m_Epsilon;
+  TReal b1 = this->m_Beta1;
+  TReal b2 = this->m_Beta2;
+  TReal cb1 = _1 - b1;
+  TReal cb2 = _1 - b2;
+  TReal b1t = b1;
+  TReal b2t = b2;
   TNatural t = 0;
   bool stop = false;
   TColumn G( this->m_Model->size( ) );
@@ -96,25 +101,6 @@ fit(
       TReal J_te
         =
         ( 0 < X_te.rows( ) )? this->m_Model->cost( X_te, y_te ): _M;
-      mt = ( mt * this->m_Beta1 ) + ( G * ( _1 - this->m_Beta1 ) );
-      vt
-        =
-        ( vt * this->m_Beta2 )
-        +
-        ( G.array( ).pow( 2 ) * ( _1 - this->m_Beta2 ) ).matrix( );
-
-      *( this->m_Model )
-        -=
-        (
-          ( mt * ( _1 / ( _1 - b1t ) ) ).array( )
-          /
-          (
-            ( ( vt * ( _1 / ( _1 - b2t ) ) ).array( ) ).sqrt( )
-            + this->m_Epsilon
-            )
-          ).matrix( )
-        *
-        this->m_Alpha;
 
       stop
         =
@@ -122,8 +108,21 @@ fit(
           t, std::sqrt( G.array( ).pow( 2 ).sum( ) ), J_tr, J_te
           );
 
-      b1t *= this->m_Beta1;
-      b2t *= this->m_Beta2;
+      if( !stop )
+      {
+        TReal i1 = _1 / ( _1 - b1t );
+        TReal i2 = _1 / ( _1 - b2t );
+
+        mt = ( mt * b1 ) + ( G * cb1 );
+        vt = ( vt * b2 ) + ( G.array( ).pow( 2 ) * cb2 ).matrix( );
+        auto D =
+          ( mt * i1 ).array( ) / ( ( ( vt * i2 ).array( ) ).sqrt( ) + e );
+        
+        *( this->m_Model ) -= D.matrix( ) * this->m_Alpha;
+
+        b1t *= b1;
+        b2t *= b2;
+      } // end if
     }
     else
       stop = true;

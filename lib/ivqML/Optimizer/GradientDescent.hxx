@@ -76,13 +76,14 @@ fit(
         =
         ( 0 < X_te.rows( ) )? this->m_Model->cost( X_te, y_te ): _M;
 
-      *( this->m_Model ) -= G * this->m_Alpha;
-
       stop
         =
         this->m_Debug(
           t, std::sqrt( G.array( ).pow( 2 ).sum( ) ), J_tr, J_te
           );
+
+      if( !stop )
+        *( this->m_Model ) -= G * this->m_Alpha;
     }
     else
       stop = true;
