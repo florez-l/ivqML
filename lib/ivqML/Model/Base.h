@@ -19,19 +19,20 @@ namespace ivqML
       using TReal    = _TReal;
       using TNatural = _TNatural;
       using Self     = Base;
-      using TMatrix
+      using TMat
       = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
-      using TColumn   = Eigen::Matrix< TReal, Eigen::Dynamic, 1 >;
-      using TRow      = Eigen::Matrix< TReal, 1, Eigen::Dynamic >;
-      using TMap      = Eigen::Map< TMatrix >;
-      using TConstMap = Eigen::Map< const TMatrix >;
+      using TCol     = Eigen::Matrix< TReal, Eigen::Dynamic, 1 >;
+      using TRow     = Eigen::Matrix< TReal, 1, Eigen::Dynamic >;
+      using TMatMap  = Eigen::Map< TMat >;
+      using TCMatMap = Eigen::Map< const TMat >;
+      using TColMap  = Eigen::Map< TCol >;
+      using TCColMap = Eigen::Map< const TCol >;
+      using TRowMap  = Eigen::Map< TRow >;
+      using TCRowMap = Eigen::Map< const TRow >;
 
     public:
       Base( const TNatural& n = 1 );
       virtual ~Base( );
-
-      TReal& operator[]( const TNatural& i );
-      const TReal& operator[]( const TNatural& i ) const;
 
       template< class _Tw >
       Self& operator+=( const Eigen::EigenBase< _Tw >& w );
@@ -39,8 +40,8 @@ namespace ivqML
       template< class _Tw >
       Self& operator-=( const Eigen::EigenBase< _Tw >& w );
 
-      const TNatural& size( ) const;
-      void init( );
+      virtual const TNatural& size( ) const;
+      virtual void init( );
 
     protected:
       virtual void _resize( const TNatural& n );

@@ -23,35 +23,6 @@ ivqML::Model::Base< _TReal, _TNatural >::
 
 // -------------------------------------------------------------------------
 template< class _TReal, class _TNatural >
-typename ivqML::Model::Base< _TReal, _TNatural >::
-TReal& ivqML::Model::Base< _TReal, _TNatural >::
-operator[]( const TNatural& i )
-{
-  static TReal _z;
-  if( i < this->m_S )
-    return( this->m_P[ i ] );
-  else
-  {
-    _z = TReal( 0 );
-    return( _z );
-  } // end if
-}
-
-// -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-const typename ivqML::Model::Base< _TReal, _TNatural >::
-TReal& ivqML::Model::Base< _TReal, _TNatural >::
-operator[]( const TNatural& i ) const
-{
-  static const TReal _z = TReal( 0 );
-  if( i < this->m_S )
-    return( this->m_P[ i ] );
-  else
-    return( _z );
-}
-
-// -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
 const typename ivqML::Model::Base< _TReal, _TNatural >::
 TNatural& ivqML::Model::Base< _TReal, _TNatural >::
 size( ) const
@@ -64,7 +35,7 @@ template< class _TReal, class _TNatural >
 void ivqML::Model::Base< _TReal, _TNatural >::
 init( )
 {
-  TMap( this->m_P, this->m_S, 0 ) *= TReal( 0 );
+  TColMap( this->m_P, this->m_S, 0 ) *= TReal( 0 );
 }
 
 // -------------------------------------------------------------------------
@@ -75,12 +46,11 @@ _resize( const TNatural& n )
   if( this->m_P != nullptr )
     std::free( this->m_P );
   this->m_S = n;
+  this->m_P = nullptr;
   if( n > 0 )
     this->m_P
       =
       reinterpret_cast< TReal* >( std::calloc( n, sizeof( TReal ) ) );
-  else
-    this->m_P = nullptr;
 }
 
 // -------------------------------------------------------------------------

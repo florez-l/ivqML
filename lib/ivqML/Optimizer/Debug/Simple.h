@@ -20,9 +20,15 @@ namespace ivqML
         using Self     = Simple;
         using TReal    = typename TModel::TReal;
         using TNatural = typename TModel::TNatural;
-        using TMatrix  = typename TModel::TMatrix;
-        using TColumn  = typename TModel::TColumn;
+        using TMat     = typename TModel::TMat;
+        using TCol     = typename TModel::TCol;
         using TRow     = typename TModel::TRow;
+        using TMatMap  = typename TModel::TMatMap;
+        using TCMatMap = typename TModel::TCMatMap;
+        using TColMap  = typename TModel::TColMap;
+        using TCColMap = typename TModel::TCColMap;
+        using TRowMap  = typename TModel::TRowMap;
+        using TCRowMap = typename TModel::TCRowMap;
 
       public:
         Simple( const TModel& m, std::ostream& o, const TNatural& e )

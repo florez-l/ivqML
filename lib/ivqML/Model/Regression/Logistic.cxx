@@ -22,7 +22,7 @@ ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
 // -------------------------------------------------------------------------
 template< class _TReal, class _TNatural >
 ivqML::Model::Regression::Logistic< _TReal, _TNatural >::SVisitor::
-SVisitor( const TColumn& Z )
+SVisitor( const TCol& Z )
 {
   this->Z = &Z;
   this->E =

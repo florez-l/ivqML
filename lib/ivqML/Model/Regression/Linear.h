@@ -23,15 +23,22 @@ namespace ivqML
         using TNatural   = _TNatural;
         using Self       = Linear;
         using Superclass = ivqML::Model::Base< TReal, TNatural >;
-        using TMatrix    = typename Superclass::TMatrix;
-        using TColumn    = typename Superclass::TColumn;
+        using TMat       = typename Superclass::TMat;
+        using TCol       = typename Superclass::TCol;
         using TRow       = typename Superclass::TRow;
-        using TMap       = typename Superclass::TMap;
-        using TConstMap  = typename Superclass::TConstMap;
+        using TMatMap    = typename Superclass::TMatMap;
+        using TCMatMap   = typename Superclass::TCMatMap;
+        using TColMap    = typename Superclass::TColMap;
+        using TCColMap   = typename Superclass::TCColMap;
+        using TRowMap    = typename Superclass::TRowMap;
+        using TCRowMap   = typename Superclass::TCRowMap;
 
       public:
         Linear( const TNatural& n = 1 );
         virtual ~Linear( ) override;
+
+        TReal& operator[]( const TNatural& i );
+        const TReal& operator[]( const TNatural& i ) const;
 
         template< class _TX >
         auto operator()( const Eigen::EigenBase< _TX >& X ) const;

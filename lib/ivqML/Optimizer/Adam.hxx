@@ -84,9 +84,9 @@ fit(
   TReal b2t = b2;
   TNatural t = 0;
   bool stop = false;
-  TColumn G( this->m_Model->size( ) );
-  TColumn mt = TColumn::Zero( G.rows( ) );
-  TColumn vt = TColumn::Zero( G.rows( ) );
+  TCol G( this->m_Model->size( ) );
+  TCol mt = TCol::Zero( G.rows( ) );
+  TCol vt = TCol::Zero( G.rows( ) );
 
   while( !stop )
   {

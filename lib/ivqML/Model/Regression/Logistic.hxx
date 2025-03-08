@@ -64,7 +64,7 @@ cost_gradient(
   auto X = bX.derived( ).template cast< TReal >( );
   auto y = by.derived( ).template cast< TReal >( );
 
-  TColumn z = this->operator()( X );
+  TCol z = this->operator()( X );
   SVisitor v( z );
   y.visit( v );
   z -= y;
@@ -84,7 +84,7 @@ typename ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
 TReal ivqML::Model::Regression::Logistic< _TReal, _TNatural >::
 cost( const Eigen::EigenBase< _TX >& X, const Eigen::EigenBase< _Ty >& y )
 {
-  TColumn z = this->operator()( X );
+  TCol z = this->operator()( X );
   SVisitor v( z );
   y.derived( ).template cast< TReal >( ).visit( v );
   return( v.J / TReal( X.rows( ) ) );

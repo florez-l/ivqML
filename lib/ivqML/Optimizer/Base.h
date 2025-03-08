@@ -16,15 +16,19 @@ namespace ivqML
     class Base
     {
     public:
-      using TModel    = _TModel;
-      using Self      = Base;
-      using TReal     = typename TModel::TReal;
-      using TNatural  = typename TModel::TNatural;
-      using TMatrix   = typename TModel::TMatrix;
-      using TColumn   = typename TModel::TColumn;
-      using TRow      = typename TModel::TRow;
-      using TMap      = typename TModel::TMap;
-      using TConstMap = typename TModel::TConstMap;
+      using TModel   = _TModel;
+      using Self     = Base;
+      using TReal    = typename TModel::TReal;
+      using TNatural = typename TModel::TNatural;
+      using TMat     = typename TModel::TMat;
+      using TCol     = typename TModel::TCol;
+      using TRow     = typename TModel::TRow;
+      using TMatMap  = typename TModel::TMatMap;
+      using TCMatMap = typename TModel::TCMatMap;
+      using TColMap  = typename TModel::TColMap;
+      using TCColMap = typename TModel::TCColMap;
+      using TRowMap  = typename TModel::TRowMap;
+      using TCRowMap = typename TModel::TCRowMap;
 
       using TDebug
       =

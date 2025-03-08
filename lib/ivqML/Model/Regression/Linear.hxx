@@ -15,7 +15,7 @@ operator()( const Eigen::EigenBase< _TX >& X ) const
   return(
     ( ( X.derived( ).template cast< TReal >( )
         *
-        TMap( this->m_P + 1, this->m_S - 1, 1 ) ).array( )
+        TCColMap( this->m_P + 1, this->m_S - 1, 1 ) ).array( )
       +
       this->m_P[ 0 ] ).matrix( )
     );
@@ -45,26 +45,26 @@ fit(
      throw AssertionError( 'Incompatible sizes.' )
   */
 
-  TMatrix b( 1, n + 1 );
-  b( 0 , 0 ) = y.mean( );
+  TRow b( n + 1 );
+  b( 0 ) = y.mean( );
   b.block( 0, 1, 1, n )
     =
     ( X.array( ).colwise( ) * y.col( 0 ).array( ) ).colwise( ).mean( );
 
-  TMatrix A( n + 1, n + 1 );
+  TMat A( n + 1, n + 1 );
   A( 0 , 0 ) = 1 + L2;
   A.block( 1, 1, n, n )
     =
-    ( TMatrix::Identity( n, n ) * L2 ).array( )
+    ( TMat::Identity( n, n ) * L2 ).array( )
     +
     ( ( X.transpose( ) * X ).array( ) / TReal( m ) );
   A.block( 0, 1, 1, n ) = X.colwise( ).mean( );
   A.block( 1, 0, n, 1 ) = A.block( 0, 1, 1, n ).transpose( );
 
   this->_resize( n + 1 );
-  TMap( this->m_P, n + 1, 1 )
+  TRowMap( this->m_P, n + 1, 1 )
     =
-    A.colPivHouseholderQr().solve( b.transpose( ) );
+    A.colPivHouseholderQr( ).solve( b.transpose( ) );
 }
 
 // -------------------------------------------------------------------------
@@ -79,12 +79,10 @@ cost_gradient(
   const TReal& L1, const TReal& L2
   )
 {
-  std::cout << "uh oh" << std::endl;
-
   auto X = bX.derived( ).template cast< TReal >( );
   auto y = by.derived( ).template cast< TReal >( );
 
-  TColumn z = this->operator()( X ) - y;
+  TCol z = this->operator()( X ) - y;
   G.derived( )( 0 , 0 ) = TReal( 2 ) * z.mean( );
   G.derived( ).block( 1, 0, X.cols( ), 1 )
     =

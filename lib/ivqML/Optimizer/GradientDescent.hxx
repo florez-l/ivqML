@@ -60,7 +60,7 @@ fit(
 
   TNatural t = 0;
   bool stop = false;
-  TColumn G( this->m_Model->size( ) );
+  TCol G( this->m_Model->size( ) );
 
   while( !stop )
   {

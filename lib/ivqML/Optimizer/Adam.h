@@ -22,12 +22,15 @@ namespace ivqML
       using Superclass = ivqML::Optimizer::GradientDescent< TModel >;
       using TReal      = typename Superclass::TReal;
       using TNatural   = typename Superclass::TNatural;
-      using TMatrix    = typename Superclass::TMatrix;
-      using TColumn    = typename Superclass::TColumn;
+      using TMat       = typename Superclass::TMat;
+      using TCol       = typename Superclass::TCol;
       using TRow       = typename Superclass::TRow;
-      using TMap       = typename Superclass::TMap;
-      using TConstMap  = typename Superclass::TConstMap;
-      using TDebug     = typename Superclass::TDebug;
+      using TMatMap    = typename Superclass::TMatMap;
+      using TCMatMap   = typename Superclass::TCMatMap;
+      using TColMap    = typename Superclass::TColMap;
+      using TCColMap   = typename Superclass::TCColMap;
+      using TRowMap    = typename Superclass::TRowMap;
+      using TCRowMap   = typename Superclass::TCRowMap;
 
     public:
       Adam( TModel& m );

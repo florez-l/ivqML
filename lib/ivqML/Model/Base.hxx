@@ -12,7 +12,7 @@ Self& ivqML::Model::Base< _TReal, _TNatural >::
 operator+=( const Eigen::EigenBase< _Tw >& w )
 {
   if( w.size( ) == this->m_S )
-    TMap( this->m_P, w.rows( ), w.cols( ) )
+    TMatMap( this->m_P, w.rows( ), w.cols( ) )
       +=
       w.derived( ).template cast< TReal >( );
   return( *this );
@@ -26,7 +26,7 @@ Self& ivqML::Model::Base< _TReal, _TNatural >::
 operator-=( const Eigen::EigenBase< _Tw >& w )
 {
   if( w.size( ) == this->m_S )
-    TMap( this->m_P, w.rows( ), w.cols( ) )
+    TMatMap( this->m_P, w.rows( ), w.cols( ) )
       -=
       w.derived( ).template cast< TReal >( );
   return( *this );

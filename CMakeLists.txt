@@ -18,7 +18,7 @@ find_package(ivq REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
 
 ## -- Subdirs
-subdirs(bash cmake lib/ivqML)
+subdirs(bash cmake examples lib/ivqML)
 # TODO: include(cmake/ivqMLInstall.cmake)
 
 ## eof - $RCSfile$

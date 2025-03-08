@@ -20,6 +20,35 @@ ivqML::Model::Regression::Linear< _TReal, _TNatural >::
 }
 
 // -------------------------------------------------------------------------
+template< class _TReal, class _TNatural >
+typename ivqML::Model::Regression::Linear< _TReal, _TNatural >::
+TReal& ivqML::Model::Regression::Linear< _TReal, _TNatural >::
+operator[]( const TNatural& i )
+{
+  static TReal _z;
+  if( i < this->m_S )
+    return( this->m_P[ i ] );
+  else
+  {
+    _z = TReal( 0 );
+    return( _z );
+  } // end if
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal, class _TNatural >
+const typename ivqML::Model::Regression::Linear< _TReal, _TNatural >::
+TReal& ivqML::Model::Regression::Linear< _TReal, _TNatural >::
+operator[]( const TNatural& i ) const
+{
+  static const TReal _z = TReal( 0 );
+  if( i < this->m_S )
+    return( this->m_P[ i ] );
+  else
+    return( _z );
+}
+
+// -------------------------------------------------------------------------
 namespace ivqML
 {
   namespace Model

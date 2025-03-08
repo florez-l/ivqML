@@ -167,9 +167,9 @@ void fit( const Args& args )
   using TModel = typename TOptimizer::TModel;
   using TNatural = typename TOptimizer::TNatural;
   using TReal = typename TOptimizer::TReal;
-  using TMatrix = typename TOptimizer::TMatrix;
+  using TMat = typename TOptimizer::TMat;
 
-  TMatrix X_tr( 0, 0 ), y_tr( 0, 0 ), X_te( 0, 0 ), y_te( 0, 0 );
+  TMat X_tr( 0, 0 ), y_tr( 0, 0 ), X_te( 0, 0 ), y_te( 0, 0 );
 
   // Prepare test data
   TReal test_coeff;
@@ -178,7 +178,7 @@ void fit( const Args& args )
   if( test_istr.eof( ) && !test_istr.fail( ) )
   {
     // Read training data
-    TMatrix D;
+    TMat D;
     ivqML::IO::ReadCSV( D, args.TrainFilename, 0, args.Delimiter );
     TNatural n = D.cols( ) - 1;
 

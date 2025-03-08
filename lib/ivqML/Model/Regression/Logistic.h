@@ -25,11 +25,15 @@ namespace ivqML
         =
           ivqML::Model::Regression::Linear< TReal, TNatural >;
         using Self       = Logistic;
-        using TMatrix    = typename Superclass::TMatrix;
-        using TColumn    = typename Superclass::TColumn;
+        using TMat       = typename Superclass::TMat;
+        using TCol       = typename Superclass::TCol;
         using TRow       = typename Superclass::TRow;
-        using TMap       = typename Superclass::TMap;
-        using TConstMap  = typename Superclass::TConstMap;
+        using TMatMap    = typename Superclass::TMatMap;
+        using TCMatMap   = typename Superclass::TCMatMap;
+        using TColMap    = typename Superclass::TColMap;
+        using TCColMap   = typename Superclass::TCColMap;
+        using TRowMap    = typename Superclass::TRowMap;
+        using TCRowMap   = typename Superclass::TCRowMap;
 
       protected:
         using TIdx = Eigen::Index;
@@ -72,11 +76,11 @@ namespace ivqML
          */
         struct SVisitor
         {
-          SVisitor( const TColumn& Z );
+          SVisitor( const TCol& Z );
           void init( const TReal& y, const TIdx& i, const TIdx& j );
           void operator()( const TReal& y, const TIdx& i, const TIdx& j );
 
-          const TColumn* Z;
+          const TCol* Z;
           TReal J;
           TReal E;
           TReal D;
