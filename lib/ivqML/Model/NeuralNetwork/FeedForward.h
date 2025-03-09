@@ -4,6 +4,7 @@
 #ifndef __ivqML__Model__NeuralNetwork__FeedForward__h__
 #define __ivqML__Model__NeuralNetwork__FeedForward__h__
 
+#include <functional>
 #include <initializer_list>
 #include <vector>
 #include <ivqML/Model/Base.h>
@@ -11,6 +12,10 @@
 
 
 #include <algorithm>
+#include <cctype>
+#include <cmath>
+#include <random>
+#include <string>
 
 
 
@@ -21,6 +26,107 @@ namespace ivqML
   {
     namespace NeuralNetwork
     {
+      /**
+       */
+      template< class _TReal >
+      class ActivationFactory
+      {
+      public:
+        using TReal = _TReal;
+        using Self  = ActivationFactory;
+        using TMat  = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
+        using TMap  = Eigen::Map< TMat >;
+
+        using TUnary = std::function< TReal( const TReal&, bool ) >;
+        using TFunction = std::function< void( TMap&, const TMap&, bool ) >;
+
+      public:
+        static TFunction Get( const std::string& a )
+          {
+            std::string n = a;
+            std::transform(
+              n.begin( ), n.end( ), n.begin( ),
+              []( const unsigned char& c ) -> unsigned char
+              {
+                return( std::tolower( c ) );
+              }
+              );
+            if( n == "softmax" )
+            {
+              return( []( TMap& A, const TMap& Z, bool d ) -> void {} );
+            }
+            else
+            {
+              if( n == "relu" )
+                return(
+                  []( TMap& A, const TMap& Z, bool d ) -> void
+                  {
+                    A = Z.unaryExpr(
+                      [&d]( const TReal& z ) -> TReal
+                      {
+                        if( d )
+                          return( ( z < TReal( 0 ) )? TReal( 0 ): TReal( 1 ) );
+                        else
+                          return( ( z < TReal( 0 ) )? TReal( 0 ): z );
+                      }
+                      );
+                  }
+                  );
+              else if( n == "tanh" )
+                return(
+                  []( TMap& A, const TMap& Z, bool d ) -> void
+                  {
+                    A = Z.unaryExpr(
+                      [&d]( const TReal& z ) -> TReal
+                      {
+                        TReal a = std::tanh( z );
+                        if( d )
+                          return( TReal( 1 ) - ( a * a ) );
+                        else
+                          return( a );
+                      }
+                      );
+                  }
+                  );
+              else if( n == "sigmoid" )
+                return(
+                  []( TMap& A, const TMap& Z, bool d ) -> void
+                  {
+                    A = Z.unaryExpr(
+                      [&d]( const TReal& z ) -> TReal
+                      {
+                        static const TReal _0  = TReal( 0 );
+                        static const TReal _1  = TReal( 1 );
+                        static const TReal _M  = std::numeric_limits< TReal >::max( );
+                        static const TReal _L  = std::log( _M ) / TReal( 2 );
+
+                        TReal s;
+                        if     ( z >  _L ) s = _1;
+                        else if( z < -_L ) s = _0;
+                        else               s = _1 / ( _1 + std::exp( -z ) );
+
+                        return( s * ( ( d )? ( _1 - s ): _1 ) );
+                      }
+                      );
+                  }
+                  );
+              else // if( n == "identity" )
+                return(
+                  []( TMap& A, const TMap& Z, bool d ) -> void
+                  {
+                    A = Z.unaryExpr(
+                      [&d]( const TReal& z ) -> TReal
+                      {
+                        return( ( d )? TReal( 1 ): z );
+                      }
+                      );
+                  }
+                  );
+            } // end if
+          }
+      };
+      
+
       /**
        */
       template< class _TReal, class _TNatural = unsigned long long >
@@ -42,7 +148,10 @@ namespace ivqML
         using TRowMap    = typename Superclass::TRowMap;
         using TCRowMap   = typename Superclass::TCRowMap;
 
-        using TActivation = int;
+        using TActivationFactory
+        =
+          ivqML::Model::NeuralNetwork::ActivationFactory< TReal >;
+        using TActivation = typename TActivationFactory::TFunction;
 
       public:
         FeedForward( )
@@ -70,7 +179,7 @@ namespace ivqML
           const TNatural& i, const TNatural& o, const std::string& a
           )
           {
-            this->set_input_layer( i, o, aaaa );
+            this->set_input_layer( i, o, TActivationFactory::Get( a ) );
           }
         void add_layer( const TNatural& o, TActivation a )
           {
@@ -79,7 +188,7 @@ namespace ivqML
           }
         void add_layer( const TNatural& o, const std::string& a )
           {
-            this->add_layer( o, aaaa );
+            this->add_layer( o, TActivationFactory::Get( a ) );
           }
         TNatural number_of_layers( ) const
           {
@@ -139,6 +248,22 @@ namespace ivqML
               this->m_B.push_back( TRowMap( b, 1, o ) );
               b += o;
             } // end for
+
+            // Init some random parameters
+            std::random_device rd;
+            std::mt19937 rg( rd( ) );
+            std::uniform_real_distribution< TReal > rdis(
+              std::numeric_limits< TReal >::epsilon( ),
+              TReal( 1 )
+              );
+            std::transform(
+              this->m_P, this->m_P + this->m_S, this->m_P,
+              [&]( const TReal& v ) -> TReal
+              {
+                return( ( TReal( 2 ) * rdis( rg ) ) - TReal( 1 ) );
+              }
+              );
+
           }
 
         template< class _TX >
@@ -167,7 +292,7 @@ namespace ivqML
                 ( TMatMap( Ab, M, i ) * this->m_W[ l ] ).array( )
                 +
                 this->m_B[ l ];
-              TMatMap( Ab, M, o ) = this->m_A[ l ]( TMatMap( Zb, M, o ) );
+              this->m_A[ l ]( TMatMap( Ab, M, o ), TMatMap( Zb, M, o ) );
             } // end for
 
             TMat A = TMatMap( Ab, M, this->output_size( ) );
@@ -212,6 +337,7 @@ namespace ivqML
       protected:
         virtual void _to_stream( std::ostream& o ) const
           {
+            this->Superclass::_to_stream( o );
           }
 
       protected:
