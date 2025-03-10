@@ -169,11 +169,11 @@ namespace ivqML
             this->m_N.clear( );
             this->m_W.clear( );
             this->m_B.clear( );
-            this->m_A.clear( );
+            this->m_F.clear( );
 
             this->m_N.push_back( i );
             this->m_N.push_back( o );
-            this->m_A.push_back( a );
+            this->m_F.push_back( a );
           }
         void set_input_layer(
           const TNatural& i, const TNatural& o, const std::string& a
@@ -184,7 +184,7 @@ namespace ivqML
         void add_layer( const TNatural& o, TActivation a )
           {
             this->m_N.push_back( o );
-            this->m_A.push_back( a );
+            this->m_F.push_back( a );
           }
         void add_layer( const TNatural& o, const std::string& a )
           {
@@ -196,13 +196,15 @@ namespace ivqML
           }
         const TNatural& input_size( const TNatural& l = 0 ) const
           {
+            static const TNatural _0 = TNatural( 0 );
             if( l < this->m_N.size( ) )
               return( this->m_N[ l ] );
             else
-              return( 0 );
+              return( _0 );
           }
         const TNatural& output_size( const TNatural& l = 0 ) const
           {
+            static const TNatural _0 = TNatural( 0 );
             if( this->m_N.size( ) > 0 )
             {
               if( l == 0 )
@@ -213,11 +215,11 @@ namespace ivqML
                 if( i < this->m_N.size( ) )
                   return( this->m_N[ i ] );
                 else
-                  return( 0 );
+                  return( _0 );
               }
             }
             else
-              return( 0 );
+              return( _0 );
           }
 
         TReal& operator[]( std::initializer_list< TNatural > i )
@@ -266,14 +268,15 @@ namespace ivqML
 
           }
 
-        template< class _TX >
-        TMat operator()( const Eigen::EigenBase< _TX >& X ) const
+        template< class _TA >
+        auto operator()( const Eigen::EigenBase< _TA >& bX ) const
           {
+            auto X = bX.derived( ).template cast< TReal >( );
             TNatural L = this->number_of_layers( );
             TNatural M = X.rows( );
             TNatural mN
               =
-              *( std::max_element( this->m_N.begin( ) + 1, this->m_N.end( ) ) );
+              *( std::max_element( this->m_N.begin( ), this->m_N.end( ) ) );
             TReal* Ab
               =
               reinterpret_cast< TReal* >(
@@ -281,18 +284,26 @@ namespace ivqML
                 );
             TReal* Zb = Ab + ( mN * M );
 
-            TMatMap( Ab, M, this->m_N[ 0 ] ) = X.template cast< TReal >( );
+            TMatMap( Ab, M, this->m_N[ 0 ] ) = X;
             for( TNatural l = 0; l < L; ++l )
             {
               TNatural i = this->m_N[ l ];
               TNatural o = this->m_N[ l + 1 ];
 
-              TMatMap( Zb, M, o )
-                =
-                ( TMatMap( Ab, M, i ) * this->m_W[ l ] ).array( )
-                +
-                this->m_B[ l ];
-              this->m_A[ l ]( TMatMap( Ab, M, o ), TMatMap( Zb, M, o ) );
+              TMatMap Z( Zb, M, o );
+
+              std::cout << "................." << std::endl;
+              std::cout << TMatMap( Ab, M, i ) << std::endl;
+              std::cout << "................." << std::endl;
+
+              Z = ( TMatMap( Ab, M, i ) * this->m_W[ l ] ) + this->m_B[ l ];
+              std::cout << Z << std::endl;
+              std::cout << "+++++++++++++++++" << std::endl;
+
+              TMatMap A( Ab, M, o );
+              this->m_F[ l ]( A, Z, false );
+              std::cout << A << std::endl;
+              std::cout << "*****************" << std::endl;
             } // end for
 
             TMat A = TMatMap( Ab, M, this->output_size( ) );
@@ -344,7 +355,7 @@ namespace ivqML
         std::vector< TNatural >    m_N;
         std::vector< TMatMap >     m_W;
         std::vector< TRowMap >     m_B;
-        std::vector< TActivation > m_A;
+        std::vector< TActivation > m_F;
       };
     } // end namespace
   } // end namespace

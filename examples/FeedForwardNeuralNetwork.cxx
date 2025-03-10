@@ -32,10 +32,24 @@ int main( int argc, char** argv )
   m.set_input_layer( 2, 10, "relu" );
   m.add_layer( 5, "relu" );
   m.add_layer( 3, "relu" );
-  m.add_layer( 1, "sigmoid" );
+  m.add_layer( 1, "identity" );
   m.init( );
 
+  std::cout << "---------------------------------------------" << std::endl;
   std::cout << "Model: " << std::endl << m << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
+
+  TNatural M = 7;
+  TModel::TMat X = TModel::TMat::Ones( 7, m.input_size( ) );
+  auto y = m( X );
+
+  std::cout << "---------------------------------------------" << std::endl;
+  std::cout << X << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
+  std::cout << y << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
+  std::cout << "_Z" << typeid( y ).name( ) << std::endl;
+  std::cout << "---------------------------------------------" << std::endl;
 
   return( EXIT_SUCCESS );
 }
