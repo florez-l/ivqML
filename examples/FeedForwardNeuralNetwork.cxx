@@ -32,7 +32,7 @@ int main( int argc, char** argv )
   m.set_input_layer( 2, 10, "relu" );
   m.add_layer( 5, "relu" );
   m.add_layer( 3, "relu" );
-  m.add_layer( 1, "identity" );
+  m.add_layer( 1, "sigmoid" );
   m.init( );
 
   std::cout << "---------------------------------------------" << std::endl;

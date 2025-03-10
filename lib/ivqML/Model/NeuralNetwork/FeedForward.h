@@ -291,19 +291,9 @@ namespace ivqML
               TNatural o = this->m_N[ l + 1 ];
 
               TMatMap Z( Zb, M, o );
-
-              std::cout << "................." << std::endl;
-              std::cout << TMatMap( Ab, M, i ) << std::endl;
-              std::cout << "................." << std::endl;
-
-              Z = ( TMatMap( Ab, M, i ) * this->m_W[ l ] ) + this->m_B[ l ];
-              std::cout << Z << std::endl;
-              std::cout << "+++++++++++++++++" << std::endl;
-
+              Z = ( TMatMap( Ab, M, i ) * this->m_W[ l ] ).rowwise( ) + this->m_B[ l ];
               TMatMap A( Ab, M, o );
               this->m_F[ l ]( A, Z, false );
-              std::cout << A << std::endl;
-              std::cout << "*****************" << std::endl;
             } // end for
 
             TMat A = TMatMap( Ab, M, this->output_size( ) );
