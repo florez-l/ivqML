@@ -14,11 +14,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 include(GenerateExportHeader)
 
 # -- Find required packages
-find_package(ivq REQUIRED)
 find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(ivq REQUIRED)
+set(ivqML_OpenMP_LINK "")
+if(OpenMP_CXX_FOUND)
+  set(ivqML_OpenMP_LINK "OpenMP::OpenMP_CXX")
+endif()
 
 ## -- Subdirs
-subdirs(bash cmake examples lib/ivqML)
+subdirs(examples lib/ivqML)
 # TODO: include(cmake/ivqMLInstall.cmake)
 
 ## eof - $RCSfile$

@@ -5,16 +5,17 @@
 #define __ivqML__Config__h__
 
 
+
 #include <iostream>
 
 
 
 
-
 #include <ivqML/Export.h>
-#include <string>
-#include <Eigen/Core>
 
-#endif // __ivqML__Config__h__
+#include <string>
+#include <ivq/eigen/Config.h>
+
+#endif // __ivqML__Config__Config__h__
 
 // eof - $RCSfile$

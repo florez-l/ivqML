@@ -20,6 +20,6 @@ generate_export_header(
   EXPORT_MACRO_NAME ivqML_EXPORT
   EXPORT_FILE_NAME Export.h
   )
-target_link_libraries(ivqML ivq::ivq)
+target_link_libraries(ivqML ivq::ivq ${ivqML_OpenMP_LINK})
 
 ## eof - $RCSfile$
