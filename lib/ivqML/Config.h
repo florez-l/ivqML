@@ -14,6 +14,7 @@
 #include <ivqML/Export.h>
 
 #include <functional>
+#include <numeric>
 #include <string>
 #include <utility>
 #include <ivq/eigen/Config.h>

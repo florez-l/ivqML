@@ -38,6 +38,7 @@ namespace ivqML
         virtual void set_size( const TNatural& n ) override;
         virtual void set_input_size( const TNatural& n0 );
         virtual void add_layer( const TNatural& n, const std::string& a );
+        TNatural number_of_layers( ) const;
 
         virtual void init(
           std::function< TReal( ) > g = [](){return( 0 );}
@@ -48,7 +49,7 @@ namespace ivqML
 
         template< class _TX, class _TY >
         TReal gradient(
-          TReal* rG,
+          TReal* bG,
           const Eigen::EigenBase< _TX >& X,
           const Eigen::EigenBase< _TY >& Y
           ) const;
@@ -59,17 +60,25 @@ namespace ivqML
           TNatural N { 0 };
           TNatural M { 0 };
           TReal*   B { nullptr };
-          TReal*   Z { nullptr };
-          TReal*   A { nullptr };
-          bool     K { false };
 
-          void allocate( const TNatural& m, bool keepAZ );
+          /* TODO
+             TReal*   Z { nullptr };
+             TReal*   A { nullptr };
+             bool     K { false };
+          */
+          std::vector< TMatrixMap > Z;
+          std::vector< TMatrixMap > A;
+
+          void allocate(
+            const std::vector< TNatural >& n,
+            const TNatural& m,
+            bool keepAZ
+            );
           void free( );
         };
 
       protected:
-        template< class _TX >
-        auto _eval( const Eigen::EigenBase< _TX >& bX, SBuffer& b ) const;
+        void _eval( SBuffer& b ) const;
 
         virtual void _to_stream( std::ostream& o ) const override;
 

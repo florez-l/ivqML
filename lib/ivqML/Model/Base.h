@@ -43,6 +43,7 @@ namespace ivqML
       Base( const TNatural& n );
       virtual ~Base( );
 
+      const TNatural& size( ) const;
       virtual void set_size( const TNatural& n );
       virtual void init( std::function< TReal( ) > g = [](){return( 0 );} );
 

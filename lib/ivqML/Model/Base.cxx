@@ -26,6 +26,15 @@ ivqML::Model::Base< _TReal, _TNatural >::
 
 // -------------------------------------------------------------------------
 template< class _TReal, class _TNatural >
+const typename ivqML::Model::Base< _TReal, _TNatural >::
+TNatural& ivqML::Model::Base< _TReal, _TNatural >::
+size( ) const
+{
+  return( this->m_S );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal, class _TNatural >
 void ivqML::Model::Base< _TReal, _TNatural >::
 set_size( const TNatural& n )
 {
