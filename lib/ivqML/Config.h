@@ -13,7 +13,9 @@
 
 #include <ivqML/Export.h>
 
+#include <functional>
 #include <string>
+#include <utility>
 #include <ivq/eigen/Config.h>
 
 #endif // __ivqML__Config__Config__h__
