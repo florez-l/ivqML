@@ -4,7 +4,7 @@
 #ifndef __ivqML__Model__Base__h__
 #define __ivqML__Model__Base__h__
 
-#include <ivqML/Config.h>
+#include <ivqML/Model/Cost.h>
 
 // -------------------------------------------------------------------------
 #define ivqML_Model_Types                                     \
@@ -15,7 +15,8 @@
   using TRow       = typename Superclass::TRow;               \
   using TMatrixMap = typename Superclass::TMatrixMap;         \
   using TColumnMap = typename Superclass::TColumnMap;         \
-  using TRowMap    = typename Superclass::TRowMap
+  using TRowMap    = typename Superclass::TRowMap;            \
+  using TCost      = typename Superclass::TCost
 
 // -------------------------------------------------------------------------
 namespace ivqML
@@ -39,6 +40,8 @@ namespace ivqML
       using TColumnMap = Eigen::Map< TColumn >;
       using TRowMap    = Eigen::Map< TRow >;
 
+      using TCost = ivqML::Model::Cost< TReal >;
+
     public:
       Base( const TNatural& n );
       virtual ~Base( );
@@ -53,6 +56,8 @@ namespace ivqML
     protected:
       TNatural m_S { 0 };
       TReal* m_P   { nullptr };
+
+      TCost m_J;
 
     public:
       friend std::ostream& operator<<( std::ostream& o, const Self& m )

@@ -86,6 +86,14 @@ init( std::function< TReal( ) > g )
     this->m_B.push_back( TColumnMap( p, this->m_N[ l ], 1 ) );
     p += this->m_B.back( ).size( );
   } // end for
+
+  // Configure cost
+  if( this->m_A.back( ).first == "sigmoid" )
+    this->m_J.set_type_to_MCE( );
+  else if( this->m_A.back( ).first == "softmax" )
+    this->m_J.set_type_to_CCE( );
+  else
+    this->m_J.set_type_to_MSE( );
 }
 
 // -------------------------------------------------------------------------

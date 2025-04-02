@@ -13,7 +13,9 @@
 
 #include <ivqML/Export.h>
 
+#include <cmath>
 #include <functional>
+#include <limits>
 #include <numeric>
 #include <string>
 #include <utility>

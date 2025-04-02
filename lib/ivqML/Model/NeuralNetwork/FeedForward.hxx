@@ -32,29 +32,57 @@ gradient(
   // Prepare buffers
   TNatural M = X.cols( );
   this->m_BwdBuf.allocate( this->m_N, M, true );
-  TReal* G = bG + ( this->m_S - this->m_N.back( ) );
+  TReal* G = bG;
 
   // Forward propagation
   this->m_BwdBuf.A[ 0 ] = X;
   this->_eval( this->m_BwdBuf );
 
-  // Backpropagate last layer
+  // Compute cost
   TNatural L = this->number_of_layers( );
+  TReal J = this->m_J( Y, this->m_BwdBuf.A[ L ] );
+
+  // Backpropagate last layer
   this->m_BwdBuf.A[ L ] -= Y;
-     
-  TMatrixMap( G, this->m_N.back( ), 1 )
+  TNatural oG =  this->m_S - this->m_N[ L ];
+  TMatrixMap( G + oG, this->m_N[ L ], 1 )
     =
     this->m_BwdBuf.A[ L ].rowwise( ).mean( );
+  oG -= this->m_N[ L ] * this->m_N[ L - 1 ];
+  TMatrixMap( G + oG, this->m_N[ L ], this->m_N[ L - 1 ] )
+    =
+    ( this->m_BwdBuf.A[ L ] * this->m_BwdBuf.A[ L - 1 ].transpose( ) )
+    /
+    TReal( M );
 
-  /* TODO
-     G = A.rowwise( ).mean( );
-     bG -= this->m_N[ L - 2 ] * this->m_N[ L - 1 ];
-     new ( &G ) TMatrixMap( bG, this->m_N[ L - 1 ], this->m_N[ L - 2 ] );
-     G =
-  */
+  // Backpropagate remaining layers
+  for( TNatural k = 0; k < L - 1; ++k )
+  {
+    TNatural l = L - k - 1;
+    this->m_A[ l - 1 ]
+      .second( this->m_BwdBuf.Z[ l - 1 ], this->m_BwdBuf.Z[ l - 1 ], true );
 
 
-  return( TReal( 0 ) );
+    this->m_BwdBuf.A[ l ].array( )
+      =
+      this->m_BwdBuf.Z[ l - 1 ].array( )
+      *
+      ( this->m_W[ l ] * this->m_BwdBuf.A[ l + 1 ] ).array( );
+
+    oG -= this->m_N[ l ];
+    TMatrixMap( G + oG, this->m_N[ l ], 1 )
+      =
+      this->m_BwdBuf.A[ l ].rowwise( ).mean( );
+
+    oG -= this->m_N[ l ] * this->m_N[ l - 1 ];
+    TMatrixMap( G + oG, this->m_N[ l ], this->m_N[ l - 1 ] )
+      =
+      ( this->m_BwdBuf.A[ l ] * this->m_BwdBuf.A[ l - 1 ].transpose( ) )
+      /
+      TReal( M );
+  } // end for
+
+  return( J );
 }
 
 #endif // __ivqML__Model__NeuralNetwork__FeedForward__hxx__

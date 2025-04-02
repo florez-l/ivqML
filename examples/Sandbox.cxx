@@ -3,6 +3,7 @@
 // =========================================================================
 
 #include <iostream>
+#include <random>
 #include <ivqML/IO.h>
 #include <ivqML/Model/NeuralNetwork/FeedForward.h>
 
@@ -28,7 +29,17 @@ int main( int argc, char** argv )
   model.add_layer( 40, "relu" );
   model.add_layer( 20, "ReLu" );
   model.add_layer( 10, "softMax" );
-  model.init( );
+
+  // Random generate initial parameters
+  std::random_device rand_dev;
+  std::mt19937 rand_gen{ rand_dev( ) };
+  std::normal_distribution< TReal > rand_dist{ 0, 1e-2 };
+  model.init(
+    [&rand_gen, &rand_dist]() -> TReal
+    {
+      return( rand_dist( rand_gen ) );
+    }
+    );
 
   TModel::TMatrix Atr = model( Xtr );
   TModel::TMatrix Ate = model( Xte );
@@ -43,14 +54,15 @@ int main( int argc, char** argv )
 
 
   TModel::TRow G( model.size( ) );
+  G.fill( 0 );
   TReal J = model.gradient( G.data( ), Xtr, Ytr );
 
-
-  std::cout << G << std::endl;
-  std::cout << "----------------------------" << std::endl;
+  /* TODO
+     std::cout << G << std::endl;
+     std::cout << "----------------------------" << std::endl;
+  */
   std::cout << J << std::endl;
   std::cout << "----------------------------" << std::endl;
-
 
   return( EXIT_SUCCESS );
 }
