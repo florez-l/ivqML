@@ -37,6 +37,8 @@ namespace ivqML
 
         virtual void set_size( const TNatural& n ) override;
         virtual void set_input_size( const TNatural& n0 );
+        virtual TNatural input_size( ) const override;
+        virtual TNatural output_size( ) const override;
         virtual void add_layer( const TNatural& n, const std::string& a );
         TNatural number_of_layers( ) const;
 

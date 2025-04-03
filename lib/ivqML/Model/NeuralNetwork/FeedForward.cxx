@@ -44,6 +44,30 @@ set_input_size( const TNatural& n0 )
 
 // -------------------------------------------------------------------------
 template< class _TReal, class _TNatural >
+typename ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+TNatural ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+input_size( ) const
+{
+  if( this->m_N.size( ) > 0 )
+    return( this->m_N[ 0 ] );
+  else
+    return( 0 );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal, class _TNatural >
+typename ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+TNatural ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+output_size( ) const
+{
+  if( this->m_N.size( ) > 0 )
+    return( this->m_N.back( ) );
+  else
+    return( 0 );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal, class _TNatural >
 void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
 add_layer( const TNatural& n, const std::string& a )
 {
@@ -175,6 +199,7 @@ template< class _TReal, class _TNatural >
 void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
 _to_stream( std::ostream& o ) const
 {
+  this->Superclass::_to_stream( o );
 }
 
 // -------------------------------------------------------------------------
