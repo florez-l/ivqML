@@ -7,7 +7,15 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/lib
   )
 
-add_executable(ivqML_examples_Sandbox Sandbox.cxx)
-target_link_libraries(ivqML_examples_Sandbox ivqML)
+set(
+  _execs
+  Sandbox
+  SimpleMNISTTest
+  )
+
+foreach(_e ${_execs})
+  add_executable(ivqML_examples_${_e} ${_e}.cxx)
+  target_link_libraries(ivqML_examples_${_e} ivqML)
+endforeach()
 
 ## eof - $RCSfile$
