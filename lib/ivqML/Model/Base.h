@@ -50,6 +50,12 @@ namespace ivqML
       virtual void set_size( const TNatural& n );
       virtual void init( std::function< TReal( ) > g = [](){return( 0 );} );
 
+      template< class _TG >
+      Self& operator+=( const Eigen::EigenBase< _TG >& G );
+
+      template< class _TG >
+      Self& operator-=( const Eigen::EigenBase< _TG >& G );
+
     protected:
       virtual void _to_stream( std::ostream& o ) const;
 
@@ -68,6 +74,8 @@ namespace ivqML
     };
   } // end namespace
 } // end namespace
+
+#include <ivqML/Model/Base.hxx>
 
 #endif // __ivqML__Model__Base__h__
 

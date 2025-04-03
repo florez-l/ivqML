@@ -26,13 +26,13 @@ gradient(
   const Eigen::EigenBase< _TX >& bX, const Eigen::EigenBase< _TY >& bY
   ) const
 {
+  TReal* G = bG;
   auto X = bX.derived( ).template cast< TReal >( );
   auto Y = bY.derived( ).template cast< TReal >( );
 
   // Prepare buffers
   TNatural M = X.cols( );
   this->m_BwdBuf.allocate( this->m_N, M, true );
-  TReal* G = bG;
 
   // Forward propagation
   this->m_BwdBuf.A[ 0 ] = X;
@@ -61,7 +61,6 @@ gradient(
     TNatural l = L - k - 1;
     this->m_A[ l - 1 ]
       .second( this->m_BwdBuf.Z[ l - 1 ], this->m_BwdBuf.Z[ l - 1 ], true );
-
 
     this->m_BwdBuf.A[ l ].array( )
       =
