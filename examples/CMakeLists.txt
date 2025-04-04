@@ -10,6 +10,7 @@ include_directories(
 set(
   _execs
   Sandbox
+  SimpleFeedForwardSigmoidOutputTest
   SimpleMNISTTest
   )
 

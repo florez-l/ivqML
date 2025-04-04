@@ -37,10 +37,15 @@ gradient(
   // Forward propagation
   this->m_BwdBuf.A[ 0 ] = X;
   this->_eval( this->m_BwdBuf );
-
+  
   // Compute cost
   TNatural L = this->number_of_layers( );
   TReal J = this->m_J( Y, this->m_BwdBuf.A[ L ] );
+
+  std::cout << "-------------------------------------" << std::endl;
+  std::cout << "----> " << this->m_BwdBuf.A.size( ) << " <-> " << this->m_BwdBuf.Z.size( ) << std::endl;
+  std::cout << "----> " << this->m_BwdBuf.A[ L ] << std::endl;
+  std::cout << "-------------------------------------" << std::endl;
 
   // Backpropagate last layer
   this->m_BwdBuf.A[ L ] -= Y;

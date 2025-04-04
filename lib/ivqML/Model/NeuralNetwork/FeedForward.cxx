@@ -97,7 +97,7 @@ init( std::function< TReal( ) > g )
   this->m_B.clear( );
 
   this->m_S = 0;
-  for( TNatural n = 0; n < this->m_N.size( ); n++ )
+  for( TNatural n = 1; n < this->m_N.size( ); n++ )
     this->m_S += ( this->m_N[ n - 1 ] + 1 ) * this->m_N[ n ];
 
   this->Superclass::init( g );
