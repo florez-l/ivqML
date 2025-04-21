@@ -65,6 +65,46 @@ init( std::function< TReal( ) > g )
 
 // -------------------------------------------------------------------------
 template< class _TReal >
+typename ivqML::Model::Base< _TReal >::
+TReal ivqML::Model::Base< _TReal >::
+_regularize(
+  const TReal& J, TReal* G, const TReal& l1, const TReal& l2
+  ) const
+{
+  TReal rJ = J;
+  if( l1 != TReal( 0 ) || l2 != TReal( 0 ) )
+  {
+    TMatrixMap P( this->m_P, this->m_S, 1 );
+    if( l1 != TReal( 0 ) )
+      rJ += P.array( ).abs( ).sum( ) * l1;
+    if( l2 != TReal( 0 ) )
+      rJ += P.array( ).pow( 2 ).sum( ) * l2;
+
+    TMatrixMap( G, this->m_S, 1 )
+      =
+      TMatrixMap( G, this->m_S, 1 )
+      .binaryExpr(
+        P,
+        [&l1,&l2]( const TReal& g, const TReal& p ) -> TReal
+        {
+          TReal rg = g;
+          if( l1 != TReal( 0 ) )
+            rg
+              +=
+              ( p < TReal( 0 ) )
+              ? -l1
+              : ( ( p > TReal( 0 ) )? l1: TReal( 0 ) );
+          if( l2 != TReal( 0 ) )
+            rg += TReal( 2 ) * l2 * p;
+          return( rg );
+        }
+        );
+  } // end if
+  return( rJ );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal >
 void ivqML::Model::Base< _TReal >::
 _to_stream( std::ostream& o ) const
 {

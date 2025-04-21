@@ -6,7 +6,7 @@
 #include <random>
 #include <ivqML/IO.h>
 #include <ivqML/Model/NeuralNetwork/FeedForward.h>
-#include <ivqML/Optimizer/GradientDescent.h>
+#include <ivqML/Optimizer/Adam.h>
 
 int main( int argc, char** argv )
 {
@@ -63,11 +63,13 @@ int main( int argc, char** argv )
   std::cout << "Eval   : " << std::endl << model( Xtr ) << std::endl;
 
   // Fit model
-  using TOptimizer = ivqML::Optimizer::GradientDescent< TModel >;
+  using TOptimizer = ivqML::Optimizer::Adam< TModel >;
   TOptimizer opt( Xtr.data( ), Ytr.data( ), Xtr.cols( ) );
-  opt.set_batch_size( 16 );
+  opt.set_batch_size( 0 );
   opt.set_regularization( 0, 0 );
   opt.set_learning_rate( 1e-2 );
+  opt.set_beta1( 0.9 );
+  opt.set_beta2( 0.999 );
   opt.set_validation_to_normal( ); // LOO, KFold
   opt.set_debugger(
     [](

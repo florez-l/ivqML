@@ -53,7 +53,8 @@ namespace ivqML
         TReal gradient(
           TReal* bG,
           const Eigen::EigenBase< _TX >& X,
-          const Eigen::EigenBase< _TY >& Y
+          const Eigen::EigenBase< _TY >& Y,
+          const TReal& l1, const TReal& l2
           ) const;
 
         virtual void allocate_fitting_buffer( const TNatural& M ) const override;

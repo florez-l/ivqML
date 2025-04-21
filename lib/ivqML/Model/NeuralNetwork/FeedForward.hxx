@@ -42,7 +42,8 @@ typename ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 TReal ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 gradient(
   TReal* bG,
-  const Eigen::EigenBase< _TX >& bX, const Eigen::EigenBase< _TY >& bY
+  const Eigen::EigenBase< _TX >& bX, const Eigen::EigenBase< _TY >& bY,
+  const TReal& l1, const TReal& l2
   ) const
 {
   TNatural M = bX.cols( );
@@ -104,6 +105,8 @@ gradient(
     TMatrixMap( G + oG, this->m_N[ l ], this->m_N[ l - 1 ] )
       = ( D * E.transpose( ) ) / TReal( M );
   } // end for
+
+  J = this->_regularize( J, bG, l1, l2 );
 
   if( own_fitting_buffer )
     this->free_fitting_buffer( );

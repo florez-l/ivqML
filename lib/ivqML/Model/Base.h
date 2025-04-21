@@ -62,6 +62,10 @@ namespace ivqML
       virtual void free_fitting_buffer( ) const = 0;
 
     protected:
+      virtual TReal _regularize(
+        const TReal& J, TReal* G,
+        const TReal& l1, const TReal& l2
+        ) const;
       virtual void _to_stream( std::ostream& o ) const;
 
     protected:
