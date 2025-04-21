@@ -19,9 +19,10 @@ namespace ivqML
       using Self      = Functions;
       using TReal     = _TReal;
       using TMatrix   = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
+      using TRow      = Eigen::Matrix< TReal, 1, Eigen::Dynamic >;
       using TMap = Eigen::Map< TMatrix >;
-      using TElementwise = std::function< TReal( const TReal&, bool ) >;
-      using TFunction = std::function< void( TMap&, const TMap&, bool ) >;
+      using TElementwise = std::function< TReal( const TReal& ) >;
+      using TFunction = std::function< void( TMap, TMap, bool ) >;
       using TPair = std::pair< std::string, TFunction >;
 
     public:

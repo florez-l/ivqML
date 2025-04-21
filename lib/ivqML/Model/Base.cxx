@@ -8,16 +8,16 @@
 #include <cstring>
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-ivqML::Model::Base< _TReal, _TNatural >::
+template< class _TReal >
+ivqML::Model::Base< _TReal >::
 Base( const TNatural& n )
 {
   this->set_size( n );
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-ivqML::Model::Base< _TReal, _TNatural >::
+template< class _TReal >
+ivqML::Model::Base< _TReal >::
 ~Base( )
 {
   if( this->m_P != nullptr )
@@ -25,17 +25,17 @@ ivqML::Model::Base< _TReal, _TNatural >::
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-const typename ivqML::Model::Base< _TReal, _TNatural >::
-TNatural& ivqML::Model::Base< _TReal, _TNatural >::
+template< class _TReal >
+const typename ivqML::Model::Base< _TReal >::
+TNatural& ivqML::Model::Base< _TReal >::
 size( ) const
 {
   return( this->m_S );
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::Base< _TReal, _TNatural >::
+template< class _TReal >
+void ivqML::Model::Base< _TReal >::
 set_size( const TNatural& n )
 {
   if( this->m_S != n )
@@ -46,8 +46,8 @@ set_size( const TNatural& n )
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::Base< _TReal, _TNatural >::
+template< class _TReal >
+void ivqML::Model::Base< _TReal >::
 init( std::function< TReal( ) > g )
 {
   if( this->m_P != nullptr )
@@ -64,8 +64,8 @@ init( std::function< TReal( ) > g )
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::Base< _TReal, _TNatural >::
+template< class _TReal >
+void ivqML::Model::Base< _TReal >::
 _to_stream( std::ostream& o ) const
 {
   o << this->m_S;
@@ -78,15 +78,9 @@ namespace ivqML
 {
   namespace Model
   {
-    template class ivqML_EXPORT Base< float, unsigned int >;
-    template class ivqML_EXPORT Base< float, unsigned long >;
-    template class ivqML_EXPORT Base< float, unsigned long long >;
-    template class ivqML_EXPORT Base< double, unsigned int >;
-    template class ivqML_EXPORT Base< double, unsigned long >;
-    template class ivqML_EXPORT Base< double, unsigned long long >;
-    template class ivqML_EXPORT Base< long double, unsigned int >;
-    template class ivqML_EXPORT Base< long double, unsigned long >;
-    template class ivqML_EXPORT Base< long double, unsigned long long >;
+    template class ivqML_EXPORT Base< float >;
+    template class ivqML_EXPORT Base< double >;
+    template class ivqML_EXPORT Base< long double >;
   } // end namespace
 } // end namespace
 

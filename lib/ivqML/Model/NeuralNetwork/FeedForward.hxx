@@ -5,87 +5,108 @@
 #define __ivqML__Model__NeuralNetwork__FeedForward__hxx__
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
+template< class _TReal >
 template< class _TX >
-auto ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+auto ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 operator()( const Eigen::EigenBase< _TX >& X ) const
 {
-  this->m_FwdBuf.allocate( this->m_N, X.cols( ), false );
-  this->m_FwdBuf.A[ 0 ] = X.derived( ).template cast< TReal >( );
-  this->_eval( this->m_FwdBuf );
-  return( this->m_FwdBuf.A.back( ) );
+  auto bN = this->m_N.begin( );
+  auto eN = this->m_N.end( );
+
+  TNatural M = X.cols( );
+  TNatural N = X.rows( );
+  TNatural As = *( std::max_element( bN, eN ) );
+  TNatural Zs = *( std::max_element( ++bN, eN ) );
+  TNatural Ns = ( As + Zs ) * M;
+
+  TReal* B = reinterpret_cast< TReal* >( std::calloc( Ns, sizeof( TReal ) ) );
+  TMatrixMap( B, N, M ) = X.derived( ).template cast< TReal >( );
+  this->_eval( B, B + ( As * N ), M, false );
+  TMatrix R = TMatrixMap( B, this->m_N.back( ), M );
+
+  std::free( B );
+  return( R );
+
+  /* TODO
+     this->m_FwdBuf.allocate( this->m_N, X.cols( ), false );
+     this->m_FwdBuf.A[ 0 ] = X.derived( ).template cast< TReal >( );
+     this->_eval( this->m_FwdBuf );
+     return( this->m_FwdBuf.A.back( ) );
+  */
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
+template< class _TReal >
 template< class _TX, class _TY >
-typename ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
-TReal ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+typename ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
+TReal ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 gradient(
   TReal* bG,
   const Eigen::EigenBase< _TX >& bX, const Eigen::EigenBase< _TY >& bY
   ) const
 {
-  TReal* G = bG;
-  auto X = bX.derived( ).template cast< TReal >( );
-  auto Y = bY.derived( ).template cast< TReal >( );
+  TNatural M = bX.cols( );
 
-  // Prepare buffers
-  TNatural M = X.cols( );
-  this->m_BwdBuf.allocate( this->m_N, M, true );
+  bool own_fitting_buffer = ( this->m_FittingBuffer == nullptr );
+  if( own_fitting_buffer )
+    this->allocate_fitting_buffer( M );
+
+  TNatural L = this->number_of_layers( );
+  TNatural oG =  this->m_S;
+  TNatural oA = std::accumulate( this->m_N.begin( ), this->m_N.end( ), 0 ) * M;
+  TNatural oZ = oA - ( this->m_N[ 0 ] * M );
+  TReal* A = this->m_FittingBuffer;
+  TReal* Z = A + oA;
+  TReal* G = bG;
 
   // Forward propagation
-  this->m_BwdBuf.A[ 0 ] = X;
-  this->_eval( this->m_BwdBuf );
-  
-  // Compute cost
-  TNatural L = this->number_of_layers( );
-  TReal J = this->m_J( Y, this->m_BwdBuf.A[ L ] );
+  auto Y = bY.derived( ).template cast< TReal >( );
+  TMatrixMap( A, this->m_N[ 0 ], M ) = bX.derived( ).template cast< TReal >( );
+  this->_eval( A, Z, M, true );
 
-  std::cout << "-------------------------------------" << std::endl;
-  std::cout << "----> " << this->m_BwdBuf.A.size( ) << " <-> " << this->m_BwdBuf.Z.size( ) << std::endl;
-  std::cout << "----> " << this->m_BwdBuf.A[ L ] << std::endl;
-  std::cout << "-------------------------------------" << std::endl;
+  // Compute cost
+  oA -= this->m_N[ L ] * M;
+  TMatrixMap D( A + oA, this->m_N[ L ], M );
+  TReal J = this->m_J( Y, D );
 
   // Backpropagate last layer
-  this->m_BwdBuf.A[ L ] -= Y;
-  TNatural oG =  this->m_S - this->m_N[ L ];
-  TMatrixMap( G + oG, this->m_N[ L ], 1 )
-    =
-    this->m_BwdBuf.A[ L ].rowwise( ).mean( );
+  D -= Y;
+  oG -= this->m_N[ L ];
+  TMatrixMap( G + oG, this->m_N[ L ], 1 ) = D.rowwise( ).mean( );
+
   oG -= this->m_N[ L ] * this->m_N[ L - 1 ];
+  oA -= this->m_N[ L - 1 ] * M;
+  TMatrixMap E( A + oA, this->m_N[ L - 1 ], M );
   TMatrixMap( G + oG, this->m_N[ L ], this->m_N[ L - 1 ] )
     =
-    ( this->m_BwdBuf.A[ L ] * this->m_BwdBuf.A[ L - 1 ].transpose( ) )
-    /
-    TReal( M );
+    ( D * E.transpose( ) ) / TReal( M );
 
   // Backpropagate remaining layers
   for( TNatural k = 0; k < L - 1; ++k )
   {
     TNatural l = L - k - 1;
-    this->m_A[ l - 1 ]
-      .second( this->m_BwdBuf.Z[ l - 1 ], this->m_BwdBuf.Z[ l - 1 ], true );
 
-    this->m_BwdBuf.A[ l ].array( )
-      =
-      this->m_BwdBuf.Z[ l - 1 ].array( )
-      *
-      ( this->m_W[ l ] * this->m_BwdBuf.A[ l + 1 ] ).array( );
+    oZ -= this->m_N[ l ] * M;
+    TMatrixMap mZ( Z + oZ, this->m_N[ l ], M );
+
+    this->m_A[ l - 1 ].second( mZ, mZ, true );
+
+    E = mZ.array( ) * ( this->m_W[ l ].transpose( ) * D ).array( );
 
     oG -= this->m_N[ l ];
-    TMatrixMap( G + oG, this->m_N[ l ], 1 )
-      =
-      this->m_BwdBuf.A[ l ].rowwise( ).mean( );
+    TMatrixMap( G + oG, this->m_N[ l ], 1 ) = E.rowwise( ).mean( );
+
+    new( &D ) TMatrixMap( E.data( ), E.rows( ), E.cols( ) );
+    oA -= this->m_N[ l - 1 ] * M;
+    new( &E ) TMatrixMap( A + oA, this->m_N[ l - 1 ], M );
 
     oG -= this->m_N[ l ] * this->m_N[ l - 1 ];
     TMatrixMap( G + oG, this->m_N[ l ], this->m_N[ l - 1 ] )
-      =
-      ( this->m_BwdBuf.A[ l ] * this->m_BwdBuf.A[ l - 1 ].transpose( ) )
-      /
-      TReal( M );
+      = ( D * E.transpose( ) ) / TReal( M );
   } // end for
 
+  if( own_fitting_buffer )
+    this->free_fitting_buffer( );
   return( J );
 }
 

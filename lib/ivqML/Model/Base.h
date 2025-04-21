@@ -25,13 +25,13 @@ namespace ivqML
   {
     /**
      */
-    template< class _TReal, class _TNatural >
+    template< class _TReal >
     class Base
     {
     public:
       using Self     = Base;
       using TReal    = _TReal;
-      using TNatural = _TNatural;
+      using TNatural = unsigned long long;
       using TMatrix  = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
       using TColumn  = Eigen::Matrix< TReal, Eigen::Dynamic, 1 >;
       using TRow     = Eigen::Matrix< TReal, 1, Eigen::Dynamic >;
@@ -58,12 +58,15 @@ namespace ivqML
       template< class _TG >
       Self& operator-=( const Eigen::EigenBase< _TG >& G );
 
+      virtual void allocate_fitting_buffer( const TNatural& M ) const = 0;
+      virtual void free_fitting_buffer( ) const = 0;
+
     protected:
       virtual void _to_stream( std::ostream& o ) const;
 
     protected:
       TNatural m_S { 0 };
-      TReal* m_P   { nullptr };
+      TReal*   m_P { nullptr };
 
       TCost m_J;
 

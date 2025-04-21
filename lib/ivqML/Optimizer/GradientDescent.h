@@ -22,6 +22,7 @@ namespace ivqML
       using TNatural = typename TModel::TNatural;
       using TReal    = typename TModel::TReal;
       using TMatrix  = typename TModel::TMatrix;
+      using TRow     = typename TModel::TRow;
       using TMap     = Eigen::Map< const TMatrix >;
 
       using TBatch   = std::pair< TMap, TMap >;
@@ -120,15 +121,17 @@ namespace ivqML
                 )
               );
 
+          model->allocate_fitting_buffer( batch_size );
           this->_fit( model, batches );
+          model->free_fitting_buffer( );
         }
 
     protected:
       void _fit( TModel* model, const TBatches& batches )
         {
           TNatural S = model->size( );
-          TMatrix G = TMatrix::Zero( 1, S );
-          TMatrix sG = G;
+          TRow G = TRow::Zero( S );
+          TRow sG = G;
 
           bool stop = false;
           TNatural t = 0;
@@ -146,8 +149,8 @@ namespace ivqML
             } // end for
             Jtr /= TReal( batches.size( ) );
 
-            std::cout << t << " " << Jtr << " " << G << std::endl;
-            stop = ( !( t < 10 ) );
+            std::cout << t << " " << Jtr << " " << ( sG * sG.transpose( ) ) << std::endl;
+            // TODO: stop = ( !( t < 10 ) );
 
           } // end while
         }

@@ -5,10 +5,10 @@
 #define __ivqML__Model__Base__hxx__
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
+template< class _TReal >
 template< class _TG >
-typename ivqML::Model::Base< _TReal, _TNatural >::
-Self& ivqML::Model::Base< _TReal, _TNatural >::
+typename ivqML::Model::Base< _TReal >::
+Self& ivqML::Model::Base< _TReal >::
 operator+=( const Eigen::EigenBase< _TG >& G )
 {
   TMatrixMap( this->m_P, G.rows( ), G.cols( ) )
@@ -18,10 +18,10 @@ operator+=( const Eigen::EigenBase< _TG >& G )
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
+template< class _TReal >
 template< class _TG >
-typename ivqML::Model::Base< _TReal, _TNatural >::
-Self& ivqML::Model::Base< _TReal, _TNatural >::
+typename ivqML::Model::Base< _TReal >::
+Self& ivqML::Model::Base< _TReal >::
 operator-=( const Eigen::EigenBase< _TG >& G )
 {
   TMatrixMap( this->m_P, G.rows( ), G.cols( ) )

@@ -26,7 +26,7 @@ int main( int argc, char** argv )
   model.add_layer( 1, "SigmOid" );
 
   // Create some data separated by a vertical line in 0
-  TModel::TNatural Mtr = 10;
+  TModel::TNatural Mtr = 10000;
   TModel::TRow Ytr( Mtr );
   std::bernoulli_distribution bern_dist( 0.5 );
   std::generate(
@@ -50,7 +50,6 @@ int main( int argc, char** argv )
   Xtr.array( ).row( N - 1 ) *= ( Ytr.array( ) * TReal( 2 ) ) - TReal( 1 );
 
   // Random generate initial parameters
-  /* TODO */
   std::normal_distribution< TReal > init_dist{ 0, 1 };
   model.init(
     [&rand_gen, &init_dist]() -> TReal
@@ -59,12 +58,16 @@ int main( int argc, char** argv )
     }
     );
 
+  std::cout << "Model  : " << model << std::endl;
+  std::cout << "Inputs : " << std::endl <<  Xtr << std::endl;
+  std::cout << "Eval   : " << std::endl << model( Xtr ) << std::endl;
+
   // Fit model
   using TOptimizer = ivqML::Optimizer::GradientDescent< TModel >;
   TOptimizer opt( Xtr.data( ), Ytr.data( ), Xtr.cols( ) );
-  opt.set_batch_size( 0 );
+  opt.set_batch_size( 16 );
   opt.set_regularization( 0, 0 );
-  opt.set_learning_rate( 1e-6 );
+  opt.set_learning_rate( 1e-2 );
   opt.set_validation_to_normal( ); // LOO, KFold
   opt.set_debugger( );
   opt.fit( &model );

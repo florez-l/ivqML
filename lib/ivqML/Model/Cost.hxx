@@ -42,19 +42,7 @@ template< class _TY, class _TZ >
 typename ivqML::Model::Cost< _TReal >::
 TReal ivqML::Model::Cost< _TReal >::
 _mce(
-  const Eigen::EigenBase< _TY >& bY, const Eigen::EigenBase< _TZ >& bZ
-  ) const
-{
-  return( TReal( 0 ) );
-}
-
-// -------------------------------------------------------------------------
-template< class _TReal >
-template< class _TY, class _TZ >
-typename ivqML::Model::Cost< _TReal >::
-TReal ivqML::Model::Cost< _TReal >::
-_cce(
-  const Eigen::EigenBase< _TY >& bY, const Eigen::EigenBase< _TZ >& bZ
+  const Eigen::EigenBase< _TY >& Y, const Eigen::EigenBase< _TZ >& Z
   ) const
 {
   static const TReal E
@@ -65,12 +53,38 @@ _cce(
       );
   static const TReal D = std::log( E );
 
-  auto Y = bY.derived( );
-  auto Z = bZ.derived( );
+  return(
+    Y.derived( ).binaryExpr(
+      Z.derived( ),
+      [&]( const TReal& y, const TReal& z ) -> TReal
+      {
+        TReal zz = ( y == TReal( 1 ) )? z: TReal( 1 ) - z;
+        return( -( ( E < zz )? std::log( zz ): D ) );
+      }
+      ).mean( )
+    );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal >
+template< class _TY, class _TZ >
+typename ivqML::Model::Cost< _TReal >::
+TReal ivqML::Model::Cost< _TReal >::
+_cce(
+  const Eigen::EigenBase< _TY >& Y, const Eigen::EigenBase< _TZ >& Z
+  ) const
+{
+  static const TReal E
+    =
+    std::pow(
+      TReal( 10 ),
+      std::log10( std::numeric_limits< TReal >::epsilon( ) ) * TReal( 0.5 )
+      );
+  static const TReal D = std::log( E );
 
   return(
-    Y.binaryExpr(
-      Z,
+    Y.derived( ).binaryExpr(
+      Z.derived( ),
       [&]( const TReal& y, const TReal& z ) -> TReal
       {
         if( y != TReal( 0 ) )

@@ -5,33 +5,32 @@
 #include <ivqML/Model/NeuralNetwork/FeedForward.h>
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 FeedForward( )
   : Superclass( 0 )
 {
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 ~FeedForward( )
 {
-  this->m_FwdBuf.free( );
-  this->m_BwdBuf.free( );
+  this->free_fitting_buffer( );
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+void ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 set_size( const TNatural& n )
 {
   // Do nothing
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+void ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 set_input_size( const TNatural& n0 )
 {
   this->m_N.clear( );
@@ -43,9 +42,9 @@ set_input_size( const TNatural& n0 )
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-typename ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
-TNatural ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+typename ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
+TNatural ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 input_size( ) const
 {
   if( this->m_N.size( ) > 0 )
@@ -55,9 +54,9 @@ input_size( ) const
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-typename ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
-TNatural ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+typename ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
+TNatural ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 output_size( ) const
 {
   if( this->m_N.size( ) > 0 )
@@ -67,8 +66,8 @@ output_size( ) const
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+void ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 add_layer( const TNatural& n, const std::string& a )
 {
   this->m_N.push_back( n );
@@ -76,9 +75,9 @@ add_layer( const TNatural& n, const std::string& a )
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-typename ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
-TNatural ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+typename ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
+TNatural ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 number_of_layers( ) const
 {
   if( this->m_N.size( ) > 0 )
@@ -88,8 +87,8 @@ number_of_layers( ) const
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+void ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 init( std::function< TReal( ) > g )
 {
   this->m_N.shrink_to_fit( );
@@ -105,7 +104,7 @@ init( std::function< TReal( ) > g )
   TReal* p = this->m_P;
   for( TNatural l = 1; l < this->m_N.size( ); ++l )
   {
-    this->m_W.push_back( TMatrixMap( p, this->m_N[ l - 1 ], this->m_N[ l ] ) );
+    this->m_W.push_back( TMatrixMap( p, this->m_N[ l ], this->m_N[ l - 1 ] ) );
     p += this->m_W.back( ).size( );
     this->m_B.push_back( TColumnMap( p, this->m_N[ l ], 1 ) );
     p += this->m_B.back( ).size( );
@@ -121,85 +120,71 @@ init( std::function< TReal( ) > g )
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::SBuffer::
-allocate( const std::vector< TNatural >& n, const TNatural& m, bool keepAZ )
+template< class _TReal >
+void ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
+allocate_fitting_buffer( const TNatural& M ) const
 {
-  if( this->M < m )
-  {
-    this->free( );
-    if( keepAZ )
-    {
-      this->N = std::accumulate( n.begin( ), n.end( ), 0 );
-      this->B
-        =
-        reinterpret_cast< TReal* >(
-          std::calloc( ( this->N * m ) << 1, sizeof( TReal ) )
-          );
-    }
-    else
-    {
-      this->N = *( std::max_element( n.begin( ), n.end( ) ) );
-      this->B
-        =
-        reinterpret_cast< TReal* >(
-          std::calloc( this->N * m, sizeof( TReal ) )
-          );
-    } // end if
-  } // end if
+  auto bN = this->m_N.begin( );
+  auto eN = this->m_N.end( );
 
-  if( this->M != m && this->B != nullptr )
-  {
-    TReal* a = this->B;
-    TReal* z = this->B + ( ( keepAZ )? ( ( this->N * m ) + n[ 0 ] ): 0 );
-    this->A.clear( );
-    this->Z.clear( );
+  TNatural N = *( bN++ );
+  N += std::accumulate( bN, eN, 0 ) << 1;
+  N *= M;
 
-    this->A.push_back( TMatrixMap( a, n[ 0 ], m ) );
-    if( keepAZ ) a += this->A.back( ).size( );
-    for( TNatural l = 1; l < n.size( ); ++l )
-    {
-      this->A.push_back( TMatrixMap( a, n[ l ], m ) );
-      this->Z.push_back( TMatrixMap( z, n[ l ], m ) );
-      if( keepAZ ) a += this->A.back( ).size( );
-      if( keepAZ ) z += this->Z.back( ).size( );
-    } // end for
-  } // end if
-  this->M = m;
+  this->free_fitting_buffer( );
+  this->m_FittingBuffer
+    =
+    reinterpret_cast< TReal* >( std::calloc( N, sizeof( TReal ) ) );
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::SBuffer::
-free( )
+template< class _TReal >
+void ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
+free_fitting_buffer( ) const
 {
-  this->M = 0;
-  this->Z.clear( );
-  this->A.clear( );
-  if( this->B != nullptr )
-    std::free( this->B );
-  this->B = nullptr;
+  if( this->m_FittingBuffer != nullptr )
+    std::free( this->m_FittingBuffer );
+  this->m_FittingBuffer = nullptr;
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
-_eval( SBuffer& b ) const
+template< class _TReal >
+void ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
+_eval( TReal* Ab, TReal* Zb, const TNatural& M, bool offset ) const
 {
+  TReal* A = Ab;
+  TReal* Z = Zb;
+
   TNatural L = this->number_of_layers( );
   for( TNatural l = 0; l < L; ++l )
   {
-    b.Z[ l ] = ( this->m_W[ l ] * b.A[ l ] ).colwise( ) + this->m_B[ l ];
-    this->m_A[ l ].second( b.A[ l + 1 ], b.Z[ l ], false );
+    TNatural i = this->m_N[ l ];
+    TNatural o = this->m_N[ l + 1 ];
+
+    TMatrixMap( Z, o, M )
+      =
+      ( this->m_W[ l ] * TMatrixMap( A, i, M ) ).colwise( )
+      +
+      this->m_B[ l ];
+    if( offset )
+      A += i * M;
+
+    this->m_A[ l ].second(
+      TMatrixMap( A, o, M ),
+      TMatrixMap( Z, o, M ),
+      false
+      );
+    if( offset )
+      Z += o * M;
   } // end for
 }
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-void ivqML::Model::NeuralNetwork::FeedForward< _TReal, _TNatural >::
+template< class _TReal >
+void ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 _to_stream( std::ostream& o ) const
 {
-  this->Superclass::_to_stream( o );
+  // TODO: this->Superclass::_to_stream( o );
 }
 
 // -------------------------------------------------------------------------
@@ -209,15 +194,9 @@ namespace ivqML
   {
     namespace NeuralNetwork
     {
-      template class ivqML_EXPORT FeedForward< float, unsigned int >;
-      template class ivqML_EXPORT FeedForward< float, unsigned long >;
-      template class ivqML_EXPORT FeedForward< float, unsigned long long >;
-      template class ivqML_EXPORT FeedForward< double, unsigned int >;
-      template class ivqML_EXPORT FeedForward< double, unsigned long >;
-      template class ivqML_EXPORT FeedForward< double, unsigned long long >;
-      template class ivqML_EXPORT FeedForward< long double, unsigned int >;
-      template class ivqML_EXPORT FeedForward< long double, unsigned long >;
-      template class ivqML_EXPORT FeedForward< long double, unsigned long long >;
+      template class ivqML_EXPORT FeedForward< float >;
+      template class ivqML_EXPORT FeedForward< double >;
+      template class ivqML_EXPORT FeedForward< long double >;
     } // end namespace
   } // end namespace
 } // end namespace

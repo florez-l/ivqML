@@ -17,13 +17,13 @@ namespace ivqML
     {
       /**
        */
-      template< class _TReal, class _TNatural = unsigned long long >
+      template< class _TReal >
       class FeedForward
-        : public ivqML::Model::Base< _TReal, _TNatural >
+        : public ivqML::Model::Base< _TReal >
       {
       public:
         using Self       = FeedForward;
-        using Superclass = ivqML::Model::Base< _TReal, _TNatural >;
+        using Superclass = ivqML::Model::Base< _TReal >;
         ivqML_Model_Types;
 
         using TFunctions = ivqML::Model::Functions< TReal >;
@@ -43,7 +43,7 @@ namespace ivqML
         TNatural number_of_layers( ) const;
 
         virtual void init(
-          std::function< TReal( ) > g = [](){return( 0 );}
+          std::function< TReal( ) > g = [](){ return( 0 ); }
           ) override;
 
         template< class _TX >
@@ -56,31 +56,32 @@ namespace ivqML
           const Eigen::EigenBase< _TY >& Y
           ) const;
 
+        virtual void allocate_fitting_buffer( const TNatural& M ) const override;
+        virtual void free_fitting_buffer( ) const override;
+        /* TODO
+           protected:
+           struct SBuffer
+           {
+           TNatural N { 0 };
+           TNatural M { 0 };
+           TReal*   B { nullptr };
+
+           std::vector< TMatrixMap > Z;
+           std::vector< TMatrixMap > A;
+
+           void allocate(
+           const std::vector< TNatural >& n,
+           const TNatural& m,
+           bool keepAZ
+           );
+           void free( );
+           };
+        */
+
       protected:
-        struct SBuffer
-        {
-          TNatural N { 0 };
-          TNatural M { 0 };
-          TReal*   B { nullptr };
-
-          /* TODO
-             TReal*   Z { nullptr };
-             TReal*   A { nullptr };
-             bool     K { false };
-          */
-          std::vector< TMatrixMap > Z;
-          std::vector< TMatrixMap > A;
-
-          void allocate(
-            const std::vector< TNatural >& n,
-            const TNatural& m,
-            bool keepAZ
-            );
-          void free( );
-        };
-
-      protected:
-        void _eval( SBuffer& b ) const;
+        void _eval(
+          TReal* Ab, TReal* Zb, const TNatural& M, bool offset
+          ) const;
 
         virtual void _to_stream( std::ostream& o ) const override;
 
@@ -90,8 +91,12 @@ namespace ivqML
         std::vector< TColumnMap >      m_B;
         std::vector< TActivationPair > m_A;
 
-        mutable SBuffer m_FwdBuf;
-        mutable SBuffer m_BwdBuf;
+        mutable TReal* m_FittingBuffer { nullptr };
+
+        /* TODO
+           mutable SBuffer m_FwdBuf;
+           mutable SBuffer m_BwdBuf;
+        */
       };
     } // end namespace
   } // end namespace

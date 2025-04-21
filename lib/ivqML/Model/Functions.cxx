@@ -31,9 +31,9 @@ Get( const std::string& name )
     return(
       std::make_pair(
         "softmax",
-        []( TMap& A, const TMap& Z, bool d ) -> void
+        []( TMap A, TMap Z, bool d ) -> void
         {
-          TMatrix m = Z.colwise( ).maxCoeff( );
+          TRow m = Z.colwise( ).maxCoeff( );
           A = ( Z.rowwise( ) - m.row( 0 ) ).array( ).exp( );
           m = A.colwise( ).sum( );
           A.array( ).rowwise( ) /= m.array( ).row( 0 );
@@ -57,7 +57,7 @@ Get( const std::string& name )
       return(
         std::make_pair(
           "relu",
-          []( TMap& A, const TMap& Z, bool d ) -> void
+          []( TMap A, TMap Z, bool d ) -> void
           {
             A = Z.unaryExpr(
               [&d]( const TReal& z ) -> TReal
@@ -77,7 +77,7 @@ Get( const std::string& name )
       return(
         std::make_pair(
           "leakyrelu",
-          []( TMap& A, const TMap& Z, bool d ) -> void
+          []( TMap A, TMap Z, bool d ) -> void
           {
             A = Z.unaryExpr(
               [&d]( const TReal& z ) -> TReal
@@ -99,7 +99,7 @@ Get( const std::string& name )
       return(
         std::make_pair(
           "tanh",
-          []( TMap& A, const TMap& Z, bool d ) -> void
+          []( TMap A, TMap Z, bool d ) -> void
           {
             A = Z.unaryExpr(
               [&d]( const TReal& z ) -> TReal
@@ -119,7 +119,7 @@ Get( const std::string& name )
       return(
         std::make_pair(
           "sigmoid",
-          [&]( TMap& A, const TMap& Z, bool d ) -> void
+          [&]( TMap A, TMap Z, bool d ) -> void
           {
             A = Z.unaryExpr(
               [&d]( const TReal& z ) -> TReal
@@ -140,7 +140,7 @@ Get( const std::string& name )
       return(
         std::make_pair(
           "linear",
-          []( TMap& A, const TMap& Z, bool d ) -> void
+          []( TMap A, TMap Z, bool d ) -> void
           {
             A = Z.unaryExpr(
               [&d]( const TReal& z ) -> TReal

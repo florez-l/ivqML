@@ -36,7 +36,7 @@ namespace ivqML
 
       template< class _TY, class _TZ >
       TReal operator()(
-        const Eigen::EigenBase< _TY >& bY, const Eigen::EigenBase< _TZ >& bZ
+        const Eigen::EigenBase< _TY >& Y, const Eigen::EigenBase< _TZ >& Z
         ) const;
 
     protected:
@@ -47,12 +47,12 @@ namespace ivqML
 
       template< class _TY, class _TZ >
       TReal _mce(
-        const Eigen::EigenBase< _TY >& bY, const Eigen::EigenBase< _TZ >& bZ
+        const Eigen::EigenBase< _TY >& Y, const Eigen::EigenBase< _TZ >& Z
         ) const;
 
       template< class _TY, class _TZ >
       TReal _cce(
-        const Eigen::EigenBase< _TY >& bY, const Eigen::EigenBase< _TZ >& bZ
+        const Eigen::EigenBase< _TY >& Y, const Eigen::EigenBase< _TZ >& Z
         ) const;
 
     protected:
