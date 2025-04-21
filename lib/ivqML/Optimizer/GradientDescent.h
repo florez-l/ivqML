@@ -28,6 +28,9 @@ namespace ivqML
       using TBatch   = std::pair< TMap, TMap >;
       using TBatches = std::vector< TBatch >;
 
+      using TDebugger =
+        std::function< bool( const TNatural&, TModel*, const TReal&, const TReal&, const TReal*, const TReal*, const TNatural&, const TReal*, const TReal*, const TNatural& ) >;
+
     public:
       GradientDescent(
         const TReal* Xtr, const TReal* Ytr,
@@ -86,8 +89,9 @@ namespace ivqML
         {
         }
 
-      void set_debugger( )
+      void set_debugger( TDebugger d )
         {
+          this->m_Debugger = d;
         }
 
       void fit( TModel* model )
@@ -149,8 +153,13 @@ namespace ivqML
             } // end for
             Jtr /= TReal( batches.size( ) );
 
-            std::cout << t << " " << Jtr << " " << ( sG * sG.transpose( ) ) << std::endl;
-            // TODO: stop = ( !( t < 10 ) );
+            stop
+              =
+              this->m_Debugger(
+                t, model, Jtr, sG * sG.transpose( ),
+                this->m_Xtr, this->m_Ytr, this->m_Mtr,
+                this->m_Xte, this->m_Yte, this->m_Mte
+                );
 
           } // end while
         }
@@ -166,6 +175,18 @@ namespace ivqML
 
       TNatural m_BatchSize { 0 };
       TReal m_LearningRate { 1e-2 };
+
+      TDebugger m_Debugger
+        {
+          [](
+            const TNatural&, TModel*, const TReal&, const TReal&,
+            const TReal*, const TReal*, const TNatural&,
+            const TReal*, const TReal*, const TNatural&
+            ) -> bool
+          {
+            return( false );
+          }
+        };
     };
 
   } // end namespace

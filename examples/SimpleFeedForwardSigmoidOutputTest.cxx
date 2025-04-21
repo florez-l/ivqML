@@ -69,7 +69,18 @@ int main( int argc, char** argv )
   opt.set_regularization( 0, 0 );
   opt.set_learning_rate( 1e-2 );
   opt.set_validation_to_normal( ); // LOO, KFold
-  opt.set_debugger( );
+  opt.set_debugger(
+    [](
+      const TModel::TNatural& t, TModel* model,
+      const TReal& Jtr, const TReal& nG,
+      const TReal* Xtr, const TReal* Ytr, const TModel::TNatural& Mtr,
+      const TReal* Xte, const TReal* Yte, const TModel::TNatural& Mte
+      ) -> bool
+    {
+      std::cout << t << " " << Jtr << " " << nG << std::endl;
+      return( false );
+    }
+    );
   opt.fit( &model );
 
   return( EXIT_SUCCESS );
