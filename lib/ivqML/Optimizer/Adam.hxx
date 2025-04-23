@@ -75,6 +75,13 @@ _fit( TModel* model, const TBatches& batches )
   TRow M = TRow::Zero( S );
   TRow V = TRow::Zero( S );
   TRow sG = G;
+  TReal e = this->m_Epsilon;
+  TReal b1 = this->m_Beta1;
+  TReal b2 = this->m_Beta2;
+  TReal cb1 = TReal( 1 ) - b1;
+  TReal cb2 = TReal( 1 ) - b2;
+  TReal b1t = b1;
+  TReal b2t = b2;
 
   bool stop = false;
   TNatural t = 0;
@@ -82,6 +89,8 @@ _fit( TModel* model, const TBatches& batches )
   {
     t++;
 
+    TReal i1 = TReal( 1 ) / ( TReal( 1 ) - b1t );
+    TReal i2 = TReal( 1 ) / ( TReal( 1 ) - b2t );
     sG.fill( 0 );
     TReal Jtr = 0;
     for( const TBatch& batch: batches )
@@ -92,6 +101,10 @@ _fit( TModel* model, const TBatches& batches )
           G.data( ), batch.first, batch.second,
           this->m_Lambda1, this->m_Lambda2
           );
+      M = ( M * b1 ) + ( G * cb1 );
+      V = ( V * b2 ) + ( G.array( ).pow( 2 ) * cb2 ).matrix( );
+      G = ( M * i1 ).array( ) / ( ( ( V * i2 ).array( ) ).sqrt( ) + e );
+
       sG += G;
       *model -= G * this->m_LearningRate;
     } // end for
@@ -104,6 +117,9 @@ _fit( TModel* model, const TBatches& batches )
         this->m_Xtr, this->m_Ytr, this->m_Mtr,
         this->m_Xte, this->m_Yte, this->m_Mte
         );
+
+    b1t *= b1;
+    b2t *= b2;
   } // end while
 }
 

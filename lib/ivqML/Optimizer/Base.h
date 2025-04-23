@@ -68,6 +68,11 @@ namespace ivqML
           this->m_BatchSize = s;
         }
 
+      void set_epsilon( const TReal& e )
+        {
+          this->m_Epsilon = e;
+        }
+
       void set_regularization( const TReal& l1, const TReal& l2 )
         {
           this->m_Lambda1 = l1;
@@ -139,6 +144,7 @@ namespace ivqML
       TNatural m_Mtr { 0 };
       TNatural m_Mte { 0 };
 
+      TReal m_Epsilon { std::numeric_limits< TReal >::epsilon( ) };
       TReal m_Lambda1 { TReal( 0 ) };
       TReal m_Lambda2 { TReal( 0 ) };
 
