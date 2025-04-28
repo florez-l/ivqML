@@ -17,138 +17,57 @@ namespace ivqML
     {
     public:
       using TModel = _TModel;
+      ivqML_TypeTraits( typename TModel::TReal );
       using Self = Base;
 
-      using TNatural = typename TModel::TNatural;
-      using TReal    = typename TModel::TReal;
-      using TMatrix  = typename TModel::TMatrix;
-      using TRow     = typename TModel::TRow;
-      using TMap     = Eigen::Map< const TMatrix >;
-
-      using TBatch   = std::pair< TMap, TMap >;
-      using TBatches = std::vector< TBatch >;
-
       using TDebugger =
-        std::function< bool( const TNatural&, TModel*, const TReal&, const TReal&, const TReal*, const TReal*, const TNatural&, const TReal*, const TReal*, const TNatural& ) >;
+        std::function<
+          bool(
+            const TNatural&, TModel*, const TReal&, const TReal&,
+            const TReal*, const TReal*, const TNatural&,
+            const TReal*, const TReal*, const TNatural&
+            )
+          >;
+
+    protected:
+      using TBatchRow = Eigen::Matrix< TNatural, 1, Eigen::Dynamic >;
+      using TBatch    = Eigen::Map< TBatchRow >;
+      using TBatches  = std::vector< TBatch >;
+      using TShuffler = std::function< void( ) >;
 
     public:
-      Base(
-        const TReal* Xtr, const TReal* Ytr,
-        const TNatural& Mtr
-        )
-        {
-          this->m_Xtr = Xtr;
-          this->m_Ytr = Ytr;
-          this->m_Xte = nullptr;
-          this->m_Yte = nullptr;
-          this->m_Mtr = Mtr;
-          this->m_Mte = 0;
-        }
+      Base( );
+      virtual ~Base( );
 
-      Base(
-        const TReal* Xtr, const TReal* Ytr,
-        const TReal* Xte, const TReal* Yte,
-        const TNatural& Mtr, const TNatural& Mte
-        )
-        {
-          this->m_Xtr = Xtr;
-          this->m_Ytr = Ytr;
-          this->m_Xte = Xte;
-          this->m_Yte = Yte;
-          this->m_Mtr = Mtr;
-          this->m_Mte = Mte;
-        }
+      TDebugger debugger( ) const;
+      void set_debugger( TDebugger d );
 
-      virtual ~Base( )
-        {
-        }
+      void set_data( TReal* X, TReal* Y, const TNatural& M );
 
-      void set_batch_size( const TNatural& s )
-        {
-          this->m_BatchSize = s;
-        }
+      template< class _TBX, class _TBY >
+      void set_data(
+        Eigen::EigenBase< _TBX >& X, Eigen::EigenBase< _TBY >& Y
+        );
 
-      void set_epsilon( const TReal& e )
-        {
-          this->m_Epsilon = e;
-        }
-
-      void set_regularization( const TReal& l1, const TReal& l2 )
-        {
-          this->m_Lambda1 = l1;
-          this->m_Lambda2 = l2;
-        }
-
-      void set_validation_to_normal( )
-        {
-        }
-
-      void set_validation_to_leave_one_out( )
-        {
-        }
-
-      void set_validation_to_kfold( const TNatural& k )
-        {
-        }
-
-      void set_debugger( TDebugger d )
-        {
-          this->m_Debugger = d;
-        }
-
-      virtual void fit( TModel* model )
-        {
-          TNatural N = model->input_size( );
-          TNatural O = model->output_size( );
-
-          // Compute batches without copying input training data
-          TBatches batches;
-          TNatural batch_size = this->m_Mtr;
-          if( 0 < this->m_BatchSize && this->m_BatchSize < this->m_Mtr )
-            batch_size = this->m_BatchSize;
-          TNatural n_batches = this->m_Mtr / batch_size;
-          TNatural last_batch_size = this->m_Mtr % batch_size;
-          const TReal* xtr = this->m_Xtr;
-          const TReal* ytr = this->m_Ytr;
-          for( TNatural b = 0; b < n_batches; ++b )
-          {
-            batches.push_back(
-              TBatch(
-                TMap( xtr, N, batch_size ), TMap( ytr, O, batch_size )
-                )
-              );
-            xtr += batches.back( ).first.size( );
-            ytr += batches.back( ).second.size( );
-          } // end for
-          if( last_batch_size > 0 )
-            batches.push_back(
-              TBatch(
-                TMap( xtr, N, last_batch_size ), TMap( ytr, O, last_batch_size )
-                )
-              );
-
-          model->allocate_fitting_buffer( batch_size );
-          this->_fit( model, batches );
-          model->free_fitting_buffer( );
-        }
+      void fit( TModel& model );
 
     protected:
-      virtual void _fit( TModel* model, const TBatches& batches ) = 0;
+      virtual void _fit(
+        TModel& model, TBatches& batches, TShuffler shuffler
+        ) = 0;
+
+    private:
+      void _free( );
 
     protected:
-      const TReal* m_Xtr { nullptr };
-      const TReal* m_Ytr { nullptr };
-      const TReal* m_Xte { nullptr };
-      const TReal* m_Yte { nullptr };
+      TReal*   m_X         { nullptr };
+      TReal*   m_Y         { nullptr };
+      TNatural m_M         { 0 };
+      bool     m_OwnBuffer { true };
 
-      TNatural m_Mtr { 0 };
-      TNatural m_Mte { 0 };
-
-      TReal m_Epsilon { std::numeric_limits< TReal >::epsilon( ) };
-      TReal m_Lambda1 { TReal( 0 ) };
-      TReal m_Lambda2 { TReal( 0 ) };
-
-      TNatural m_BatchSize { 0 };
+      ivqML_AttributeMacro( batch_size, BatchSize, TNatural, TNatural( 0 ) );
+      ivqML_AttributeMacro( lambda1, Lambda1, TReal, TReal( 0 ) );
+      ivqML_AttributeMacro( lambda2, Lambda2, TReal, TReal( 0 ) );
 
       TDebugger m_Debugger
         {
@@ -165,6 +84,8 @@ namespace ivqML
 
   } // end namespace
 } // end namespace
+
+#include <ivqML/Optimizer/Base.hxx>
 
 #endif // __ivqML__Optimizer__Base__h__
 

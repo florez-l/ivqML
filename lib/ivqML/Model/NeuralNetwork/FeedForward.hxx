@@ -26,13 +26,6 @@ operator()( const Eigen::EigenBase< _TX >& X ) const
 
   std::free( B );
   return( R );
-
-  /* TODO
-     this->m_FwdBuf.allocate( this->m_N, X.cols( ), false );
-     this->m_FwdBuf.A[ 0 ] = X.derived( ).template cast< TReal >( );
-     this->_eval( this->m_FwdBuf );
-     return( this->m_FwdBuf.A.back( ) );
-  */
 }
 
 // -------------------------------------------------------------------------
@@ -106,7 +99,7 @@ gradient(
       = ( D * E.transpose( ) ) / TReal( M );
   } // end for
 
-  J = this->_regularize( J, bG, l1, l2 );
+  J = this->_R( J, bG, l1, l2 );
 
   if( own_fitting_buffer )
     this->free_fitting_buffer( );

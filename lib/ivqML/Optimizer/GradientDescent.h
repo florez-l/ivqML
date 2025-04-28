@@ -17,41 +17,29 @@ namespace ivqML
       : public ivqML::Optimizer::Base< _TModel >
     {
     public:
-      using TModel     = _TModel;
-      using Self       = GradientDescent;
-      using Superclass = ivqML::Optimizer::Base< TModel >;
+      using TModel = _TModel;
+      ivqML_TypeTraits( typename TModel::TReal );
+      using Self = GradientDescent;
+      using Superclass = ivqML::Optimizer::Base< _TModel >;
 
-      using TNatural  = typename Superclass::TNatural;
-      using TReal     = typename Superclass::TReal;
-      using TMatrix   = typename Superclass::TMatrix;
-      using TRow      = typename Superclass::TRow;
-      using TMap      = typename Superclass::TMap;
+    protected:
+      using TBatchRow = typename Superclass::TBatchRow;
       using TBatch    = typename Superclass::TBatch;
       using TBatches  = typename Superclass::TBatches;
-      using TDebugger = typename Superclass::TDebugger;
+      using TShuffler = typename Superclass::TShuffler;
 
     public:
-      GradientDescent(
-        const TReal* Xtr, const TReal* Ytr,
-        const TNatural& Mtr
-        );
-      GradientDescent(
-        const TReal* Xtr, const TReal* Ytr,
-        const TReal* Xte, const TReal* Yte,
-        const TNatural& Mtr, const TNatural& Mte
-        );
-      virtual ~GradientDescent( );
-
-      const TReal& learning_rate( ) const;
-      void set_learning_rate( const TReal& a );
+      GradientDescent( );
+      virtual ~GradientDescent( ) override;
 
     protected:
-      virtual void _fit( TModel* model, const TBatches& batches ) override;
+      virtual void _fit(
+        TModel& model, TBatches& batches, TShuffler shuffler
+        ) override;
 
     protected:
-      TReal m_LearningRate { 1e-2 };
+      ivqML_AttributeMacro( learning_rate, Alpha, TReal, TReal( 1e-2 ) );
     };
-
   } // end namespace
 } // end namespace
 

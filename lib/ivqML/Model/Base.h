@@ -50,7 +50,7 @@ namespace ivqML
       virtual TNatural input_size( ) const = 0;
       virtual TNatural output_size( ) const = 0;
       virtual void set_size( const TNatural& n );
-      virtual void init( std::function< TReal( ) > g = [](){return( 0 );} );
+      virtual void init( std::function< TReal( ) > g = [](){ return( 0 ); } );
 
       template< class _TG >
       Self& operator+=( const Eigen::EigenBase< _TG >& G );
@@ -62,8 +62,8 @@ namespace ivqML
       virtual void free_fitting_buffer( ) const = 0;
 
     protected:
-      virtual TReal _regularize(
-        const TReal& J, TReal* G,
+      virtual TReal _R(
+        const TReal& J, TReal* bG,
         const TReal& l1, const TReal& l2
         ) const;
       virtual void _to_stream( std::ostream& o ) const;

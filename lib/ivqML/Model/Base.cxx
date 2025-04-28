@@ -3,9 +3,7 @@
 // =========================================================================
 
 #include <ivqML/Model/Base.h>
-
-#include <algorithm>
-#include <cstring>
+#include <thread>
 
 // -------------------------------------------------------------------------
 template< class _TReal >
@@ -67,40 +65,58 @@ init( std::function< TReal( ) > g )
 template< class _TReal >
 typename ivqML::Model::Base< _TReal >::
 TReal ivqML::Model::Base< _TReal >::
-_regularize(
-  const TReal& J, TReal* G, const TReal& l1, const TReal& l2
-  ) const
+_R( const TReal& J, TReal* bG, const TReal& l1, const TReal& l2 ) const
 {
-  TReal rJ = J;
-  if( l1 != TReal( 0 ) || l2 != TReal( 0 ) )
+  TReal rJ = TReal( 0 );
+  if( l1 != TReal( 0 ) || l2 != 0 )
   {
-    TMatrixMap P( this->m_P, this->m_S, 1 );
-    if( l1 != TReal( 0 ) )
-      rJ += P.array( ).abs( ).sum( ) * l1;
-    if( l2 != TReal( 0 ) )
-      rJ += P.array( ).pow( 2 ).sum( ) * l2;
+    TNatural N = std::thread::hardware_concurrency( ) >> 2;
+    N = ( N == 0 )? 1: N;
+    TNatural tS = this->m_S / N;
+    TNatural lS = this->m_S % N;
+    N  = ( tS == 0 )? 0: N;
+    N += ( lS != 0 )? 1: 0;
 
-    TMatrixMap( G, this->m_S, 1 )
-      =
-      TMatrixMap( G, this->m_S, 1 )
-      .binaryExpr(
-        P,
-        [&l1,&l2]( const TReal& g, const TReal& p ) -> TReal
+    std::vector< TReal > bJ( N, TReal( 0 ) );
+    auto f = [ &l1, &l2, &bJ ]( TReal* P, TReal* G, const TNatural& S, const TNatural& i ) -> void
+      {
+        for( TNatural s = 0; s < S; ++s )
         {
-          TReal rg = g;
           if( l1 != TReal( 0 ) )
-            rg
-              +=
-              ( p < TReal( 0 ) )
-              ? -l1
-              : ( ( p > TReal( 0 ) )? l1: TReal( 0 ) );
+          {
+            bJ[ i ] += std::fabs( *( P + s ) ) * l1;
+            *( G + s ) += TReal( ( *( P + s ) > TReal( 0 ) )? 1: ( ( *( P + s ) < TReal( 0 ) )? -1: 0 ) ) * l1;
+          } // end if
           if( l2 != TReal( 0 ) )
-            rg += TReal( 2 ) * l2 * p;
-          return( rg );
-        }
-        );
+          {
+            bJ[ i ] += *( P + s ) * *( P + s ) * l2;
+            *( G + s ) += TReal( 2 ) * *( P + s ) * l2;
+          } // end if
+        } // end if
+      };
+
+    if( N > 1 )
+    {
+      std::vector< std::thread > threads;
+      TReal* P = this->m_P;
+      TReal* G = bG;
+      for( TNatural i = 0; i < N - 1; ++i )
+      {
+        threads.emplace_back( f, P, G, tS, i );
+        P += tS;
+        G += tS;
+      } // end for
+      threads.emplace_back( f, P, G, ( lS != 0 )? lS: tS, N - 1 );
+
+      for( std::thread& t: threads )
+        t.join( );
+    }
+    else
+      f( this->m_P, bG, this->m_S, 0 );
+    
+    rJ = std::accumulate( bJ.begin( ), bJ.end( ), 0 );
   } // end if
-  return( rJ );
+  return( J + rJ );
 }
 
 // -------------------------------------------------------------------------

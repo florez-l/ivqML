@@ -6,12 +6,10 @@
 #include <random>
 #include <ivqML/IO.h>
 #include <ivqML/Model/NeuralNetwork/FeedForward.h>
-#include <ivqML/Optimizer/Adam.h>
+#include <ivqML/Optimizer/GradientDescent.h>
 
 int main( int argc, char** argv )
 {
-  std::cout << "Number of threads: " << Eigen::nbThreads( ) << std::endl;
-
   using TReal = long double;
   using TModel = ivqML::Model::NeuralNetwork::FeedForward< TReal >;
 
@@ -58,19 +56,27 @@ int main( int argc, char** argv )
     }
     );
 
-  std::cout << "Model  : " << model << std::endl;
-  std::cout << "Inputs : " << std::endl <<  Xtr << std::endl;
-  std::cout << "Eval   : " << std::endl << model( Xtr ) << std::endl;
+  /* TODO
+     std::cout << "Model  : " << model << std::endl;
+     std::cout << "Inputs : " << std::endl <<  Xtr << std::endl;
+     std::cout << "Eval   : " << std::endl << model( Xtr ) << std::endl;
+  */
 
   // Fit model
-  using TOptimizer = ivqML::Optimizer::Adam< TModel >;
-  TOptimizer opt( Xtr.data( ), Ytr.data( ), Xtr.cols( ) );
+  using TOptimizer = ivqML::Optimizer::GradientDescent< TModel >;
+  TOptimizer opt;
+  opt.set_data( Xtr.data( ), Ytr.data( ), Xtr.cols( ) );
   opt.set_batch_size( 0 );
-  opt.set_regularization( 0, 0 );
+  opt.set_lambda1( 0 );
+  opt.set_lambda2( 0 );
   opt.set_learning_rate( 1e-2 );
-  opt.set_beta1( 0.9 );
-  opt.set_beta2( 0.999 );
-  opt.set_validation_to_normal( ); // LOO, KFold
+  /* TODO
+     opt.set_beta1( 0.9 );
+     opt.set_beta2( 0.999 );
+  */
+  /* TODO
+     opt.set_validation_to_normal( ); // LOO, KFold
+  */
   opt.set_debugger(
     [](
       const TModel::TNatural& t, TModel* model,
@@ -83,7 +89,7 @@ int main( int argc, char** argv )
       return( false );
     }
     );
-  opt.fit( &model );
+  opt.fit( model );
 
   return( EXIT_SUCCESS );
 }
