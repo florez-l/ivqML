@@ -30,6 +30,24 @@ operator()( const Eigen::EigenBase< _TX >& X ) const
 
 // -------------------------------------------------------------------------
 template< class _TReal >
+template< class _TX >
+auto ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
+threshold( const Eigen::EigenBase< _TX >& X ) const
+{
+  TMatrix T;
+  if( this->m_A.back( ).first == "sigmoid" )
+  {
+  }
+  else if( this->m_A.back( ).first == "softmax" )
+  {
+  }
+  else
+    T = this->operator()( X );
+  return( T );
+}
+
+// -------------------------------------------------------------------------
+template< class _TReal >
 template< class _TX, class _TY >
 typename ivqML::Model::NeuralNetwork::FeedForward< _TReal >::
 TReal ivqML::Model::NeuralNetwork::FeedForward< _TReal >::

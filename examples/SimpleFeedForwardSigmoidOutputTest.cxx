@@ -20,7 +20,7 @@ int main( int argc, char** argv )
   // Create model
   TModel model;
   model.set_input_size( 2 );
-  model.add_layer( 4, "relu" );
+  model.add_layer( 16, "relu" );
   model.add_layer( 1, "SigmOid" );
 
   // Create some data separated by a vertical line in 0
@@ -66,10 +66,10 @@ int main( int argc, char** argv )
   using TOptimizer = ivqML::Optimizer::GradientDescent< TModel >;
   TOptimizer opt;
   opt.set_data( Xtr.data( ), Ytr.data( ), Xtr.cols( ) );
-  opt.set_batch_size( 0 );
+  opt.set_batch_size( 16 );
   opt.set_lambda1( 0 );
   opt.set_lambda2( 0 );
-  opt.set_learning_rate( 1e-2 );
+  opt.set_learning_rate( 1e-6 );
   /* TODO
      opt.set_beta1( 0.9 );
      opt.set_beta2( 0.999 );
@@ -79,12 +79,13 @@ int main( int argc, char** argv )
   */
   opt.set_debugger(
     [](
-      const TModel::TNatural& t, TModel* model,
+      const TModel::TNatural& t, TModel& model,
       const TReal& Jtr, const TReal& nG,
-      const TReal* Xtr, const TReal* Ytr, const TModel::TNatural& Mtr,
-      const TReal* Xte, const TReal* Yte, const TModel::TNatural& Mte
+      const TReal* Xtr, const TReal* Ytr, const TModel::TNatural& Mtr
       ) -> bool
     {
+      // TODO: auto Ztr = model.threshold( Eigen::Map< const TModel::TMatrix >( Xtr, model.input_size( ), Mtr ) );
+
       std::cout << t << " " << Jtr << " " << nG << std::endl;
       return( false );
     }

@@ -23,8 +23,7 @@ namespace ivqML
       using TDebugger =
         std::function<
           bool(
-            const TNatural&, TModel*, const TReal&, const TReal&,
-            const TReal*, const TReal*, const TNatural&,
+            const TNatural&, TModel&, const TReal&, const TReal&,
             const TReal*, const TReal*, const TNatural&
             )
           >;
@@ -72,8 +71,7 @@ namespace ivqML
       TDebugger m_Debugger
         {
           [](
-            const TNatural&, TModel*, const TReal&, const TReal&,
-            const TReal*, const TReal*, const TNatural&,
+            const TNatural&, TModel&, const TReal&, const TReal&,
             const TReal*, const TReal*, const TNatural&
             ) -> bool
           {

@@ -28,10 +28,17 @@ _fit( TModel& model, TBatches& batches, TShuffler shuffler )
 
   TRow G( model.size( ) );
   TRow sG( model.size( ) );
-  for( unsigned int e = 0; e < 10; ++e )
+
+  TReal J = std::numeric_limits< TReal >::max( );
+  TNatural t = 0;
+  bool stop = false;
+  while( !stop )
   {
+    t++;
+
     shuffler( );
-    TReal J = 0;
+
+    J = 0;
     sG.fill( TReal( 0 ) );
     for( const TBatch& b: batches )
     {
@@ -43,7 +50,17 @@ _fit( TModel& model, TBatches& batches, TShuffler shuffler )
       sG += G;
     } // end for
     J /= TReal( batches.size( ) );
-  } // end for
+
+    // Check stop
+    stop
+      =
+      this->m_Debugger(
+        t, model, J, sG * sG.transpose( ), this->m_X, this->m_Y, this->m_M
+        );
+  } // end while
+  this->m_Debugger(
+    t, model, J, sG * sG.transpose( ), this->m_X, this->m_Y, this->m_M
+    );
 }
 
 #endif // __ivqML__Optimizer__GradientDescent__hxx__

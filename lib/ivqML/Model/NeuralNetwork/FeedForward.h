@@ -49,6 +49,9 @@ namespace ivqML
         template< class _TX >
         auto operator()( const Eigen::EigenBase< _TX >& X ) const;
 
+        template< class _TX >
+        auto threshold( const Eigen::EigenBase< _TX >& X ) const;
+
         template< class _TX, class _TY >
         TReal gradient(
           TReal* bG,
