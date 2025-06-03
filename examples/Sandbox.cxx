@@ -68,22 +68,77 @@ public:
     {
       TMatrixMap D( I, N, M );
       TColumnRelation R;
-      std::vector< TReal > S;
+      TMatrix S( N, M );
 
       for( TNatural c = 0; c < D.cols( ); ++c )
       {
         TColumnMap x( D.col( c ).data( ), D.rows( ), 1 );
-        if( R.find( x ) == R.end( ) )
+        auto rIt = R.find( x );
+        if( rIt == R.end( ) )
         {
           std::cout << ( c + 1 ) << " / " << D.cols( ) << " ---> (" << x.transpose( ) << ")" << std::endl;
           // SingleSampleMeanShift( std::back_inserter( shifted_means ), I, m, N, M, distance, kernel );
           // shifted_means_relations.insert( std::make_pair( x, shifted_means.size( ) / N ) );
+          TColumnMap s( S.col( c ).data( ), N, 1 );
+          this->_shift( s, x, D );
+          R.insert( std::make_pair( x, s ) );
         }
         else
-        {
-          std::cout << "uhhuoo" << std::endl;
-        } // end if
+          S.col( c ) = rIt->second;
       } // end for
+
+      std::cout << "-------------------" << std::endl;
+      std::cout << S << std::endl;
+      std::cout << "-------------------" << std::endl;
+
+    }
+
+protected:
+  void _shift( TColumnMap& s, const TColumnMap& x, const TMatrixMap& D )
+    {
+      Eigen::Map< TColumn > cur( const_cast< TReal* >( s.data( ) ), s.rows( ), s.cols( ) );
+      TColumn pre;
+      cur = x;
+
+      for( TNatural e = 0; e < this->m_MaximumNumberOfIterations; ++e )
+      {
+        pre = cur;
+
+        TReal W = TReal( 0 );
+        TColumn mean = TColumn::Zero( x.rows( ), x.cols( ) );
+        std::cout << mean.transpose( ) << std::endl;
+
+        for( TNatural c = 0; c < D.cols( ); ++c )
+        {
+          TReal w = this->m_Kernel( this->m_Distance( TColumnMap( D.col( c ).data( ), D.rows( ), 1 ), s ) );
+          std::cout << "----> " << w << std::endl;
+        } // end for
+
+        /* TODO
+           {
+           TReal w = kernel( distance( I + ( i * N ), current_point.data( ), N ) );
+           if( w > TReal( 0 ) )
+           {
+           W += w;
+           mean += Eigen::Map< const TCol >( I + ( i * N ), N, 1 );
+           } // end if
+           } // end for
+           std::cout << "\t" << mean.transpose( ) << ":" << W << std::endl;
+           if( W > TReal( 0 ) )
+           current_point = mean / W;
+           else
+           break;
+           if( std::sqrt( ( current_point - prev_point ).array( ).pow( 2 ).sum( ) ) < convergence_threshold)
+           break;
+        */
+      } // end for
+
+      /* TODO
+         std::cout << current_point.transpose( ) << std::endl;
+         for( TNatural d = 0; d < current_point.size( ); ++d )
+         shifted_mean = current_point( d );
+      */
+      std::exit( 1 );
     }
 
 protected:
@@ -125,42 +180,42 @@ int main( int argc, char** argv )
 
 
   // Parameters for the Mean Shift algorithm
-    /*
-  double bandwidth = 1.5;            // Defines the radius of the search window. Crucial for results.
-  double convergence_threshold = 0.001; // How small a shift is considered convergence.
-  int max_iterations = 100;          // Maximum iterations for a single point's shift.
-  double cluster_merge_threshold = 1.0; // Distance to merge two converged modes into one cluster.
+  /*
+    double bandwidth = 1.5;            // Defines the radius of the search window. Crucial for results.
+    double convergence_threshold = 0.001; // How small a shift is considered convergence.
+    int max_iterations = 100;          // Maximum iterations for a single point's shift.
+    double cluster_merge_threshold = 1.0; // Distance to merge two converged modes into one cluster.
 
-  std::cout << "--- Mean Shift Clustering Example ---" << std::endl;
-  std::cout << "Bandwidth: " << bandwidth << std::endl;
-  std::cout << "Convergence Threshold: " << convergence_threshold << std::endl;
-  std::cout << "Cluster Merge Threshold: " << cluster_merge_threshold << std::endl;
-  std::cout << "Max Iterations per point: " << max_iterations << std::endl;
-  std::cout << "-----------------------------------" << std::endl;
-  
-  auto distance
+    std::cout << "--- Mean Shift Clustering Example ---" << std::endl;
+    std::cout << "Bandwidth: " << bandwidth << std::endl;
+    std::cout << "Convergence Threshold: " << convergence_threshold << std::endl;
+    std::cout << "Cluster Merge Threshold: " << cluster_merge_threshold << std::endl;
+    std::cout << "Max Iterations per point: " << max_iterations << std::endl;
+    std::cout << "-----------------------------------" << std::endl;
+
+    auto distance
     =
     []( const TReal* a, const TReal* b, const TNatural& n ) -> TReal
     {
-      TReal d = TReal( 0 );
-      for( TNatural i = 0; i < n; ++i )
-        d += ( a[ i ] - b[ i ] ) * ( a[ i ] - b[ i ] );
-      return( std::sqrt( d ) );
+    TReal d = TReal( 0 );
+    for( TNatural i = 0; i < n; ++i )
+    d += ( a[ i ] - b[ i ] ) * ( a[ i ] - b[ i ] );
+    return( std::sqrt( d ) );
     };
-  TReal kernel_coeff = -TReal( 0.5 ) / ( bandwidth * bandwidth );
-  TReal epsilon = std::numeric_limits< TReal >::epsilon( );
-  auto kernel
+    TReal kernel_coeff = -TReal( 0.5 ) / ( bandwidth * bandwidth );
+    TReal epsilon = std::numeric_limits< TReal >::epsilon( );
+    auto kernel
     =
     [ &kernel_coeff, &epsilon ]( const TReal& d ) -> TReal
     {
-      TReal w = std::exp( kernel_coeff * d * d );
-      if( w <= epsilon )
-        w = TReal( 0 );
-      return( w );
+    TReal w = std::exp( kernel_coeff * d * d );
+    if( w <= epsilon )
+    w = TReal( 0 );
+    return( w );
     };
 
-  MeanShift( I, N, M, distance, kernel );
-*/
+    MeanShift( I, N, M, distance, kernel );
+  */
   /* TODO
      TMatrix I( 2, 11 );
      I.transpose( )
@@ -181,7 +236,7 @@ int main( int argc, char** argv )
      convergence_threshold,
      max_iterations,
      cluster_merge_threshold);
-     
+
      std::cout << "\n--- Clustering Results ---" << std::endl;
      for (size_t i = 0; i < data.size(); ++i) {
      std::cout << "Original Point (" << data[i].coords[0] << ", " << data[i].coords[1]
