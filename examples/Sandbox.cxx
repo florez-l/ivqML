@@ -25,7 +25,6 @@ public:
   using TDistance = std::function< TReal( const TColumnMap&, const TColumnMap& ) >;
   using TKernel = std::function< TReal( const TReal& ) >;
 
-protected:
   struct SMapColCmp
   {
     bool operator()( const TColumnMap& a, const TColumnMap& b ) const
@@ -64,81 +63,105 @@ public:
     {
     }
 
-  void shift( const TReal* I, const TNatural& N, const TNatural& M )
+  void compute_means( const TReal* I, const TNatural& N, const TNatural& M )
     {
       TMatrixMap D( I, N, M );
-      TColumnRelation R;
-      TMatrix S( N, M );
 
+      // Prepare outputs
+      this->m_Means.clear( );
+      this->m_Relation.clear( );
+
+      // Main loop
       for( TNatural c = 0; c < D.cols( ); ++c )
       {
         TColumnMap x( D.col( c ).data( ), D.rows( ), 1 );
-        auto rIt = R.find( x );
-        if( rIt == R.end( ) )
+        auto rIt = this->m_Relation.upper_bound( x );
+        bool ok = ( rIt == this->m_Relation.end( ) );
+        if( !ok )
+          ok = ( this->m_ConvergenceThreshold < std::sqrt( ( rIt->first - x ).array( ).pow( 2 ).sum( ) ) );
+        if( ok )
         {
-          std::cout << ( c + 1 ) << " / " << D.cols( ) << " ---> (" << x.transpose( ) << ")" << std::endl;
-          // SingleSampleMeanShift( std::back_inserter( shifted_means ), I, m, N, M, distance, kernel );
-          // shifted_means_relations.insert( std::make_pair( x, shifted_means.size( ) / N ) );
-          TColumnMap s( S.col( c ).data( ), N, 1 );
-          this->_shift( s, x, D );
-          R.insert( std::make_pair( x, s ) );
-        }
-        else
-          S.col( c ) = rIt->second;
+          for( TNatural n = 0; n < N; ++n )
+            this->m_Means.push_back( 0 );
+          TColumnMap s( this->m_Means.data( ) + ( this->m_Means.size( ) - N ), N, 1 );
+          this->_mean( s, x, D );
+          this->m_Relation.insert( std::make_pair( x, s ) );
+
+          std::cout << x.transpose( ) << " ++++++++++++ " << s.transpose( ) << std::endl;
+
+        } // end if
       } // end for
+      this->m_Means.shrink_to_fit( );
 
-      std::cout << "-------------------" << std::endl;
-      std::cout << S << std::endl;
-      std::cout << "-------------------" << std::endl;
-
+      std::cout << "----------------------------" << std::endl;
+      for( auto m: this->m_Relation )
+        std::cout << m.first.transpose( ) << " ***** " << m.second.transpose( ) << std::endl;
+      std::cout << "----------------------------" << std::endl;
+      for( auto v: this->m_Means )
+        std::cout << v << std::endl;
+      std::cout << "----------------------------" << std::endl;
     }
 
-protected:
-  void _shift( TColumnMap& s, const TColumnMap& x, const TMatrixMap& D )
+  void shift( TReal* bO, const TReal* bI, const TNatural& N, const TNatural& M )
     {
+      const TReal* I = bI;
+      TReal* O = bO;
+      for( TNatural m = 0; m < M; ++m )
+      {
+        TColumnMap x( I, N, 1 );
+        auto rIt = this->m_Relation.upper_bound( x );
+        if( rIt == this->m_Relation.end( ) )
+          rIt = this->m_Relation.begin( );
+
+        std::cout << rIt->first.transpose( ) << " ::: " << rIt->second.transpose( ) << std::endl;
+
+        for( TNatural n = 0; n < N; ++n )
+          O[ n ] = rIt->second( n, 0 );
+
+        I += N;
+        O += N;
+      } // end for
+    }
+
+
+protected:
+  void _mean( TColumnMap& s, const TColumnMap& x, const TMatrixMap& D )
+    {
+      // **NOTE** s and cur point to the same data buffer
       Eigen::Map< TColumn > cur( const_cast< TReal* >( s.data( ) ), s.rows( ), s.cols( ) );
       TColumn pre;
       cur = x;
 
-      for( TNatural e = 0; e < this->m_MaximumNumberOfIterations; ++e )
+      // Main loop
+      bool stop = false;
+      TNatural i = 0;
+      while( !stop && i <= this->m_MaximumNumberOfIterations )
       {
+        i++;
         pre = cur;
 
         TReal W = TReal( 0 );
         TColumn mean = TColumn::Zero( x.rows( ), x.cols( ) );
-        std::cout << mean.transpose( ) << std::endl;
 
         for( TNatural c = 0; c < D.cols( ); ++c )
         {
           TReal w = this->m_Kernel( this->m_Distance( TColumnMap( D.col( c ).data( ), D.rows( ), 1 ), s ) );
-          std::cout << "----> " << w << std::endl;
+          if( w > this->m_Epsilon )
+          {
+            mean += D.col( c ) * w;
+            W += w;
+          } // end if
         } // end for
+        if( W != TReal( 0 ) )
+        {
+          cur = mean / W;
 
-        /* TODO
-           {
-           TReal w = kernel( distance( I + ( i * N ), current_point.data( ), N ) );
-           if( w > TReal( 0 ) )
-           {
-           W += w;
-           mean += Eigen::Map< const TCol >( I + ( i * N ), N, 1 );
-           } // end if
-           } // end for
-           std::cout << "\t" << mean.transpose( ) << ":" << W << std::endl;
-           if( W > TReal( 0 ) )
-           current_point = mean / W;
-           else
-           break;
-           if( std::sqrt( ( current_point - prev_point ).array( ).pow( 2 ).sum( ) ) < convergence_threshold)
-           break;
-        */
-      } // end for
-
-      /* TODO
-         std::cout << current_point.transpose( ) << std::endl;
-         for( TNatural d = 0; d < current_point.size( ); ++d )
-         shifted_mean = current_point( d );
-      */
-      std::exit( 1 );
+          if( std::sqrt( ( cur - pre ).array( ).pow( 2 ).sum( ) ) < this->m_ConvergenceThreshold )
+            stop = true;
+        }
+        else
+          stop = true;
+      } // end while
     }
 
 protected:
@@ -149,6 +172,9 @@ protected:
   TReal    m_ConvergenceThreshold;
   TNatural m_MaximumNumberOfIterations { 100 };
   TReal    m_ClusterMergeThreshold { TReal( 1 ) };
+
+  std::vector< TReal > m_Means;
+  TColumnRelation      m_Relation;
 };
 
 int main( int argc, char** argv )
@@ -176,7 +202,12 @@ int main( int argc, char** argv )
   TNatural M = 11;
 
   MeanShiftFunctions< TReal, TNatural > ms_funcs;
-  ms_funcs.shift( I, N, M );
+  ms_funcs.compute_means( I, N, M );
+
+  std::vector< TReal > tI( N * M, 0 );
+  ms_funcs.shift( tI.data( ), I, N, M );
+  for( auto v: tI )
+    std::cout << v << std::endl;
 
 
   // Parameters for the Mean Shift algorithm
