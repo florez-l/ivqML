@@ -7,6 +7,7 @@
 #include <limits>
 #include <map>
 #include <vector>
+#include <cstring>
 #include <ivq/eigen/Config.h>
 
 template< class _TReal, class _TNatural = unsigned long long >
@@ -40,7 +41,119 @@ public:
   using TColumnRelation = std::map< TColumnMap, TColumnMap, SMapColCmp >;
 
 public:
-  MeanShiftFunctions( )
+  MeanShiftFunctions( const TReal* I, const TNatural& N, const TNatural& M )
+    {
+      this->_init( );
+      new ( &( this->m_Data ) ) TMatrixMap( I, N, M );
+    }
+  virtual ~MeanShiftFunctions( )
+    {
+      /* TODO
+         if( this->m_Means != nullptr )
+         std::free( this->m_Means );
+      */
+    }
+
+  void compute_means( )
+    {
+      std::cout << this->m_Data << std::endl;
+
+      // Prepare outputs
+      /* TODO
+         if( this->m_Means != nullptr )
+         std::free( this->m_Means );
+         this->m_Means = reinterpret_cast< TReal* >( std::calloc( N * M, sizeof( TReal ) ) );
+         this->m_Relation.clear( );
+
+         // Main loop
+         const TReal* bI = I;
+         TReal* bM = this->m_Means;
+         for( TNatural m = 0; m < M; ++m )
+         {
+         std::cout << (m+1) << "/" << M << std::endl;
+
+         TColumnMap x( bI, N, 1 );
+         auto rIt = this->m_Relation.upper_bound( x );
+         bool ok = ( rIt == this->m_Relation.end( ) );
+         if( !ok )
+         ok = ( this->m_ConvergenceThreshold < std::sqrt( ( rIt->first - x ).array( ).pow( 2 ).sum( ) ) );
+         if( ok )
+         {
+         this->_mean( bM, bI, I, N, M );
+         this->m_Relation.insert( std::make_pair( x, TColumnMap( bM, N, 1 ) ) );
+         } // end if
+
+         bI = bI + N;
+         bM = bM + N;
+         } // end for
+      */
+
+      /* TODO
+         TMatrixMap D( I, N, M );
+
+         // Prepare outputs
+         this->m_Means.clear( );
+         this->m_Relation.clear( );
+
+         // Main loop
+         for( TNatural c = 0; c < D.cols( ); ++c )
+         {
+         TColumnMap x( D.col( c ).data( ), D.rows( ), 1 );
+         auto rIt = this->m_Relation.upper_bound( x );
+         bool ok = ( rIt == this->m_Relation.end( ) );
+         if( !ok )
+         ok = ( this->m_ConvergenceThreshold < std::sqrt( ( rIt->first - x ).array( ).pow( 2 ).sum( ) ) );
+         if( ok )
+         {
+         for( TNatural n = 0; n < N; ++n )
+         this->m_Means.push_back( 0 );
+         TColumnMap s( this->m_Means.data( ) + ( this->m_Means.size( ) - N ), N, 1 );
+         this->_mean( s, x, D );
+         this->m_Relation.insert( std::make_pair( x, s ) );
+
+         std::cout << x.transpose( ) << " ++++++++++++ " << s.transpose( ) << std::endl;
+
+         } // end if
+         } // end for
+         this->m_Means.shrink_to_fit( );
+
+         std::cout << "----------------------------" << std::endl;
+         for( auto m: this->m_Relation )
+         std::cout << m.first.transpose( ) << " ***** " << m.second.transpose( ) << std::endl;
+         std::cout << "----------------------------" << std::endl;
+         for( auto v: this->m_Means )
+         std::cout << v << std::endl;
+         std::cout << "----------------------------" << std::endl;
+      */
+    }
+
+  void shift( TReal* bO, const TReal* bI, const TNatural& N, const TNatural& M )
+    {
+      /* TODO
+         const TReal* I = bI;
+         TReal* O = bO;
+         for( TNatural m = 0; m < M; ++m )
+         {
+         TColumnMap x( I, N, 1 );
+         auto rIt = this->m_Relation.upper_bound( x );
+         if( rIt == this->m_Relation.end( ) )
+         rIt = this->m_Relation.begin( );
+
+         std::cout << rIt->first.transpose( ) << " ::: " << rIt->second.transpose( ) << std::endl;
+
+         for( TNatural n = 0; n < N; ++n )
+         O[ n ] = rIt->second( n, 0 );
+
+         I += N;
+         O += N;
+         } // end for
+      */
+    }
+
+
+protected:
+
+  void _init( )
     {
       TReal b = std::log10( std::numeric_limits< TReal >::epsilon( ) );
       this->m_Epsilon = std::pow( TReal( 10 ), b * TReal( 0.5 ) );
@@ -59,109 +172,46 @@ public:
           return( std::exp( ( d * d ) / TReal( -9 ) ) ); // ( -0.5 / 1.5 )
         };
     }
-  virtual ~MeanShiftFunctions( )
-    {
-    }
 
-  void compute_means( const TReal* I, const TNatural& N, const TNatural& M )
-    {
-      TMatrixMap D( I, N, M );
-
-      // Prepare outputs
-      this->m_Means.clear( );
-      this->m_Relation.clear( );
-
-      // Main loop
-      for( TNatural c = 0; c < D.cols( ); ++c )
-      {
-        TColumnMap x( D.col( c ).data( ), D.rows( ), 1 );
-        auto rIt = this->m_Relation.upper_bound( x );
-        bool ok = ( rIt == this->m_Relation.end( ) );
-        if( !ok )
-          ok = ( this->m_ConvergenceThreshold < std::sqrt( ( rIt->first - x ).array( ).pow( 2 ).sum( ) ) );
-        if( ok )
-        {
-          for( TNatural n = 0; n < N; ++n )
-            this->m_Means.push_back( 0 );
-          TColumnMap s( this->m_Means.data( ) + ( this->m_Means.size( ) - N ), N, 1 );
-          this->_mean( s, x, D );
-          this->m_Relation.insert( std::make_pair( x, s ) );
-
-          std::cout << x.transpose( ) << " ++++++++++++ " << s.transpose( ) << std::endl;
-
-        } // end if
-      } // end for
-      this->m_Means.shrink_to_fit( );
-
-      std::cout << "----------------------------" << std::endl;
-      for( auto m: this->m_Relation )
-        std::cout << m.first.transpose( ) << " ***** " << m.second.transpose( ) << std::endl;
-      std::cout << "----------------------------" << std::endl;
-      for( auto v: this->m_Means )
-        std::cout << v << std::endl;
-      std::cout << "----------------------------" << std::endl;
-    }
-
-  void shift( TReal* bO, const TReal* bI, const TNatural& N, const TNatural& M )
-    {
-      const TReal* I = bI;
-      TReal* O = bO;
-      for( TNatural m = 0; m < M; ++m )
-      {
-        TColumnMap x( I, N, 1 );
-        auto rIt = this->m_Relation.upper_bound( x );
-        if( rIt == this->m_Relation.end( ) )
-          rIt = this->m_Relation.begin( );
-
-        std::cout << rIt->first.transpose( ) << " ::: " << rIt->second.transpose( ) << std::endl;
-
-        for( TNatural n = 0; n < N; ++n )
-          O[ n ] = rIt->second( n, 0 );
-
-        I += N;
-        O += N;
-      } // end for
-    }
-
-
-protected:
-  void _mean( TColumnMap& s, const TColumnMap& x, const TMatrixMap& D )
+  void _mean( TReal* s, const TReal* x, const TReal* I, const TNatural& N, const TNatural& M )
     {
       // **NOTE** s and cur point to the same data buffer
-      Eigen::Map< TColumn > cur( const_cast< TReal* >( s.data( ) ), s.rows( ), s.cols( ) );
-      TColumn pre;
-      cur = x;
+      /* TODO
+         Eigen::Map< TColumn > cur( const_cast< TReal* >( s.data( ) ), s.rows( ), s.cols( ) );
+         TColumn pre;
+         cur = x;
 
-      // Main loop
-      bool stop = false;
-      TNatural i = 0;
-      while( !stop && i <= this->m_MaximumNumberOfIterations )
-      {
-        i++;
-        pre = cur;
+         // Main loop
+         bool stop = false;
+         TNatural i = 0;
+         while( !stop && i <= this->m_MaximumNumberOfIterations )
+         {
+         i++;
+         pre = cur;
 
-        TReal W = TReal( 0 );
-        TColumn mean = TColumn::Zero( x.rows( ), x.cols( ) );
+         TReal W = TReal( 0 );
+         TColumn mean = TColumn::Zero( x.rows( ), x.cols( ) );
 
-        for( TNatural c = 0; c < D.cols( ); ++c )
-        {
-          TReal w = this->m_Kernel( this->m_Distance( TColumnMap( D.col( c ).data( ), D.rows( ), 1 ), s ) );
-          if( w > this->m_Epsilon )
-          {
-            mean += D.col( c ) * w;
-            W += w;
-          } // end if
-        } // end for
-        if( W != TReal( 0 ) )
-        {
-          cur = mean / W;
+         for( TNatural c = 0; c < D.cols( ); ++c )
+         {
+         TReal w = this->m_Kernel( this->m_Distance( TColumnMap( D.col( c ).data( ), D.rows( ), 1 ), s ) );
+         if( w > this->m_Epsilon )
+         {
+         mean += D.col( c ) * w;
+         W += w;
+         } // end if
+         } // end for
+         if( W != TReal( 0 ) )
+         {
+         cur = mean / W;
 
-          if( std::sqrt( ( cur - pre ).array( ).pow( 2 ).sum( ) ) < this->m_ConvergenceThreshold )
-            stop = true;
-        }
-        else
-          stop = true;
-      } // end while
+         if( std::sqrt( ( cur - pre ).array( ).pow( 2 ).sum( ) ) < this->m_ConvergenceThreshold )
+         stop = true;
+         }
+         else
+         stop = true;
+         } // end while
+      */
     }
 
 protected:
@@ -171,10 +221,14 @@ protected:
   TReal    m_Epsilon;
   TReal    m_ConvergenceThreshold;
   TNatural m_MaximumNumberOfIterations { 100 };
-  TReal    m_ClusterMergeThreshold { TReal( 1 ) };
+  TReal    m_ClusterMergeThreshold     { TReal( 1 ) };
 
-  std::vector< TReal > m_Means;
-  TColumnRelation      m_Relation;
+  TMatrixMap m_Data { nullptr, 0, 0 };
+
+  /* TODO
+     TReal*          m_Means { nullptr };
+     TColumnRelation m_Relation;
+  */
 };
 
 int main( int argc, char** argv )
@@ -201,13 +255,15 @@ int main( int argc, char** argv )
   TNatural N = 2;
   TNatural M = 11;
 
-  MeanShiftFunctions< TReal, TNatural > ms_funcs;
-  ms_funcs.compute_means( I, N, M );
+  MeanShiftFunctions< TReal, TNatural > ms_funcs( I, N, M );
+  ms_funcs.compute_means( );
 
-  std::vector< TReal > tI( N * M, 0 );
-  ms_funcs.shift( tI.data( ), I, N, M );
-  for( auto v: tI )
-    std::cout << v << std::endl;
+  /* TODO
+     std::vector< TReal > tI( N * M, 0 );
+     ms_funcs.shift( tI.data( ), I, N, M );
+     for( auto v: tI )
+     std::cout << v << std::endl;
+  */
 
 
   // Parameters for the Mean Shift algorithm
