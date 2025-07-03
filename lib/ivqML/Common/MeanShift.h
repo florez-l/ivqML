@@ -39,6 +39,9 @@ namespace ivqML
       MeanShift( TReal* data, const TNatural& dims, const TNatural& samples );
       virtual ~MeanShift( );
 
+      template< class _TOutIt >
+      void GetMeans( _TOutIt out );
+
     protected:
       void _init( );
       void _allocate( const TNatural& S );
@@ -57,6 +60,17 @@ namespace ivqML
     };
   } // end namespace
 } // end namespace
+
+// -------------------------------------------------------------------------
+template< class _TReal, class _TNatural >
+template< class _TOutIt >
+void ivqML::Common::MeanShift< _TReal, _TNatural >::
+GetMeans( _TOutIt out )
+{
+  for( const auto& m: this->m_ShiftedMeansMap )
+    for( const auto& v: m.first )
+      *out = v;
+}
 
 #endif // __ivqML__Common__MeanShift__h__
 

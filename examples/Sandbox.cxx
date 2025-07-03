@@ -29,7 +29,14 @@ int main( int argc, char** argv )
   TNatural N = 2;
 
   TMeanShift ms( I, N, M );
+  std::vector< TReal > means;
+  ms.GetMeans( std::back_inserter( means ) );
 
+  std::cout << means.size( ) << std::endl;
+  std::cout << "--------------------------------" << std::endl;
+  for( const auto& v: means )
+    std::cout << v << std::endl;
+  
   return( EXIT_SUCCESS );
 }
 
