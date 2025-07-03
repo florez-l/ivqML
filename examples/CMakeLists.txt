@@ -11,6 +11,7 @@ set(
   _execs
   Sandbox
   SimpleFeedForwardSigmoidOutputTest
+  SimpleMeanShift
   SimpleMNISTTest
   )
 

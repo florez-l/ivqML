@@ -61,7 +61,9 @@ void ivqML::Common::MeanShift< _TReal, _TNatural >::
 _allocate( const TNatural& S )
 {
   this->_free( );
-  this->m_ShiftedData = reinterpret_cast< TReal* >( std::calloc( S, sizeof( TReal ) ) );
+  this->m_ShiftedData
+    =
+    reinterpret_cast< TReal* >( std::calloc( S, sizeof( TReal ) ) );
 }
 
 // -------------------------------------------------------------------------
@@ -84,6 +86,7 @@ _go( TReal* I, TReal* O, const TNatural& N, const TNatural& M )
 
   for( TNatural i = 0; i < M; ++i )
   {
+    std::cout << i <<  "/" << M << std::endl;
     TColumnMap xi( I + ( i * N ), N, 1 );
     TColumnMap xo( O + ( i * N ), N, 1 );
 
