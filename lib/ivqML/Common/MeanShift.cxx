@@ -21,11 +21,14 @@ operator()( const TColumnMap& a, const TColumnMap& b ) const
 // -------------------------------------------------------------------------
 template< class _TReal, class _TNatural >
 ivqML::Common::MeanShift< _TReal, _TNatural >::
-MeanShift( TReal* data, const TNatural& dims, const TNatural& samples )
+MeanShift(
+  TReal* data, const TNatural& dims, const TNatural& samples,
+  TReal* frequencies
+  )
 {
   this->_init( );
   this->_allocate( dims * samples );
-  this->_go( data, this->m_ShiftedData, dims, samples );
+  this->_go( data, this->m_ShiftedData, dims, samples, frequencies );
 }
 
 // -------------------------------------------------------------------------
@@ -79,7 +82,7 @@ _free( )
 // -------------------------------------------------------------------------
 template< class _TReal, class _TNatural >
 void ivqML::Common::MeanShift< _TReal, _TNatural >::
-_go( TReal* I, TReal* O, const TNatural& N, const TNatural& M )
+_go( TReal* I, TReal* O, const TNatural& N, const TNatural& M, TReal* F )
 {
   this->m_MeansMap.clear( );
   this->m_ShiftedMeansMap.clear( );
@@ -116,12 +119,15 @@ _go( TReal* I, TReal* O, const TNatural& N, const TNatural& M )
       TNatural k = 0;
       while( !stop )
       {
-        xs.fill( 0 );
         TReal W = 0;
         for( TNatural j = 0; j < M; ++j )
         {
           TColumnMap xj( I + ( j * N ), N, 1 );
-          TReal w = this->m_Kernel( xo, xj );
+          TReal w
+            =
+            this->m_Kernel( xo, xj )
+            *
+            ( ( F != nullptr )? F[ j ]: TReal( 1 ) );
           xs += xj * w;
           W += w;
         } // end for

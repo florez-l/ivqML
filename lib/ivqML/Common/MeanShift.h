@@ -36,7 +36,10 @@ namespace ivqML
       using TShiftedMeansMap = std::map< TColumnMap, std::vector< TColumnMap >, SShiftCmp >;
 
     public:
-      MeanShift( TReal* data, const TNatural& dims, const TNatural& samples );
+      MeanShift(
+        TReal* data, const TNatural& dims, const TNatural& samples,
+        TReal* frequencies = nullptr
+        );
       virtual ~MeanShift( );
 
       template< class _TOutIt >
@@ -46,7 +49,10 @@ namespace ivqML
       void _init( );
       void _allocate( const TNatural& S );
       void _free( );
-      void _go( TReal* I, TReal* O, const TNatural& N, const TNatural& M );
+      void _go(
+        TReal* I, TReal* O, const TNatural& N, const TNatural& M,
+        TReal* F
+        );
 
     protected:
       TReal* m_ShiftedData { nullptr };
