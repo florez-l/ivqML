@@ -18,14 +18,18 @@ int main( int argc, char** argv )
   using TNatural = unsigned long long;
   using TMeanShift = ivqML::Common::MeanShift< TReal, TNatural >;
   using TImage = itk::VectorImage< TReal, 2 >;
+  using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
 
-  TNatural bins = 100;
+  TNatural bins = 256;
 
   auto reader = ivq::ITK::ImageFileReader< TImage >::New( );
   reader->SetFileName( argv[ 1 ] );
   reader->Update( );
-  // Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic > I = ivq::ITK::ImageToMatrix( reader->GetOutput( ) )( { 1 }, Eigen::placeholders::all );
-  auto I = ivq::ITK::ImageToMatrix( reader->GetOutput( ) );
+  auto R = ivq::ITK::ImageToMatrix( reader->GetOutput( ) );
+  TMatrix G( 1, 3 );
+  G << 0.299, 0.587, 0.114;
+  TMatrix I = G * R.block( 0, 0, 3, R.cols( ) );
+
   TReal min_I = I.minCoeff( );
   TReal max_I = I.maxCoeff( );
 
@@ -47,22 +51,23 @@ int main( int argc, char** argv )
     Hmap.insert( std::make_pair( idx, 0 ) ).first->second += 1;
   } // end for
 
-  Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic > H( I.rows( ), Hmap.size( ) );
-  Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic > F( 1, Hmap.size( ) );
+  TMatrix H( I.rows( ), Hmap.size( ) );
+  TMatrix F( 1, Hmap.size( ) );
   TNatural k = 0;
   for( const auto& v: Hmap )
   {
     TNatural i = 0;
     for( const auto& j: v.first )
-      H( i++, k ) = TReal( j );
+      H( i++, k ) = min_I + ( ( max_I - min_I ) * ( TReal( j ) / TReal( bins - 1 ) ) );
     F( 0, k++ ) = TReal( v.second );
   } // end for
 
-  TMeanShift ms( I.data( ), I.rows( ), I.cols( ) /*, F.data( )*/ );
+  TMeanShift ms( H.data( ), H.rows( ), H.cols( ), F.data( ) );
   std::vector< TReal > means;
   ms.GetMeans( std::back_inserter( means ) );
 
   std::cout << H.cols( ) << " " << F.cols( ) << " " << ( means.size( ) / I.rows( ) ) << std::endl;
+
   /* TODO
      std::cout << "--------------------------------" << std::endl;
      for( const auto& v: means )
