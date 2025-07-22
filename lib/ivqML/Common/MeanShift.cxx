@@ -2,6 +2,7 @@
 // @author Leonardo Florez-Valencia (florez-l@javeriana.edu.co)
 // =========================================================================
 
+/* TODO
 #include <ivqML/Common/MeanShift.h>
 
 #include <cstring>
@@ -209,5 +210,6 @@ namespace ivqML
     template class ivqML_EXPORT MeanShift< long double, unsigned long long >;
   } // end namespace
 } // end namespace
+*/
 
 // eof - $RCSfile$

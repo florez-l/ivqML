@@ -15,68 +15,93 @@ namespace ivqML
   {
     /**
      */
-    template< class _TReal, class _TNatural = unsigned long long >
+    template< class _TReal = double >
     class MeanShift
     {
     public:
-      using Self       = MeanShift;
-      using TReal      = _TReal;
-      using TNatural   = _TNatural;
-      using TColumn    = Eigen::Matrix< TReal, Eigen::Dynamic, 1 >;
-      using TColumnMap = Eigen::Map< TColumn >;
-
-      using TKernel = std::function< TReal( const TColumnMap&, const TColumnMap& ) >;
-
-    protected:
-      struct SShiftCmp
-      {
-        bool operator()( const TColumnMap& a, const TColumnMap& b ) const;
-      };
-      using TMeansMap = std::map< TColumnMap, TColumnMap, SShiftCmp >;
-      using TShiftedMeansMap = std::map< TColumnMap, std::vector< TColumnMap >, SShiftCmp >;
+      using TReal = _TReal;
 
     public:
-      MeanShift(
-        TReal* data, const TNatural& dims, const TNatural& samples,
-        TReal* frequencies = nullptr
-        );
-      virtual ~MeanShift( );
+      /**
+       */
+      template< class _TData >
+      static auto Histogram( const Eigen::EigenBase< _TData >& bD )
+        {
+          auto D = bD.derived( ).template cast< TReal >( );
 
-      template< class _TOutIt >
-      void GetMeans( _TOutIt out );
+          for( Eigen::Index r = 0; r < D.rows( ); ++r )
+          {
+          } // end for
 
-    protected:
-      void _init( );
-      void _allocate( const TNatural& S );
-      void _free( );
-      void _go(
-        TReal* I, TReal* O, const TNatural& N, const TNatural& M,
-        TReal* F
-        );
+          return( TReal( 0 ) );
+        }
+      /* TODO
+         template< class _TReal, class _TNatural = unsigned long long >
+         class MeanShift
+         {
+         public:
+         using Self       = MeanShift;
+         using TReal      = _TReal;
+         using TNatural   = _TNatural;
+         using TColumn    = Eigen::Matrix< TReal, Eigen::Dynamic, 1 >;
+         using TColumnMap = Eigen::Map< TColumn >;
 
-    protected:
-      TReal* m_ShiftedData { nullptr };
+         using TKernel = std::function< TReal( const TColumnMap&, const TColumnMap& ) >;
 
-      TMeansMap        m_MeansMap;
-      TShiftedMeansMap m_ShiftedMeansMap;
+         protected:
+         struct SShiftCmp
+         {
+         bool operator()( const TColumnMap& a, const TColumnMap& b ) const;
+         };
+         using TMeansMap = std::map< TColumnMap, TColumnMap, SShiftCmp >;
+         using TShiftedMeansMap = std::map< TColumnMap, std::vector< TColumnMap >, SShiftCmp >;
 
-      TNatural m_MaximumNumberOfIterations { 100 };
-      TReal    m_DistanceError;
-      TKernel  m_Kernel;
+         public:
+         MeanShift(
+         TReal* data, const TNatural& dims, const TNatural& samples,
+         TReal* frequencies = nullptr
+         );
+         virtual ~MeanShift( );
+
+         template< class _TOutIt >
+         void GetMeans( _TOutIt out );
+
+         protected:
+         void _init( );
+         void _allocate( const TNatural& S );
+         void _free( );
+         void _go(
+         TReal* I, TReal* O, const TNatural& N, const TNatural& M,
+         TReal* F
+         );
+
+         protected:
+         TReal* m_ShiftedData { nullptr };
+
+         TMeansMap        m_MeansMap;
+         TShiftedMeansMap m_ShiftedMeansMap;
+
+         TNatural m_MaximumNumberOfIterations { 100 };
+         TReal    m_DistanceError;
+         TKernel  m_Kernel;
+         };
+      */
     };
   } // end namespace
 } // end namespace
 
 // -------------------------------------------------------------------------
-template< class _TReal, class _TNatural >
-template< class _TOutIt >
-void ivqML::Common::MeanShift< _TReal, _TNatural >::
-GetMeans( _TOutIt out )
-{
-  for( const auto& m: this->m_ShiftedMeansMap )
-    for( const auto& v: m.first )
-      *out = v;
-}
+/* TODO
+   template< class _TReal, class _TNatural >
+   template< class _TOutIt >
+   void ivqML::Common::MeanShift< _TReal, _TNatural >::
+   GetMeans( _TOutIt out )
+   {
+   for( const auto& m: this->m_ShiftedMeansMap )
+   for( const auto& v: m.first )
+   *out = v;
+   }
+*/
 
 #endif // __ivqML__Common__MeanShift__h__
 
