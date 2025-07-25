@@ -31,17 +31,40 @@ int main( int argc, char** argv )
 
   try
   {
-    auto reader = ::ivq::ITK::ImageFileReader< TImage >::New( );
-    reader->SetFileName( argv[ 1 ] );
-    reader->Update( );
-    auto R = ivq::ITK::ImageToMatrix( reader->GetOutput( ) );
+    TReal I[ ] =
+      {
+        1.0, 1.0, 1.0,
+        1.2, 1.1, 1.0,
+        1.0, 1.3, 1.0,
+        1.1, 0.9, 1.0,
+        5.0, 5.0, 1.0,
+        5.1, 5.2, 1.0,
+        5.3, 5.0, 1.0,
+        5.0, 5.1, 1.0,
+        0.5, 6.0, 1.0,
+        0.7, 6.1, 1.0,
+        0.6, 5.9, 1.0
+      };
+    Eigen::Map< Eigen::Matrix< TReal, 3, 11 > > R( I );
 
-    using THisto = ivq::eigen::Histogram< TReal >;
-    THisto::TMatrix H;
-    THisto::multidimensional( H, R, bins );
+    
+    /* TODO
+       auto reader = ::ivq::ITK::ImageFileReader< TImage >::New( );
+       reader->SetFileName( argv[ 1 ] );
+       reader->Update( );
 
-    auto M = ivqML::Common::MeanShift<>::Histogram( H );
+       auto R = ivq::ITK::ImageToMatrix( reader->GetOutput( ) );
+    */
+
+    /* TODO
+       using THisto = ivq::eigen::Histogram< TReal >;
+       THisto::TMatrix H;
+       THisto::multidimensional( H, R.transpose( ), bins );
+    */
+
+    auto M = ivqML::Common::MeanShift<>::Histogram( R.transpose( ) /*H*/ );
     std::cout << "_Z" << typeid( M ).name( ) << std::endl;
+    std::cout << M << std::endl;
   }
   catch( const std::exception& err )
   {

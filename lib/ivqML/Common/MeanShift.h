@@ -15,11 +15,13 @@ namespace ivqML
   {
     /**
      */
-    template< class _TReal = double >
+    template< class _TReal = long double >
     class MeanShift
     {
     public:
       using TReal = _TReal;
+      using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
+      using TRow    = Eigen::Matrix< TReal, 1, Eigen::Dynamic >;
 
     public:
       /**
@@ -27,13 +29,34 @@ namespace ivqML
       template< class _TData >
       static auto Histogram( const Eigen::EigenBase< _TData >& bD )
         {
+          static const TReal eps = std::pow( TReal( 10 ), std::log10( std::numeric_limits< TReal >::epsilon( ) ) * 0.5 );
+          unsigned long long max_iter = 100;
+
           auto D = bD.derived( ).template cast< TReal >( );
+          auto X = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
+          auto F = D.block( 0, D.cols( ) - 1, D.rows( ), 1 ).array( );
+          TMatrix M = X;
 
           for( Eigen::Index r = 0; r < D.rows( ); ++r )
           {
-          } // end for
+            std::cout << ( r + 1 ) << "/" << D.rows( ) << std::endl;
+            bool stop = false;
+            unsigned long long i = 0;
+            while( !stop )
+            {
+              i += 1;
 
-          return( TReal( 0 ) );
+              auto R = M.row( r );
+
+              auto K = ( ( X.rowwise( ) - R ).array( ).pow( 2 ).rowwise( ).sum( ).array( ) / TReal( -1.5 ) ).exp( ).array( ) * F;
+              TRow m = ( X.array( ).colwise( ) * K.array( ) ).colwise( ).sum( ) / K.sum( );
+
+              TReal e = std::sqrt( ( M.row( r ) - m ).array( ).pow( 2 ).sum( ) );
+              M.row( r ) = m;
+              stop = ( e <= eps ) || !( i < max_iter );
+            } // end if
+          } // end for
+          return( M );
         }
       /* TODO
          template< class _TReal, class _TNatural = unsigned long long >
