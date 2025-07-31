@@ -15,49 +15,89 @@ namespace ivqML
   {
     /**
      */
-    template< class _TReal = long double >
+    template< class _TData, class _TReal = long double >
     class MeanShift
     {
     public:
-      using TReal = _TReal;
+      using TData     = _TData;
+      using TDataBase = Eigen::EigenBase< TData >;
+
+      using TReal   = _TReal;
       using TMatrix = Eigen::Matrix< TReal, Eigen::Dynamic, Eigen::Dynamic >;
       using TRow    = Eigen::Matrix< TReal, 1, Eigen::Dynamic >;
 
     public:
+      MeanShift( const TData& D )
+        : m_Data( &D )
+        {
+        }
+
       /**
        */
-      template< class _TData >
-      static auto Histogram( const Eigen::EigenBase< _TData >& bD )
+      void Compute( )
         {
-          static const TReal eps = std::pow( TReal( 10 ), std::log10( std::numeric_limits< TReal >::epsilon( ) ) * 0.5 );
-          unsigned long long max_iter = 100;
-
-          auto D = bD.derived( ).template cast< TReal >( );
-          auto X = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
-          auto F = D.block( 0, D.cols( ) - 1, D.rows( ), 1 ).array( );
-          TMatrix M = X;
-
-          for( Eigen::Index r = 0; r < D.rows( ); ++r )
+          const auto& D = this->m_Data->derived( );
+          if( this->m_IsHistogram )
           {
-            std::cout << ( r + 1 ) << "/" << D.rows( ) << std::endl;
-            bool stop = false;
-            unsigned long long i = 0;
-            while( !stop )
-            {
-              i += 1;
+            auto X = D.block( 0, 0, D.rows( ) - 1, D.cols( ) );
+            auto F = D.block( D.rows( ) - 1, 0, 1, D.cols( ) );
 
-              auto R = M.row( r );
-
-              auto K = ( ( X.rowwise( ) - R ).array( ).pow( 2 ).rowwise( ).sum( ).array( ) / TReal( -1.5 ) ).exp( ).array( ) * F;
-              TRow m = ( X.array( ).colwise( ) * K.array( ) ).colwise( ).sum( ) / K.sum( );
-
-              TReal e = std::sqrt( ( M.row( r ) - m ).array( ).pow( 2 ).sum( ) );
-              M.row( r ) = m;
-              stop = ( e <= eps ) || !( i < max_iter );
-            } // end if
-          } // end for
-          return( M );
+            std::cout
+              << "_Z" << typeid( _TData ).name( ) << std::endl
+              << "_Z" << typeid( TData ).name( ) << std::endl
+              << "_Z" << typeid( X ).name( ) << std::endl
+              << "_Z" << typeid( F ).name( ) << std::endl;
+            this->_Compute( X, &F );
+          } // end if
         }
+
+    protected:
+      void _Compute(
+        const Eigen::Block< const TData >& X,
+        const Eigen::Block< const TData >* F
+        )
+        {
+          std::cout << "-------------------------------" << std::endl;
+          std::cout << X << std::endl;
+          std::cout << "-------------------------------" << std::endl;
+          std::cout << *F << std::endl;
+          std::cout << "-------------------------------" << std::endl;
+        }
+
+      /* TODO
+         template< class _TData >
+         static auto Histogram( const Eigen::EigenBase< _TData >& bD )
+         {
+         static const TReal eps = std::pow( TReal( 10 ), std::log10( std::numeric_limits< TReal >::epsilon( ) ) * 0.5 );
+         unsigned long long max_iter = 100;
+
+         auto D = bD.derived( ).template cast< TReal >( );
+         auto X = D.block( 0, 0, D.rows( ), D.cols( ) - 1 );
+         auto F = D.block( 0, D.cols( ) - 1, D.rows( ), 1 ).array( );
+         TMatrix M = X;
+
+         for( Eigen::Index r = 0; r < D.rows( ); ++r )
+         {
+         std::cout << ( r + 1 ) << "/" << D.rows( ) << std::endl;
+         bool stop = false;
+         unsigned long long i = 0;
+         while( !stop )
+         {
+         i += 1;
+
+         auto R = M.row( r );
+
+         auto K = ( ( X.rowwise( ) - R ).array( ).pow( 2 ).rowwise( ).sum( ).array( ) / TReal( -1.5 ) ).exp( ).array( ) * F;
+         TRow m = ( X.array( ).colwise( ) * K.array( ) ).colwise( ).sum( ) / K.sum( );
+
+         TReal e = std::sqrt( ( M.row( r ) - m ).array( ).pow( 2 ).sum( ) );
+         M.row( r ) = m;
+         stop = ( e <= eps ) || !( i < max_iter );
+         } // end if
+         } // end for
+         return( M );
+         }
+      */
       /* TODO
          template< class _TReal, class _TNatural = unsigned long long >
          class MeanShift
@@ -109,6 +149,11 @@ namespace ivqML
          TKernel  m_Kernel;
          };
       */
+
+    protected:
+      const TDataBase* m_Data { nullptr };
+
+      bool m_IsHistogram { true };
     };
   } // end namespace
 } // end namespace

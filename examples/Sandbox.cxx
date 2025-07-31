@@ -62,9 +62,15 @@ int main( int argc, char** argv )
        THisto::multidimensional( H, R.transpose( ), bins );
     */
 
-    auto M = ivqML::Common::MeanShift<>::Histogram( R.transpose( ) /*H*/ );
-    std::cout << "_Z" << typeid( M ).name( ) << std::endl;
-    std::cout << M << std::endl;
+    using TMeanShift = ivqML::Common::MeanShift< decltype( R ) >;
+    TMeanShift ms( R );
+    ms.Compute( );
+
+    /* TODO
+       auto M = ivqML::Common::MeanShift<>::Histogram( R.transpose( ) H );
+       std::cout << "_Z" << typeid( M ).name( ) << std::endl;
+       std::cout << M << std::endl;
+    */
   }
   catch( const std::exception& err )
   {
