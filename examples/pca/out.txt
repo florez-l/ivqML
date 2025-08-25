@@ -1,5 +1,0 @@
-Read... done! 10000 2303
-Mean... done! 1 2303
-Centering... done! 10000 2303
-Covariance... done! 2303 2303
-Eigen analysis... 

@@ -4,22 +4,25 @@
 
 ## -- Base configuration
 cmake_minimum_required(VERSION 3.18)
-project(PUJ_ML VERSION 1.0.0.0)
+project(ivqML VERSION 1.0.0.1)
 
-## -- Output dirs
+# -- Output dirs
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
-## -- CMake directives
+# -- CMake directives and base applications
 include(GenerateExportHeader)
 
-## -- Find Boost
-find_package(Boost REQUIRED program_options)
+# -- Find required packages
+find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(ivq REQUIRED)
+set(ivqML_OpenMP_LINK "")
+if(OpenMP_CXX_FOUND)
+  set(ivqML_OpenMP_LINK "OpenMP::OpenMP_CXX")
+endif()
 
-## -- Find Eigen
-find_package(Eigen3 REQUIRED)
-
-## -- Source code
-subdirs(lib/cxx examples)
+## -- Subdirs
+subdirs(examples lib/ivqML)
+# TODO: include(cmake/ivqMLInstall.cmake)
 
 ## eof - $RCSfile$
